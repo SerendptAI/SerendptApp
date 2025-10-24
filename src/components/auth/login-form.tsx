@@ -64,9 +64,9 @@ export const LoginForm = ({
       className="flex-1"
     >
       <View className="flex-1">
-        <View className="h-24" />
+        <View className="h-8" />
 
-        <View className="px-5 py-4">
+        <View className="px-6 py-4">
           <TouchableOpacity onPress={() => router.replace('/onboarding')}>
             <AuthBack />
           </TouchableOpacity>

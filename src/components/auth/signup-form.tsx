@@ -71,8 +71,8 @@ export const SignupForm = ({ onSubmit = () => {}, loading = false }: SignupFormP
       className="flex-1"
     >
       <View className="flex-1">
-        <View className="h-24" />
-        <View className="px-5 py-4 flex-row items-center justify-between">
+        <View className="h-8" />
+        <View className="px-6 py-4 flex-row items-center justify-between">
           <TouchableOpacity onPress={() => router.replace('/onboarding')}>
             <AuthBack />
           </TouchableOpacity>

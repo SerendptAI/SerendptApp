@@ -27,7 +27,7 @@
     "build:staging:android": "cross-env APP_ENV=staging EXPO_NO_DOTENV=1 eas build --profile staging --platform android ",
     "build:production:ios": "cross-env APP_ENV=production EXPO_NO_DOTENV=1 eas build --profile production --platform ios",
     "build:production:android": "cross-env APP_ENV=production EXPO_NO_DOTENV=1 eas build --profile production --platform android ",
-    "prepare": "husky",
+    "prepare": "husky || true",
     "app-release": "cross-env SKIP_BRANCH_PROTECTION=true np --no-publish --no-cleanup --no-release-draft",
     "version": "pnpm run prebuild && git add .",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
@@ -143,6 +143,16 @@
     "url": "git+https://github.com/user/repo-name.git"
   },
   "packageManager": "pnpm@9.12.3",
+  "pnpm": {
+    "overrides": {
+      "react": "18.3.1",
+      "react-dom": "18.3.1"
+    }
+  },
+  "resolutions": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
   "expo": {
     "doctor": {
       "reactNativeDirectoryCheck": {

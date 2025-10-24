@@ -90,7 +90,7 @@ export default function Home() {
     <View className="flex-1 bg-white">
       <FocusAwareStatusBar />
       <SafeAreaView className="flex-1">
-        <View className="flex-row items-center justify-between px-5">
+        <View className="flex-row items-center justify-between px-6 py-4">
           <TouchableOpacity
             onPress={() => router.push('/home/settings')}
             className="h-10 w-10 rounded-full bg-[#D9D9D9] items-center justify-center"

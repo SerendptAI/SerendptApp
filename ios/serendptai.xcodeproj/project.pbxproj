@@ -439,8 +439,8 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
-				PRODUCT_BUNDLE_IDENTIFIER = com.serendpt.development;
-				PRODUCT_NAME = "serendptai";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.faboent.development";
+				PRODUCT_NAME = "faboent";
 				SWIFT_OBJC_BRIDGING_HEADER = "serendptai/serendptai-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -467,8 +467,8 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
-				PRODUCT_BUNDLE_IDENTIFIER = com.serendpt.development;
-				PRODUCT_NAME = "serendptai";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.faboent.development";
+				PRODUCT_NAME = "faboent";
 				SWIFT_OBJC_BRIDGING_HEADER = "serendptai/serendptai-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

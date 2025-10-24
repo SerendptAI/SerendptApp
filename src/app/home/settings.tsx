@@ -1,6 +1,6 @@
 import React from 'react';
 import { router } from 'expo-router';
-import { Alert, Image } from 'react-native';
+import { Alert, Image, ScrollView } from 'react-native';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -12,9 +12,11 @@ import {
   TouchableOpacity,
   Button,
   ControlledInput,
-  Modal,
   useModal,
+  SafeAreaView,
 } from '@/components/ui';
+import { ConfirmationModal } from '@/components/modals/confirmation-modal';
+import { SuccessModal } from '@/components/modals/success-modal';
 import { Plans } from '@/components/ui/icons/plans';
 import { Back } from '@/components/ui/icons/back';
 import { signOut } from '@/lib';
@@ -42,7 +44,11 @@ export default function Settings(): JSX.Element {
   });
 
   const { ref: modalRef, present, dismiss } = useModal();
-  const { ref: successModalRef, present: presentSuccess, dismiss: dismissSuccess } = useModal();
+  const {
+    ref: successModalRef,
+    present: presentSuccess,
+    dismiss: dismissSuccess,
+  } = useModal();
   const [selectedChanges, setSelectedChanges] = React.useState({
     fullname: true,
     email: true,
@@ -57,6 +63,10 @@ export default function Settings(): JSX.Element {
     setTimeout(() => {
       presentSuccess();
     }, 300);
+  };
+
+  const handleConfirmationSubmit = () => {
+    handleSubmit(onSubmit)();
   };
 
   const handleSaveChanges = () => {
@@ -88,219 +98,93 @@ export default function Settings(): JSX.Element {
   return (
     <View className="flex-1 bg-white">
       <FocusAwareStatusBar />
-      <View className="flex-1">
-        <View className="bg-[#FFFBEB] px-6 py-8">
-          <View className="h-10" />
-          <View className="flex-row items-center mb-6">
-            <TouchableOpacity onPress={() => router.back()} className="pr-2">
-              <Back />
-            </TouchableOpacity>
-          </View>
-
-          {/* Profile content */}
-          <View className="items-center">
-            {/* Avatar */}
-            <View className="h-20 w-20 rounded-full bg-white items-center justify-center mb-4">
-              <Text className="text-black font-brownstd text-2xl">{user?.full_name?.charAt(0)}</Text>
+      <SafeAreaView className="flex-1">
+        <ScrollView 
+          className="flex-1" 
+          contentContainerStyle={{ flexGrow: 1 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <View className="bg-[#FFFBEB] px-6 py-4">
+            <View className="flex-row items-center mb-6">
+              <TouchableOpacity onPress={() => router.back()} className="pr-2">
+                <Back />
+              </TouchableOpacity>
             </View>
 
-            {/* User Name */}
-            <Text className="text-black font-brownstd text-lg">{user?.full_name}</Text>
-          </View>
-        </View>
-
-        {/* Form Section */}
-        <View className="flex-1 px-6 py-6">
-          {/* Fullname Field */}
-          <ControlledInput
-            name="fullname"
-            control={control}
-            label="Fullname"
-            placeholder="Enter fullname"
-          />
-
-          {/* Email Field */}
-          <ControlledInput
-            name="email"
-            control={control}
-            label="Email"
-            placeholder="Enter email"
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-
-          {/* Password Field */}
-          <ControlledInput
-            name="password"
-            control={control}
-            label="Password"
-            placeholder="Enter password"
-            isPassword
-          />
-
-          {/* Plans Field */}
-          <View className="mb-8 relative">
-            <TouchableOpacity onPress={() => router.push('/home/pricing')}>
-              <ControlledInput
-                name="plan"
-                control={control}
-                label="Plans"
-                editable={false}
-                endImage={<Plans />}
-              />
-            </TouchableOpacity>
-          </View>
-
-          {/* Save Changes Button */}
-          <Button
-            label="Save changes"
-            className="bg-[#FFCC00] rounded-2xl py-4 mb-4"
-            textClassName="text-black font-brownstd text-lg"
-            onPress={handleSaveChanges}
-          />
-
-          {/* Logout Button */}
-          <Button
-            label="Logout"
-            className="bg-red-500 rounded-2xl py-4"
-            textClassName="text-white font-brownstd text-lg"
-            onPress={handleLogout}
-          />
-        </View>
-      </View>
-
-      {/* Confirmation Modal */}
-      <Modal ref={modalRef} snapPoints={['70%']}>
-        <View className="flex-1  items-center">
-          <View className="items-center">
-            <Image
-              source={require('../../../assets/settings.png')}
-              style={{ width: 264, height: 264 }}
-              // resizeMode="contain"
-            />
-          </View>
-
-          {/* Question */}
-          <Text className="text-center text-[30px] font-garamond text-[#000000] mb-8">
-            Are you sure you want to {'\n'} change your
-          </Text>
-
-          {/* Change Options */}
-          <View className="mb-8 items-center">
-            <View className="w-full max-w-xs">
-              {/* Username Option */}
-              <TouchableOpacity
-                onPress={() => toggleChangeSelection('fullname')}
-                className="flex-row items-center mb-6"
-              >
-                <View
-                  className={`h-8 w-8 rounded-full border items-center justify-center mr-4 ${
-                    selectedChanges.fullname
-                      ? 'bg-green-500 border-black'
-                      : 'bg-white border-gray-300'
-                  }`}
-                >
-                  {selectedChanges.fullname && (
-                    <Text className="text-[#000000] text-xs font-bold">✓</Text>
-                  )}
-                </View>
-                <Text
-                  className={`text-[16px] font-normal ${
-                    selectedChanges.fullname ? 'text-black' : 'text-gray-400'
-                  }`}
-                >
-                  Username
+            <View className="items-center">
+              <View className="h-20 w-20 rounded-full bg-white items-center justify-center mb-4">
+                <Text className="text-black font-brownstd text-2xl">
+                  {user?.full_name?.charAt(0)}
                 </Text>
-              </TouchableOpacity>
+              </View>
 
-              {/* Password Option */}
-              <TouchableOpacity
-                onPress={() => toggleChangeSelection('password')}
-                className="flex-row items-center mb-6"
-              >
-                <View
-                  className={`h-8 w-8 rounded-full border items-center justify-center mr-4 ${
-                    selectedChanges.password
-                      ? 'bg-green-500 border-black'
-                      : 'bg-white border-gray-300'
-                  }`}
-                >
-                  {selectedChanges.password && (
-                    <Text className="text-[#000000] text-xs font-bold">✓</Text>
-                  )}
-                </View>
-                <Text
-                  className={`text-[16px] font-normal ${
-                    selectedChanges.password ? 'text-black' : 'text-gray-400'
-                  }`}
-                >
-                  Password
-                </Text>
-              </TouchableOpacity>
-
-              {/* Email Option */}
-              <TouchableOpacity
-                onPress={() => toggleChangeSelection('email')}
-                className="flex-row items-center"
-              >
-                <View
-                  className={`h-8 w-8 rounded-full border items-center justify-center mr-4 ${
-                    selectedChanges.email
-                      ? 'bg-green-500 border-black'
-                      : 'bg-white border-gray-300'
-                  }`}
-                >
-                  {selectedChanges.email && (
-                    <Text className="text-[#000000] text-xs font-bold">✓</Text>
-                  )}
-                </View>
-                <Text
-                  className={`text-[16px] font-normal ${
-                    selectedChanges.email ? 'text-black' : 'text-gray-400'
-                  }`}
-                >
-                  Email Address
-                </Text>
-              </TouchableOpacity>
+              <Text className="text-black font-brownstd text-lg">
+                {user?.full_name}
+              </Text>
             </View>
           </View>
 
-          {/* Confirm Button */}
-          <Button
-            label="Yes, I'm sure"
-            className="bg-[#FFCC00] rounded-2xl w-full max-w-xs"
-            textClassName="text-black font-semibold text-lg"
-            onPress={handleSubmit(onSubmit)}
-          />
-        </View>
-      </Modal>
+          <View className="flex-1 px-6 py-6">
+            <ControlledInput
+              name="fullname"
+              control={control}
+              label="Fullname"
+              placeholder="Enter fullname"
+            />
 
-      {/* Success Modal */}
-      <Modal ref={successModalRef} snapPoints={['50%']}>
-        <View className="flex-1 px-6 justify-center items-center">
-          {/* Success Illustration */}
-          <View className="items-center mb-8">
-            <Image
-              source={require('../../../assets/success.png')}
-              style={{ width: 200, height: 200 }}
-              resizeMode="contain"
+            <ControlledInput
+              name="email"
+              control={control}
+              label="Email"
+              placeholder="Enter email"
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+
+            <ControlledInput
+              name="password"
+              control={control}
+              label="Password"
+              placeholder="Enter password"
+              isPassword
+            />
+
+            <View className="mb-8 relative">
+              <TouchableOpacity onPress={() => router.push('/home/pricing')}>
+                <ControlledInput
+                  name="plan"
+                  control={control}
+                  label="Plans"
+                  editable={false}
+                  endImage={<Plans />}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <Button
+              label="Save changes"
+              className="bg-[#FFCC00] rounded-2xl py-4 mb-4"
+              textClassName="text-black font-brownstd text-lg"
+              onPress={handleSaveChanges}
+            />
+
+            <Button
+              label="Logout"
+              className="bg-red-500 rounded-2xl py-4"
+              textClassName="text-white font-brownstd text-lg"
+              onPress={handleLogout}
             />
           </View>
+        </ScrollView>
+      </SafeAreaView>
 
-          {/* Success Message */}
-          <Text className="text-center text-[24px] font-garamond text-black mb-8">
-            Settings changed{'\n'}successfully!
-          </Text>
-
-          {/* Close Button */}
-          <Button
-            label="Close"
-            className="bg-[#FFCC00] rounded-2xl py-4 w-full max-w-xs"
-            textClassName="text-black font-semibold text-lg"
-            onPress={dismissSuccess}
-          />
-        </View>
-      </Modal>
+      <ConfirmationModal
+        ref={modalRef}
+        selectedChanges={selectedChanges}
+        onToggleChange={toggleChangeSelection}
+        onSubmit={handleConfirmationSubmit}
+      />
+      <SuccessModal ref={successModalRef} onClose={dismissSuccess} />
     </View>
   );
 }

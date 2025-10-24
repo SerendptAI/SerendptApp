@@ -1,4 +1,4 @@
-package com.serendpt.development
+package com.faboent.development
 
 import android.app.Application
 import android.content.res.Configuration
