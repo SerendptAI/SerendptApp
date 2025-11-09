@@ -27,3 +27,4 @@ export * from './close';
 export * from './check';
 export * from './uncheck';
 export * from './closes';
+export * from './delete';

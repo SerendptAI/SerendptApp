@@ -120,6 +120,7 @@ export default function DocumentDetails() {
           <ScrollView
             className="flex-1 px-6 py-6"
             showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 160 }}
           >
             {isLoadingBatches ? (
               <View className="flex-1 justify-center items-center py-20">

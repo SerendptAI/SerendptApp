@@ -146,38 +146,24 @@ android {
     }
 }
 
-configurations.all {
-    resolutionStrategy {
-        force 'androidx.browser:browser:1.5.0'
-        // force 'io.opentelemetry:opentelemetry-bom:1.24.0'  
-    }
-}
-
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
-
-    // MSAL dependency - exclude opentelemetry-bom to avoid resolution issues
-    implementation('com.microsoft.identity.client:msal:4.10.0') {
-        exclude group: 'io.opentelemetry', module: 'opentelemetry-bom'
-    }
-
-    // Add OpenTelemetry dependencies explicitly if you need them
-    // If you don't use them directly, you can remove these
-    // implementation platform('io.opentelemetry:opentelemetry-bom:1.24.0')
-    // implementation 'io.opentelemetry:opentelemetry-api:1.24.0'
 
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
     def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";
     def isWebpAnimatedEnabled = (findProperty('expo.webp.animated') ?: "") == "true";
 
     if (isGifEnabled) {
+        // For animated gif support
         implementation("com.facebook.fresco:animated-gif:${reactAndroidLibs.versions.fresco.get()}")
     }
 
     if (isWebpEnabled) {
+        // For webp support
         implementation("com.facebook.fresco:webpsupport:${reactAndroidLibs.versions.fresco.get()}")
         if (isWebpAnimatedEnabled) {
+            // Animated webp support
             implementation("com.facebook.fresco:animated-webp:${reactAndroidLibs.versions.fresco.get()}")
         }
     }

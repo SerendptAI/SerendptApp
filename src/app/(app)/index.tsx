@@ -1,6 +1,9 @@
 import React from 'react';
+import { TouchableOpacity as RNTouchableOpacity, GestureResponderEvent, Modal } from 'react-native';
 import { router } from 'expo-router';
 import { FlashList } from '@shopify/flash-list';
+import * as DocumentPicker from 'expo-document-picker';
+import { Alert } from 'react-native';
 
 import {
   FocusAwareStatusBar,
@@ -9,25 +12,94 @@ import {
   View,
   TouchableOpacity,
   Button,
+  Input,
 } from '@/components/ui';
 import { DocumentSkeleton } from '@/components/ui/document-skeleton';
-import { useAuth } from '@/lib';
 import { Logos } from '@/components/ui/icons/logos';
 import { Search } from '@/components/ui/icons/search';
 import { Pen } from '@/components/ui/icons/pen';
 import { Options } from '@/components/ui/icons/options';
-import { FontTest } from '@/components/font-test';
 import { useUser } from '@/lib/user';
-import { useGetDocumentsByEmail } from '@/api/documents';
+import {
+  useGetDocumentsByEmail,
+  uploadDocument,
+  deleteDocument,
+  editDocument,
+} from '@/api/documents';
+import { OptionsMenu } from '@/components/options-menu';
 import type { Document } from '@/api/documents';
+import { showMessage } from 'react-native-flash-message';
+import { showError } from '@/components/ui/utils';
 
 export default function Home() {
-  const userProfile = useAuth.use.profile();
   const user = useUser.use.user();
-  const { data: documentData, isLoading } = useGetDocumentsByEmail();
-
+  const { data: documentData, isLoading, refetch } = useGetDocumentsByEmail();
+  const { mutate: uploadDocumentMutation, isPending: isUploading } =
+    uploadDocument();
+  const { mutate: deleteDocumentMutation, isPending: isDeleting } =
+    deleteDocument();
+  const { mutate: editDocumentMutation, isPending: isEditing } =
+    editDocument();
+  const [selectedDocId, setSelectedDocId] = React.useState<string | null>(null);
+  const [isOptionsOpen, setIsOptionsOpen] = React.useState(false);
+  const [isRenameOpen, setIsRenameOpen] = React.useState(false);
+  const [newTitle, setNewTitle] = React.useState('');
   const calculateProgress = (lastReadPosition: number) => {
     return Math.min(Math.max(lastReadPosition, 0), 100);
+  };
+
+  const handleUploadDocument = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: [
+          'application/pdf',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'text/plain',
+        ],
+        copyToCacheDirectory: true,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const file = result.assets[0];
+
+        const maxSize = 50 * 1024 * 1024;
+        if (file.size && file.size > maxSize) {
+          showMessage({
+            message: 'File Too Large',
+            description: 'Please select a file smaller than 50MB.',
+            type: 'info',
+            duration: 3000,
+          });
+          return;
+        }
+
+        const fileObj = {
+          uri: file.uri,
+          type: file.mimeType || 'application/octet-stream',
+          name: file.name,
+        } as any;
+
+        uploadDocumentMutation(
+          { document: fileObj, user_email: user?.email || '' },
+          {
+            onSuccess: (data) => {
+              showMessage({
+                message: 'Document uploaded successfully!',
+                type: 'success',
+                duration: 3000,
+              });
+              refetch(); // Refresh the documents list
+            },
+            onError: (error) => {
+              showError(error as any);
+            },
+          }
+        );
+      }
+    } catch (error) {
+      showError(error as any);
+    }
   };
 
   const renderDocumentItem = ({ item }: { item: Document }) => {
@@ -70,14 +142,16 @@ export default function Home() {
             </View>
 
             {/* Right side - Options Icon */}
-            <TouchableOpacity
-              onPress={(e) => {
+            <RNTouchableOpacity
+              onPress={(e: GestureResponderEvent) => {
                 e.stopPropagation();
-                console.log('Options pressed for', item.document_title);
+                setSelectedDocId(item.document_id);
+                setIsOptionsOpen(true);
               }}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
               <Options />
-            </TouchableOpacity>
+            </RNTouchableOpacity>
           </View>
         </View>
       </TouchableOpacity>
@@ -124,13 +198,11 @@ export default function Home() {
               ListFooterComponent={() => (
                 <View className="py-8 items-center">
                   <Button
-                    label="Upload a new doc"
+                    label={isUploading ? 'Uploading...' : 'Upload a new doc'}
                     className="bg-yellow-400 rounded-2xl py-4 mb-4"
                     textClassName="text-black font-brownstd text-lg"
-                    onPress={() => {
-                      // Handle upload
-                      console.log('Upload pressed');
-                    }}
+                    onPress={handleUploadDocument}
+                    disabled={isUploading}
                   />
 
                   <Text className="text-sm text-[#000000] text-center font-brownstd">
@@ -149,13 +221,11 @@ export default function Home() {
               ListFooterComponent={() => (
                 <View className="py-8 items-center">
                   <Button
-                    label="Upload a new doc"
+                    label={isUploading ? 'Uploading...' : 'Upload a new doc'}
                     className="bg-yellow-400 rounded-2xl py-4 mb-4"
                     textClassName="text-black font-brownstd text-lg"
-                    onPress={() => {
-                      // Handle upload
-                      console.log('Upload pressed');
-                    }}
+                    onPress={handleUploadDocument}
+                    disabled={isUploading}
                   />
 
                   <Text className="text-sm text-[#000000] text-center font-brownstd">
@@ -171,13 +241,11 @@ export default function Home() {
               </Text>
 
               <Button
-                label="Upload a new doc"
+                label={isUploading ? 'Uploading...' : 'Upload a new doc'}
                 className="bg-yellow-400 rounded-2xl py-4 mb-4"
                 textClassName="text-black font-brownstd text-lg"
-                onPress={() => {
-                  // Handle upload
-                  console.log('Upload pressed');
-                }}
+                onPress={handleUploadDocument}
+                disabled={isUploading}
               />
 
               <Text className="text-sm text-[#000000] text-center font-brownstd">
@@ -187,6 +255,79 @@ export default function Home() {
           )}
         </View>
       </SafeAreaView>
+      <OptionsMenu
+        visible={isOptionsOpen}
+        onClose={() => setIsOptionsOpen(false)}
+        isDeleting={isDeleting}
+        onEdit={() => {
+          setIsOptionsOpen(false);
+          setIsRenameOpen(true);
+        }}
+        onDelete={() => {
+          if (!selectedDocId || isDeleting) return;
+          setIsOptionsOpen(false);
+          deleteDocumentMutation(
+            { documentId: selectedDocId },
+            {
+              onSuccess: () => {
+                showMessage({ message: 'Document deleted', type: 'success' });
+                refetch();
+              },
+              onError: (error) => {
+                showError(error as any);
+              },
+            }
+          );
+        }}
+      />
+
+      {/* Rename Modal */}
+      <Modal transparent animationType="fade" visible={isRenameOpen} onRequestClose={() => setIsRenameOpen(false)}>
+        <RNTouchableOpacity activeOpacity={1} className="flex-1 bg-black/50" onPress={() => setIsRenameOpen(false)}>
+          <View className="flex-1 items-center justify-center px-6">
+            <View className="w-full rounded-3xl bg-white p-6">
+              <Text className="text-[16px] font-brownstd text-black mb-4">Edit name</Text>
+              <Input
+                placeholder="Enter new name"
+                value={newTitle}
+                onChangeText={setNewTitle}
+                inputContainerClassName="mb-4"
+              />
+              <View className="flex-row justify-end gap-3">
+                <Button
+                  label="Cancel"
+                  className="bg-gray-200 rounded-xl px-4 py-3"
+                  textClassName="text-black font-brownstd"
+                  onPress={() => setIsRenameOpen(false)}
+                />
+                <Button
+                  label={isEditing ? 'Saving…' : 'Save'}
+                  className="bg-black rounded-xl px-4 py-3"
+                  textClassName="text-white font-brownstd"
+                  onPress={() => {
+                    if (!selectedDocId || !newTitle.trim() || isEditing) return;
+                    editDocumentMutation(
+                      { documentId: selectedDocId, documentTitle: newTitle.trim() },
+                      {
+                        onSuccess: () => {
+                          setIsRenameOpen(false);
+                          setNewTitle('');
+                          showMessage({ message: 'Name updated', type: 'success' });
+                          refetch();
+                        },
+                        onError: (error) => {
+                          showError(error as any);
+                        },
+                      }
+                    );
+                  }}
+                  disabled={isEditing}
+                />
+              </View>
+            </View>
+          </View>
+        </RNTouchableOpacity>
+      </Modal>
     </View>
   );
 }

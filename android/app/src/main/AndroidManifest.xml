@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
   <uses-permission android:name="android.permission.INTERNET"/>
+  <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
   <uses-permission android:name="android.permission.RECORD_AUDIO"/>
   <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
@@ -27,17 +28,9 @@
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="msauth" android:host="com.origination" android:pathPrefix="/auth"/>
-        <data android:scheme="msauth" android:host="expo-development-client"/>
-        <data android:scheme="origination"/>
-        <data android:scheme="com.origination.development"/>
-        <data android:scheme="exp+obytesapp"/>
-        <data android:scheme="com.origination.staging"/>
-        <data android:scheme="serendpt"/>
-        <data android:scheme="com.serendpt.development"/>
-        <data android:scheme="exp+serendpt"/>
         <data android:scheme="faboent"/>
         <data android:scheme="com.faboent.development"/>
+        <data android:scheme="exp+serendpt"/>
       </intent-filter>
     </activity>
   </application>
