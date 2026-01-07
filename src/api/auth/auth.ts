@@ -20,7 +20,11 @@ export const useSignup = createMutation<
       url: 'signup',
       method: 'POST',
       data: variables,
-    }).then((response) => response.data),
+    }).then((response) => {
+      console.log('variables', JSON.stringify(variables, null, 2));
+      console.log('first', JSON.stringify(response, null, 2));
+      return response.data;
+    }),
 });
 
 export const useLogin = createMutation<AuthResponse, LoginRequest, AxiosError>({

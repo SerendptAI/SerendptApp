@@ -30,7 +30,7 @@
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="faboent"/>
         <data android:scheme="com.faboent.development"/>
-        <data android:scheme="exp+serendpt"/>
+        <data android:scheme="exp+serendptai"/>
       </intent-filter>
     </activity>
   </application>

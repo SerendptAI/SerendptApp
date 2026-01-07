@@ -12,7 +12,6 @@ client.interceptors.request.use(
   (config) => {
     // Get the auth token from storage
     const token = getToken();
-
     // If token exists, add it to the Authorization header
     if (token?.access) {
       config.headers.Authorization = `Bearer ${token.access}`;

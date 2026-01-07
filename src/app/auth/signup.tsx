@@ -30,7 +30,9 @@ export default function Signup() {
         duration: 3000,
       });
 
-      router.replace(`/auth/verify-otp?email=${encodeURIComponent(response.email)}&flow=signup`);
+      router.replace(
+        `/auth/verify-otp?email=${encodeURIComponent(response.email)}&flow=signup`
+      );
     } catch (error) {
       showError(error as any);
     }

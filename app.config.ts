@@ -26,7 +26,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   description: `${Env.NAME} Mobile App`,
   owner: Env.EXPO_ACCOUNT_OWNER,
   scheme: Env.SCHEME,
-  slug: 'serendpt',
+  slug: 'serendptai',
   version: Env.VERSION.toString(),
   orientation: 'portrait',
   icon: './assets/icon.png',
@@ -87,7 +87,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           './assets/fonts/Roboto-SemiBold.ttf',
           './assets/fonts/Roboto-Bold.ttf',
           './assets/fonts/Roboto-ExtraBold.ttf',
-
         ],
       },
     ],
@@ -95,6 +94,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-router',
     ['app-icon-badge', appIconBadgeConfig],
     ['react-native-edge-to-edge'],
+    ['@react-native-community/datetimepicker'],
     'expo-document-picker',
   ],
   extra: {

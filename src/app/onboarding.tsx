@@ -18,7 +18,8 @@ export default function Onboarding() {
 
   const handleSignIn = () => {
     setIsFirstTime(false);
-    router.replace('/auth/login');
+    router.replace('/home');
+    // router.replace('/auth/login');
   };
 
   return (
@@ -26,8 +27,8 @@ export default function Onboarding() {
       <View className="flex-1">
         {/* Image */}
         <View className="items-start -ml-7">
-          <Image 
-            source={require('../../assets/onboarding.png')} 
+          <Image
+            source={require('../../assets/onboarding.png')}
             style={{ width: 364, height: 364 }}
             resizeMode="contain"
           />
@@ -46,13 +47,17 @@ export default function Onboarding() {
           <View className="flex-1 justify-center items-center">
             <View className="mb-16">
               <View className="flex-row items-center mb-4">
-               <Tick />
-                <Text className="text-[16px] font-brownstd text-black ml-2">reads aloud to you</Text>
+                <Tick />
+                <Text className="text-[16px] font-brownstd text-black ml-2">
+                  reads aloud to you
+                </Text>
               </View>
-              
+
               <View className="flex-row items-center">
                 <Tick />
-                <Text className="text-[16px] font-brownstd text-black ml-2">answers any question</Text>
+                <Text className="text-[16px] font-brownstd text-black ml-2">
+                  answers any question
+                </Text>
               </View>
             </View>
           </View>
@@ -64,14 +69,18 @@ export default function Onboarding() {
                 onPress={handleSignIn}
                 className="flex-1 bg-[#FFCC00] rounded-[17px] py-4"
               >
-                <Text className="font-brownstd text-black text-center">Login</Text>
+                <Text className="font-brownstd text-black text-center">
+                  Login
+                </Text>
               </Button>
-              
+
               <Button
                 onPress={handleSignUp}
                 className="flex-1 bg-[#FDF4CF] rounded-[17px] py-4"
               >
-                <Text className="font-brownstd text-gray-700 text-center">Sign up</Text>
+                <Text className="font-brownstd text-gray-700 text-center">
+                  Sign up
+                </Text>
               </Button>
             </View>
 
@@ -85,7 +94,9 @@ export default function Onboarding() {
               <View>
                 <Google />
               </View>
-              <Text className="text-white text-[16px] font-brownstd">Login/Sign up with google</Text>
+              <Text className="text-white text-[16px] font-brownstd">
+                Login/Sign up with google
+              </Text>
             </Button>
           </View>
         </View>
