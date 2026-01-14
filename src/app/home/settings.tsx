@@ -1,24 +1,25 @@
-import React from 'react';
-import { router } from 'expo-router';
-import { Alert, Image, ScrollView } from 'react-native';
-import { useForm } from 'react-hook-form';
+/* eslint-disable max-lines-per-function */
 import { zodResolver } from '@hookform/resolvers/zod';
+import { router } from 'expo-router';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { Alert, ScrollView } from 'react-native';
 import * as z from 'zod';
 
-import {
-  FocusAwareStatusBar,
-  Text,
-  View,
-  TouchableOpacity,
-  Button,
-  ControlledInput,
-  useModal,
-  SafeAreaView,
-} from '@/components/ui';
 import { ConfirmationModal } from '@/components/modals/confirmation-modal';
 import { SuccessModal } from '@/components/modals/success-modal';
-import { Plans } from '@/components/ui/icons/plans';
+import {
+  Button,
+  ControlledInput,
+  FocusAwareStatusBar,
+  SafeAreaView,
+  Text,
+  TouchableOpacity,
+  useModal,
+  View,
+} from '@/components/ui';
 import { Back } from '@/components/ui/icons/back';
+import { Plans } from '@/components/ui/icons/plans';
 import { signOut } from '@/lib';
 import { useUser } from '@/lib/user';
 
@@ -97,34 +98,34 @@ export default function Settings(): JSX.Element {
 
   return (
     <View className="flex-1 bg-white">
-      <FocusAwareStatusBar />
+      <FocusAwareStatusBar color="#FFFBEB" />
       <SafeAreaView className="flex-1">
-        <ScrollView 
-          className="flex-1" 
+        <ScrollView
+          className="flex-1"
           contentContainerStyle={{ flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
         >
           <View className="bg-[#FFFBEB] px-6 py-4">
-            <View className="flex-row items-center mb-6">
+            <View className="mb-6 flex-row items-center">
               <TouchableOpacity onPress={() => router.back()} className="pr-2">
                 <Back />
               </TouchableOpacity>
             </View>
 
             <View className="items-center">
-              <View className="h-20 w-20 rounded-full bg-white items-center justify-center mb-4">
-                <Text className="text-black font-brownstd text-2xl">
+              <View className="mb-4 size-20 items-center justify-center rounded-full bg-white">
+                <Text className="font-brownstd text-2xl text-black">
                   {user?.full_name?.charAt(0)}
                 </Text>
               </View>
 
-              <Text className="text-black font-brownstd text-lg">
+              <Text className="font-brownstd text-lg text-black">
                 {user?.full_name}
               </Text>
             </View>
           </View>
 
-          <View className="flex-1 px-6 py-6">
+          <View className="flex-1 p-6">
             <ControlledInput
               name="fullname"
               control={control}
@@ -149,7 +150,7 @@ export default function Settings(): JSX.Element {
               isPassword
             />
 
-            <View className="mb-8 relative">
+            <View className="relative mb-8">
               <TouchableOpacity onPress={() => router.push('/home/pricing')}>
                 <ControlledInput
                   name="plan"
@@ -163,14 +164,14 @@ export default function Settings(): JSX.Element {
 
             <Button
               label="Save changes"
-              className="bg-[#FFCC00] rounded-2xl py-4 mb-4"
+              className="mb-4 rounded-2xl bg-[#FFCC00] py-4"
               textClassName="text-black font-brownstd text-lg"
               onPress={handleSaveChanges}
             />
 
             <Button
               label="Logout"
-              className="bg-red-500 rounded-2xl py-4"
+              className="rounded-2xl bg-red-500 py-4"
               textClassName="text-white font-brownstd text-lg"
               onPress={handleLogout}
             />

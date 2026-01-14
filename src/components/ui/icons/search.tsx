@@ -4,13 +4,7 @@ import Svg, { Path } from 'react-native-svg';
 
 export const Search = ({ color = '#000', ...props }: SvgProps) => {
   return (
-    <Svg
-      width={22}
-      height={22}
-      viewBox="0 0 22 22"
-      fill="none"
-      {...props}
-    >
+    <Svg width={22} height={22} viewBox="0 0 22 22" fill="none" {...props}>
       <Path
         d="M16.042 16.042l4.125 4.125"
         stroke="#000"

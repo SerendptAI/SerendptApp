@@ -1,13 +1,13 @@
-import React from 'react';
 import { router } from 'expo-router';
+import React from 'react';
 
 import {
   FocusAwareStatusBar,
   SafeAreaView,
-  Text,
-  View,
-  TouchableOpacity,
   ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from '@/components/ui';
 import { Back } from '@/components/ui/icons/back';
 import { Mics } from '@/components/ui/icons/mics';
@@ -37,25 +37,25 @@ export default function Chats(): JSX.Element {
           showsVerticalScrollIndicator={false}
         >
           {/* User message card */}
-          <View className="bg-[#FFFBEB] rounded-2xl p-5 mb-5">
+          <View className="mb-5 rounded-2xl bg-[#FFFBEB] p-5">
             <View className="mb-3">
-              <View className="self-start bg-[#F3F4F6] rounded-full p-2">
+              <View className="self-start rounded-full bg-[#F3F4F6] p-2">
                 <Text className="text-[11px] text-[#1A1A1A]">You</Text>
               </View>
             </View>
-            <Text className="text-black text-[18px] leading-7">
+            <Text className="text-[18px] leading-7 text-black">
               What does circumnavigate mean
             </Text>
           </View>
 
           {/* AI response card */}
-          <View className="bg-white rounded-2xl p-5 border border-gray-200">
+          <View className="rounded-2xl border border-gray-200 bg-white p-5">
             <View className="mb-3">
-              <View className="self-start bg-[#FDF4CF] rounded-full px-2 py-2">
+              <View className="self-start rounded-full bg-[#FDF4CF] p-2">
                 <Text className="text-[11px] text-[#1A1A1A]">AI</Text>
               </View>
             </View>
-            <Text className="text-black text-[18px] leading-8">
+            <Text className="text-[18px] leading-8 text-black">
               Circumnavigate means to travel all the way around something,
               typically used in reference to the Earth or a specific
               geographical feature.
@@ -63,10 +63,10 @@ export default function Chats(): JSX.Element {
           </View>
         </ScrollView>
 
-        <View className="absolute bottom-10 left-4 right-4 z-50 px-6 py-4 ">
-          <TouchableOpacity className="bg-[#FFFBEB] rounded-full py-8 items-center justify-center flex-row gap-3">
+        <View className="absolute inset-x-4 bottom-10 z-50 px-6 py-4 ">
+          <TouchableOpacity className="flex-row items-center justify-center gap-3 rounded-full bg-[#FFFBEB] py-8">
             <Mics />
-            <Text className="text-black text-base font-medium">
+            <Text className="text-base font-medium text-black">
               Tap to talk
             </Text>
           </TouchableOpacity>

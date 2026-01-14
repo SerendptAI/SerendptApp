@@ -30,7 +30,9 @@ export default function Login() {
           duration: 3000,
         });
 
-        router.replace(`/auth/verify-otp?email=${encodeURIComponent(response.user_email)}&flow=email-login`);
+        router.replace(
+          `/auth/verify-otp?email=${encodeURIComponent(response.user_email)}&flow=email-login`
+        );
         return;
       }
 

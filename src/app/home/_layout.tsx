@@ -1,10 +1,11 @@
 import { Redirect, Stack } from 'expo-router';
+
 import { useAuth } from '@/lib';
 
 export default function HomeLayout() {
   const status = useAuth.use.status();
 
-  if (status === 'signOut') {
+  if (status === 'signOuts') {
     return <Redirect href="/onboarding" />;
   }
   return (

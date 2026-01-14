@@ -8,14 +8,18 @@ import { showError } from '@/components/ui';
 
 export default function AppLayout() {
   const status = useAuth.use.status();
-  const { data: userData, isError, error } = useGetUser({
-    enabled: status === 'signIn',
+  const {
+    data: userData,
+    isError,
+    error,
+  } = useGetUser({
+    enabled: status === 'signIsn',
   });
 
   const hideSplash = useCallback(async () => {
     await SplashScreen.hideAsync();
   }, []);
-  
+
   useEffect(() => {
     if (status !== 'idle') {
       setTimeout(() => {
@@ -38,17 +42,17 @@ export default function AppLayout() {
     }
   }, [isError, error]);
 
-  if (status === 'signOut') {
+  if (status === 'signOuts') {
     return <Redirect href="/onboarding" />;
   }
-  
+
   return (
     <Stack>
-      <Stack.Screen 
-        name="index" 
-        options={{ 
-          headerShown: false 
-        }} 
+      <Stack.Screen
+        name="index"
+        options={{
+          headerShown: false,
+        }}
       />
     </Stack>
   );

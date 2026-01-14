@@ -1,45 +1,64 @@
-import React from 'react';
-import { TouchableOpacity as RNTouchableOpacity, GestureResponderEvent, Modal } from 'react-native';
-import { router } from 'expo-router';
+/* eslint-disable max-lines-per-function */
+import { zodResolver } from '@hookform/resolvers/zod';
 import { FlashList } from '@shopify/flash-list';
 import * as DocumentPicker from 'expo-document-picker';
-import { Alert } from 'react-native';
-
+import { router } from 'expo-router';
+import React from 'react';
+import { useForm } from 'react-hook-form';
 import {
+  type GestureResponderEvent,
+  Modal,
+  TouchableOpacity as RNTouchableOpacity,
+} from 'react-native';
+import { showMessage } from 'react-native-flash-message';
+import * as z from 'zod';
+
+import type { Document } from '@/api/documents';
+import {
+  deleteDocument,
+  editDocument,
+  uploadDocument,
+  useGetDocumentsByEmail,
+} from '@/api/documents';
+import { OptionsMenu } from '@/components/options-menu';
+import {
+  Button,
+  ControlledInput,
   FocusAwareStatusBar,
+  Input,
   SafeAreaView,
   Text,
-  View,
   TouchableOpacity,
-  Button,
-  Input,
+  View,
 } from '@/components/ui';
 import { DocumentSkeleton } from '@/components/ui/document-skeleton';
 import { Logos } from '@/components/ui/icons/logos';
-import { Search } from '@/components/ui/icons/search';
-import { Pen } from '@/components/ui/icons/pen';
 import { Options } from '@/components/ui/icons/options';
-import { useUser } from '@/lib/user';
-import {
-  useGetDocumentsByEmail,
-  uploadDocument,
-  deleteDocument,
-  editDocument,
-} from '@/api/documents';
-import { OptionsMenu } from '@/components/options-menu';
-import type { Document } from '@/api/documents';
-import { showMessage } from 'react-native-flash-message';
+import { Pen } from '@/components/ui/icons/pen';
+import { Search } from '@/components/ui/icons/search';
 import { showError } from '@/components/ui/utils';
+import { useUser } from '@/lib/user';
+
+const schema = z.object({
+  text: z.string(),
+});
+
+export type HomeInputType = z.infer<typeof schema>;
 
 export default function Home() {
   const user = useUser.use.user();
+  const { control } = useForm<HomeInputType>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      text: '',
+    },
+  });
   const { data: documentData, isLoading, refetch } = useGetDocumentsByEmail();
   const { mutate: uploadDocumentMutation, isPending: isUploading } =
     uploadDocument();
   const { mutate: deleteDocumentMutation, isPending: isDeleting } =
     deleteDocument();
-  const { mutate: editDocumentMutation, isPending: isEditing } =
-    editDocument();
+  const { mutate: editDocumentMutation, isPending: isEditing } = editDocument();
   const [selectedDocId, setSelectedDocId] = React.useState<string | null>(null);
   const [isOptionsOpen, setIsOptionsOpen] = React.useState(false);
   const [isRenameOpen, setIsRenameOpen] = React.useState(false);
@@ -83,7 +102,7 @@ export default function Home() {
         uploadDocumentMutation(
           { document: fileObj, user_email: user?.email || '' },
           {
-            onSuccess: (data) => {
+            onSuccess: (_data) => {
               showMessage({
                 message: 'Document uploaded successfully!',
                 type: 'success',
@@ -118,11 +137,11 @@ export default function Home() {
           })
         }
       >
-        <View className="bg-white border border-dashed border-black rounded-2xl p-6 mb-4">
+        <View className="mb-4 rounded-2xl border border-dashed border-black bg-white p-6">
           <View className="flex-row items-center justify-between">
             {/* Left side - Title */}
             <Text
-              className="text-[20px] font-garamond-medium text-black flex-1 mr-4"
+              className="mr-4 flex-1 font-garamond-medium text-[20px] text-black"
               numberOfLines={1}
               ellipsizeMode="tail"
             >
@@ -130,12 +149,12 @@ export default function Home() {
             </Text>
 
             {/* Middle - Progress */}
-            <View className="flex-row items-center mr-4">
-              <Text className="text-sm text-black mr-3">{progress}%</Text>
+            <View className="mr-4 flex-row items-center">
+              <Text className="mr-3 text-sm text-black">{progress}%</Text>
 
-              <View className="w-20 bg-black rounded-full h-2">
+              <View className="h-2 w-20 rounded-full bg-black">
                 <View
-                  className="bg-yellow-400 h-2 rounded-full"
+                  className="h-2 rounded-full bg-yellow-400"
                   style={{ width: `${progress}%` }}
                 />
               </View>
@@ -167,9 +186,9 @@ export default function Home() {
         <View className="flex-row items-center justify-between px-6 py-4">
           <TouchableOpacity
             onPress={() => router.push('/home/settings')}
-            className="h-10 w-10 rounded-full bg-[#D9D9D9] items-center justify-center"
+            className="size-10 items-center justify-center rounded-full bg-[#D9D9D9]"
           >
-            <Text className="text-[#000000] font-bold text-[16px]">
+            <Text className="text-[16px] font-bold text-black">
               {user?.full_name?.charAt(0)}
             </Text>
           </TouchableOpacity>
@@ -180,32 +199,53 @@ export default function Home() {
             <TouchableOpacity className="mr-5">
               <Search />
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => router.push('/home/document-details')}
+            >
               <Pen />
             </TouchableOpacity>
           </View>
         </View>
 
+        <Text
+          className=" mt-[42px] text-center font-garamond text-[30px]  text-black"
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
+          Welcome back, {user?.full_name.split(' ')[0] || 'User'}!
+        </Text>
+
+        {/* <View className="px-6">
+          <ControlledInput
+            name="text"
+            control={control}
+            placeholder="Enter your text here..."
+            keyboardType="default"
+            multiline
+            inputContainerClassName="border-0 bg-[#F9F9F9] mt-[14px]"
+            className="mt-4 h-[112px] w-full border-0 border-transparent px-2"
+          />
+        </View> */}
+
         {/* Main Content */}
-        <View className="flex-1 px-6 mt-10">
+        <View className=" mt-4 flex-1 px-6">
           {isLoading ? (
             <FlashList
-              data={Array.from({ length: 5 }, (_, index) => ({ id: index }))}
+              data={Array.from({ length: 3 }, (_, index) => ({ id: index }))}
               renderItem={renderSkeletonItem}
               keyExtractor={(item) => item.id.toString()}
-              estimatedItemSize={100}
               showsVerticalScrollIndicator={false}
               ListFooterComponent={() => (
-                <View className="py-8 items-center">
+                <View className="items-center py-8">
                   <Button
                     label={isUploading ? 'Uploading...' : 'Upload a new doc'}
-                    className="bg-yellow-400 rounded-2xl py-4 mb-4"
+                    className="mb-4 rounded-2xl bg-yellow-400 py-4"
                     textClassName="text-black font-brownstd text-lg"
                     onPress={handleUploadDocument}
                     disabled={isUploading}
                   />
 
-                  <Text className="text-sm text-[#000000] text-center font-brownstd">
+                  <Text className="text-center font-brownstd text-sm text-black">
                     Supported formats: PDF, DOC, DOCX, TXT {'\n'} (Max 50MB)
                   </Text>
                 </View>
@@ -216,39 +256,38 @@ export default function Home() {
               data={documentData}
               renderItem={renderDocumentItem}
               keyExtractor={(item) => item.document_id}
-              estimatedItemSize={100}
               showsVerticalScrollIndicator={false}
               ListFooterComponent={() => (
-                <View className="py-8 items-center">
+                <View className="items-center py-8">
                   <Button
                     label={isUploading ? 'Uploading...' : 'Upload a new doc'}
-                    className="bg-yellow-400 rounded-2xl py-4 mb-4"
+                    className="mb-4 rounded-2xl bg-yellow-400 py-4"
                     textClassName="text-black font-brownstd text-lg"
                     onPress={handleUploadDocument}
                     disabled={isUploading}
                   />
 
-                  <Text className="text-sm text-[#000000] text-center font-brownstd">
+                  <Text className="text-center font-brownstd text-sm text-black">
                     Supported formats: PDF, DOC, DOCX, TXT {'\n'} (Max 50MB)
                   </Text>
                 </View>
               )}
             />
           ) : (
-            <View className="flex-1 justify-center items-center">
-              <Text className="text-lg font-brownstd text-center mb-8">
+            <View className="flex-1 items-center justify-center">
+              <Text className="mb-8 text-center font-brownstd text-lg">
                 No documents found
               </Text>
 
               <Button
                 label={isUploading ? 'Uploading...' : 'Upload a new doc'}
-                className="bg-yellow-400 rounded-2xl py-4 mb-4"
+                className="mb-4 rounded-2xl bg-yellow-400 py-4"
                 textClassName="text-black font-brownstd text-lg"
                 onPress={handleUploadDocument}
                 disabled={isUploading}
               />
 
-              <Text className="text-sm text-[#000000] text-center font-brownstd">
+              <Text className="text-center font-brownstd text-sm text-black">
                 Supported formats: PDF, DOC, DOCX, TXT {'\n'} (Max 50MB)
               </Text>
             </View>
@@ -282,11 +321,22 @@ export default function Home() {
       />
 
       {/* Rename Modal */}
-      <Modal transparent animationType="fade" visible={isRenameOpen} onRequestClose={() => setIsRenameOpen(false)}>
-        <RNTouchableOpacity activeOpacity={1} className="flex-1 bg-black/50" onPress={() => setIsRenameOpen(false)}>
+      <Modal
+        transparent
+        animationType="fade"
+        visible={isRenameOpen}
+        onRequestClose={() => setIsRenameOpen(false)}
+      >
+        <RNTouchableOpacity
+          activeOpacity={1}
+          className="flex-1 bg-black/50"
+          onPress={() => setIsRenameOpen(false)}
+        >
           <View className="flex-1 items-center justify-center px-6">
             <View className="w-full rounded-3xl bg-white p-6">
-              <Text className="text-[16px] font-brownstd text-black mb-4">Edit name</Text>
+              <Text className="mb-4 font-brownstd text-[16px] text-black">
+                Edit name
+              </Text>
               <Input
                 placeholder="Enter new name"
                 value={newTitle}
@@ -296,23 +346,29 @@ export default function Home() {
               <View className="flex-row justify-end gap-3">
                 <Button
                   label="Cancel"
-                  className="bg-gray-200 rounded-xl px-4 py-3"
+                  className="rounded-xl bg-gray-200 px-4 py-3"
                   textClassName="text-black font-brownstd"
                   onPress={() => setIsRenameOpen(false)}
                 />
                 <Button
                   label={isEditing ? 'Saving…' : 'Save'}
-                  className="bg-black rounded-xl px-4 py-3"
+                  className="rounded-xl bg-black px-4 py-3"
                   textClassName="text-white font-brownstd"
                   onPress={() => {
                     if (!selectedDocId || !newTitle.trim() || isEditing) return;
                     editDocumentMutation(
-                      { documentId: selectedDocId, documentTitle: newTitle.trim() },
+                      {
+                        documentId: selectedDocId,
+                        documentTitle: newTitle.trim(),
+                      },
                       {
                         onSuccess: () => {
                           setIsRenameOpen(false);
                           setNewTitle('');
-                          showMessage({ message: 'Name updated', type: 'success' });
+                          showMessage({
+                            message: 'Name updated',
+                            type: 'success',
+                          });
                           refetch();
                         },
                         onError: (error) => {

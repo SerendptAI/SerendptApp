@@ -1,5 +1,7 @@
 import React from 'react';
-import { View, TouchableOpacity } from '@/components/ui';
+
+import { TouchableOpacity, View } from '@/components/ui';
+
 import { Chat } from './ui/icons/chat';
 
 type Props = {
@@ -11,10 +13,10 @@ export function FloatingChatButton({ onPress, isVisible = true }: Props) {
   if (!isVisible) return null;
 
   return (
-    <View className="absolute bottom-40 right-4 z-50 mb-5">
+    <View className="absolute bottom-40 right-4 z-50 mb-10">
       <TouchableOpacity
         onPress={onPress}
-        className="w-16 h-16 bg-[#FFCC00] rounded-xl items-center justify-center shadow-lg"
+        className="size-16 items-center justify-center rounded-xl bg-[#FFCC00] shadow-lg"
         style={{
           shadowColor: '#000',
           shadowOffset: {
@@ -26,7 +28,7 @@ export function FloatingChatButton({ onPress, isVisible = true }: Props) {
           elevation: 5,
         }}
       >
-       <Chat />
+        <Chat />
       </TouchableOpacity>
     </View>
   );

@@ -1,7 +1,13 @@
+/* eslint-disable max-lines-per-function */
 import React from 'react';
-import { View, Text, TouchableOpacity, Image } from '@/components/ui';
-import { Play } from './ui/icons/play';
+
+import { Image, Text, TouchableOpacity, View } from '@/components/ui';
+
+import { SpeakerIcon } from './ui/icons';
+import { MoreOption } from './ui/icons/more-option';
 import { Pause } from './ui/icons/pause';
+import { Play } from './ui/icons/play';
+import { SoundSignal } from './ui/icons/sound-signal';
 
 type Props = {
   isVisible?: boolean;
@@ -25,56 +31,96 @@ export function FloatingAudioControl({
   if (!isVisible) return null;
 
   return (
-    <View className="absolute bottom-20 left-4 right-4 z-50">
-      <View className="bg-[#FFFBEB] rounded-2xl p-4 shadow-lg">
-        <View className="flex-row items-center justify-between">
-          {/* Left side - Profile and Voice Info */}
-          <View className="flex-row items-center flex-1">
-            <View className="w-12 h-12 rounded-full overflow-hidden mr-3">
+    <View className="absolute inset-x-4 bottom-20 z-50">
+      {isPlaying ? (
+        <View className="flex-row items-center justify-end gap-4">
+          <TouchableOpacity
+            onPress={onPlayPause}
+            className="size-[65px] items-center justify-center  rounded-full bg-[#FEF3C7]"
+          >
+            <MoreOption />
+          </TouchableOpacity>
+          <View className="relative mr-3 size-[75px] items-center justify-center overflow-hidden rounded-[14px] bg-[#FFFBEB]">
+            <View className="size-16 overflow-hidden rounded-full">
               <Image
                 source={{
                   uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
                 }}
-                className="w-full h-full"
-                contentFit="cover"
+                className=" size-16 rounded-full"
+                contentFit="contain"
               />
+              <View className="absolute inset-0 bg-black/50 " />
             </View>
-            
-            <View className="flex-1">
-              <Text className="text-black font-semibold text-base">
-                {voiceName}
-              </Text>
-              <Text className="text-gray-600 text-sm">
-                {voiceType}
-              </Text>
+
+            <View className="absolute ">
+              <SoundSignal />
             </View>
           </View>
+        </View>
+      ) : (
+        <View className="rounded-2xl border-[0.5px] border-[#ede2b6] bg-[#FFFBEB] p-2.5 drop-shadow-xl ">
+          <View className="flex-row items-center justify-between">
+            {/* Left side - Profile and Voice Info */}
+            <View className="flex-1 flex-row items-center">
+              <View className="mr-3 size-12 overflow-hidden rounded-full">
+                <Image
+                  source={{
+                    uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
+                  }}
+                  className="size-full"
+                  contentFit="cover"
+                />
+              </View>
 
-          {/* Center - Current Text */}
-          <View className="flex-1 mx-10">
-            <Text className="text-black text-base font-medium text-center">
-              "{currentText}"
-            </Text>
-          </View>
+              <View className="flex-1">
+                <Text className="font-brownstd-bold text-base text-black">
+                  {voiceName}
+                </Text>
+                <Text className="text-sm font-brownstd text-gray-600">
+                  {voiceType}
+                </Text>
+              </View>
+            </View>
 
-          {/* Right side - Controls */}
-          <View className="flex-row items-center space-x-2">
-            <TouchableOpacity
-              onPress={onPlayPause}
-              className="w-10 h-10 rounded-full bg-[#FDF4CF] items-center justify-center border border-gray-300 mr-5"
-            >
-              <Play />
-            </TouchableOpacity>
+            {/* Center - Current Text */}
 
-            <TouchableOpacity
-              onPress={onStop}
-              className="w-10 h-10 rounded-full bg-[#FDF4CF] items-center justify-center border border-gray-300"
-            >
-              <Pause />
+            {isPlaying && (
+              <View className="mx-10 flex-1">
+                <Text className="text-center text-base font-medium text-black">
+                  "{currentText}"
+                </Text>
+              </View>
+            )}
+
+            {/* Right side - Controls */}
+
+            {isPlaying && (
+              <View className="flex-row items-center space-x-2">
+                <TouchableOpacity
+                  onPress={onPlayPause}
+                  className="mr-5 size-10 items-center justify-center rounded-full border border-gray-300 bg-[#FDF4CF]"
+                >
+                  <Play />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={onStop}
+                  className="size-10 items-center justify-center rounded-full border border-gray-300 bg-[#FDF4CF]"
+                >
+                  <Pause />
+                </TouchableOpacity>
+              </View>
+            )}
+
+            <TouchableOpacity className="h-[49px] w-[167px] flex-row items-center justify-center gap-2 rounded-[24px] bg-[#FFCC00] px-6 py-2">
+              <SpeakerIcon />
+              <Text className="text-center font-brownstd text-base text-white">
+                Read aloud
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      )}
     </View>
   );
 }

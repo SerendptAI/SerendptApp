@@ -1,24 +1,22 @@
-import React, { useState } from 'react';
+/* eslint-disable max-lines-per-function */
 import { router, useLocalSearchParams } from 'expo-router';
-import { Dimensions } from 'react-native';
+import React, { useState } from 'react';
 
+import { useGetDocumentBatchesContent } from '@/api/documents';
+import { FloatingAudioControl } from '@/components/floating-audio-control';
+import { FloatingChatButton } from '@/components/floating-chat-button';
 import {
   FocusAwareStatusBar,
   SafeAreaView,
-  Text,
-  View,
-  TouchableOpacity,
   ScrollView,
-  Button,
+  Text,
+  TouchableOpacity,
+  View,
 } from '@/components/ui';
 import { Back } from '@/components/ui/icons/back';
 import { Mic } from '@/components/ui/icons/mic';
 import { PageNumber } from '@/components/ui/icons/page-number';
 import { PageSettings } from '@/components/ui/icons/page-settings';
-import { FloatingAudioControl } from '@/components/floating-audio-control';
-import { FloatingChatButton } from '@/components/floating-chat-button';
-import { useGetDocumentBatchesContent } from '@/api/documents';
-import type { DocumentBatch } from '@/api/documents';
 
 export default function DocumentDetails() {
   const { title, progress, documentId } = useLocalSearchParams<{
@@ -76,7 +74,7 @@ export default function DocumentDetails() {
           </TouchableOpacity>
 
           <Text
-            className="text-lg font-semibold text-black flex-1 text-center mx-16"
+            className="mx-16 flex-1 text-center font-garamond text-lg text-black"
             numberOfLines={1}
             ellipsizeMode="tail"
           >
@@ -85,9 +83,9 @@ export default function DocumentDetails() {
 
           <View className="flex-row items-center space-x-3">
             {isListening && (
-              <View className="bg-[#FDF4CF] rounded-full p-2 flex-row items-center gap-2">
+              <View className="flex-row items-center gap-2 rounded-full bg-[#FDF4CF] p-2">
                 <Mic />
-                <Text className="text-black text-sm font-medium">
+                <Text className="text-sm font-brownstd text-black">
                   Listening...
                 </Text>
               </View>
@@ -95,55 +93,55 @@ export default function DocumentDetails() {
           </View>
         </View>
 
-        <View className="flex-row items-center justify-between px-6 py-3 bg-gray-50">
+        <View className="flex-row items-center justify-between bg-gray-50 px-6 py-3">
           <View className="flex-row items-center">
             <View className=" mr-2 items-center justify-center">
               <PageNumber />
             </View>
-            <Text className="text-black font-brownstd text-[12px]">
+            <Text className="font-brownstd text-[12px] text-black">
               {currentPage?.batch_title || `Page ${currentPageIndex + 1}`}
             </Text>
           </View>
-          <TouchableOpacity className="h-8 w-8 rounded-full bg-black items-center justify-center">
+          <TouchableOpacity className="size-8 items-center justify-center rounded-full bg-black">
             <PageSettings />
           </TouchableOpacity>
         </View>
 
         <View className="flex-1 flex-row">
           <TouchableOpacity
-            className="absolute left-0 top-0 bottom-0 w-16 z-10"
+            className="absolute inset-y-0 left-0 z-10 w-16"
             onPress={goToPreviousPage}
             disabled={currentPageIndex === 0}
             activeOpacity={1}
           />
 
           <ScrollView
-            className="flex-1 px-6 py-6"
+            className="flex-1 p-6"
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 160 }}
           >
             {isLoadingBatches ? (
-              <View className="flex-1 justify-center items-center py-20">
-                <Text className="text-lg font-brownstd">
+              <View className="flex-1 items-center justify-center py-20">
+                <Text className="font-brownstd text-lg">
                   Loading content...
                 </Text>
               </View>
             ) : currentPage ? (
               <>
-                <Text className="text-center text-[#000000B2] text-[12px] font-brownstd mb-4">
+                <Text className="mb-4 text-center font-garamond text-[12px] text-[#000000B2]">
                   {currentPage.batch_title}
                 </Text>
 
                 <Text
-                  className="text-black text-[16px] font-brownstd"
+                  className="font-brownstd text-[16px] text-black"
                   style={{ lineHeight: 16 * 1.91 }}
                 >
                   {currentPage.batch_content.text}
                 </Text>
               </>
             ) : (
-              <View className="flex-1 justify-center items-center py-20">
-                <Text className="text-lg font-brownstd text-center">
+              <View className="flex-1 items-center justify-center py-20">
+                <Text className="text-center font-brownstd text-lg">
                   No content available
                 </Text>
               </View>
@@ -151,7 +149,7 @@ export default function DocumentDetails() {
           </ScrollView>
 
           <TouchableOpacity
-            className="absolute right-0 top-0 bottom-0 w-16 z-10"
+            className="absolute inset-y-0 right-0 z-10 w-16"
             onPress={goToNextPage}
             disabled={currentPageIndex === totalPages - 1}
             activeOpacity={1}

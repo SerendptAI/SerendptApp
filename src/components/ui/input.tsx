@@ -21,15 +21,16 @@ import { Text } from './text';
 
 const inputTv = tv({
   slots: {
-    container: 'mb-4 relative',
+    container: 'relative mb-4',
     // Floating label that sits on the border
-    label: 'absolute left-3 -top-2.5 bg-white px-2 text-sm font-brownstd text-gray-700 z-10 text-[12px]',
+    label:
+      'absolute -top-2.5 left-3 z-10 bg-white px-2 font-brownstd text-[12px] text-sm text-gray-700',
     input:
-      'text-gray-900 flex-1 border-0 bg-transparent px-4 py-5 font-brownstd text-base font-normal leading-5 text-[16px]',
+      'flex-1 border-0 bg-transparent px-4 py-5 font-brownstd text-[16px] text-base font-normal leading-5 text-gray-900',
     startIconContainer: 'pl-4',
     endIconContainer: 'pr-4',
     inputContainer:
-      'flex-row items-center rounded-lg border-2 border-[#BDBDBD] bg-white relative',
+      'relative flex-row items-center rounded-lg border-2 border-[#BDBDBD] bg-white',
   },
 
   variants: {
@@ -47,7 +48,7 @@ const inputTv = tv({
     },
     disabled: {
       true: {
-        inputContainer: 'bg-gray-100 border-gray-200',
+        inputContainer: 'border-gray-200 bg-gray-100',
         input: 'text-gray-400',
         label: 'text-gray-400',
       },
@@ -118,7 +119,7 @@ export const Input = React.forwardRef<NTextInput, NInputProps>((props, ref) => {
 
   const [isFocussed, setIsFocussed] = React.useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = React.useState(false);
-  
+
   const onBlur = React.useCallback(() => setIsFocussed(false), []);
   const onFocus = React.useCallback(() => setIsFocussed(true), []);
 
@@ -153,7 +154,7 @@ export const Input = React.forwardRef<NTextInput, NInputProps>((props, ref) => {
         {startImage && (
           <View className={styles.startIconContainer()}>{startImage}</View>
         )}
-        
+
         <NTextInput
           ref={ref}
           placeholderTextColor={placeholderTextColor}
@@ -172,7 +173,7 @@ export const Input = React.forwardRef<NTextInput, NInputProps>((props, ref) => {
             inputProps.style,
           ])}
         />
-        
+
         {showPasswordToggle && (
           <TouchableOpacity
             className={styles.endIconContainer()}
@@ -185,9 +186,11 @@ export const Input = React.forwardRef<NTextInput, NInputProps>((props, ref) => {
             {isPasswordVisible ? <Eye /> : <Eye />}
           </TouchableOpacity>
         )}
-        
+
         {endImage && !showPasswordToggle && (
-          <View className="absolute right-3 top-1/2 -translate-y-1/2">{endImage}</View>
+          <View className="absolute right-3 top-1/2 -translate-y-1/2">
+            {endImage}
+          </View>
         )}
       </View>
 
@@ -203,7 +206,7 @@ export const Input = React.forwardRef<NTextInput, NInputProps>((props, ref) => {
       )}
 
       {/* Error Message */}
-      {error && <Text className="text-sm text-red-500 mt-1">{error}</Text>}
+      {error && <Text className="mt-1 text-sm text-red-500">{error}</Text>}
     </View>
   );
 });
