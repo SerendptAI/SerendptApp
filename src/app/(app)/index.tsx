@@ -1,17 +1,14 @@
 /* eslint-disable max-lines-per-function */
-import { zodResolver } from '@hookform/resolvers/zod';
 import { FlashList } from '@shopify/flash-list';
 import * as DocumentPicker from 'expo-document-picker';
 import { router } from 'expo-router';
 import React from 'react';
-import { useForm } from 'react-hook-form';
 import {
   type GestureResponderEvent,
   Modal,
   TouchableOpacity as RNTouchableOpacity,
 } from 'react-native';
 import { showMessage } from 'react-native-flash-message';
-import * as z from 'zod';
 
 import type { Document } from '@/api/documents';
 import {
@@ -23,7 +20,6 @@ import {
 import { OptionsMenu } from '@/components/options-menu';
 import {
   Button,
-  ControlledInput,
   FocusAwareStatusBar,
   Input,
   SafeAreaView,
@@ -39,20 +35,9 @@ import { Search } from '@/components/ui/icons/search';
 import { showError } from '@/components/ui/utils';
 import { useUser } from '@/lib/user';
 
-const schema = z.object({
-  text: z.string(),
-});
-
-export type HomeInputType = z.infer<typeof schema>;
-
 export default function Home() {
   const user = useUser.use.user();
-  const { control } = useForm<HomeInputType>({
-    resolver: zodResolver(schema),
-    defaultValues: {
-      text: '',
-    },
-  });
+
   const { data: documentData, isLoading, refetch } = useGetDocumentsByEmail();
   const { mutate: uploadDocumentMutation, isPending: isUploading } =
     uploadDocument();

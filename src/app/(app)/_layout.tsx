@@ -42,7 +42,7 @@ export default function AppLayout() {
     }
   }, [isError, error]);
 
-  if (status === 'signOuts') {
+  if (status === 'signOut') {
     return <Redirect href="/onboarding" />;
   }
 

@@ -1,20 +1,21 @@
 import type { AxiosError } from 'axios';
-import { createMutation, createQuery } from 'react-query-kit';
-import { getToken } from '@/lib/auth/utils';
 import RNFetchBlob from 'react-native-blob-util';
+import { createMutation, createQuery } from 'react-query-kit';
+
+import { getToken } from '@/lib/auth/utils';
+import { Env } from '@/lib/env';
 
 import { client } from '../common';
 import type {
-  GetDocumentsByEmailResponse,
-  GetDocumentBatchesContentResponse,
-  UploadDocumentResponse,
-  UploadDocumentVariables,
   DeleteDocumentResponse,
   DeleteDocumentVariables,
   EditDocumentResponse,
   EditDocumentVariables,
+  GetDocumentBatchesContentResponse,
+  GetDocumentsByEmailResponse,
+  UploadDocumentResponse,
+  UploadDocumentVariables,
 } from './types';
-import { Env } from '@/lib/env';
 
 export const useGetDocumentsByEmail = createQuery<
   GetDocumentsByEmailResponse,
@@ -29,7 +30,11 @@ export const useGetDocumentsByEmail = createQuery<
     }).then((response) => response.data),
 });
 
-export const deleteDocument = createMutation<DeleteDocumentResponse, DeleteDocumentVariables, Error>({
+export const deleteDocument = createMutation<
+  DeleteDocumentResponse,
+  DeleteDocumentVariables,
+  Error
+>({
   mutationKey: ['documents', 'delete'],
   mutationFn: async ({ documentId }) => {
     return client({
@@ -39,7 +44,11 @@ export const deleteDocument = createMutation<DeleteDocumentResponse, DeleteDocum
   },
 });
 
-export const editDocument = createMutation<EditDocumentResponse, EditDocumentVariables, Error>({
+export const editDocument = createMutation<
+  EditDocumentResponse,
+  EditDocumentVariables,
+  Error
+>({
   mutationKey: ['documents', 'edit'],
   mutationFn: async ({ documentId, documentTitle }) => {
     return client({
@@ -67,25 +76,29 @@ export const useGetDocumentBatchesContent = createQuery<
   },
 });
 
-export const uploadDocument = createMutation<UploadDocumentResponse, UploadDocumentVariables, Error>({
+export const uploadDocument = createMutation<
+  UploadDocumentResponse,
+  UploadDocumentVariables,
+  Error
+>({
   mutationKey: ['documents', 'upload'],
   mutationFn: async ({ document, user_email }) => {
     try {
       console.log('Starting upload with RNFetchBlob...');
       console.log('Document:', document);
       console.log('User email:', user_email);
-      
+
       const token = getToken();
-      
+
       // Remove 'file://' prefix if present
       const filePath = document.uri.replace('file://', '');
       console.log('File path:', filePath);
-      
+
       const response = await RNFetchBlob.fetch(
         'POST',
         `${Env.API_URL}/process_document/`,
         {
-          'Authorization': token?.access ? `Bearer ${token.access}` : '',
+          Authorization: token?.access ? `Bearer ${token.access}` : '',
           'Content-Type': 'multipart/form-data',
         },
         [
@@ -103,16 +116,18 @@ export const uploadDocument = createMutation<UploadDocumentResponse, UploadDocum
       );
 
       console.log('Response status:', response.respInfo.status);
-      
+
       const responseData = response.json();
       console.log('Response data:', responseData);
 
       if (response.respInfo.status >= 400) {
-        throw new Error(responseData.message || `Upload failed with status ${response.respInfo.status}`);
+        throw new Error(
+          responseData.message ||
+            `Upload failed with status ${response.respInfo.status}`
+        );
       }
 
       return responseData;
-      
     } catch (error: any) {
       console.error('Upload error:', error);
       throw new Error(error.message || 'Upload failed');

@@ -5,7 +5,7 @@ import { useAuth } from '@/lib';
 export default function HomeLayout() {
   const status = useAuth.use.status();
 
-  if (status === 'signOuts') {
+  if (status === 'signOut') {
     return <Redirect href="/onboarding" />;
   }
   return (

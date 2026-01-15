@@ -18,8 +18,7 @@ export default function Onboarding() {
 
   const handleSignIn = () => {
     setIsFirstTime(false);
-    router.replace('/home');
-    // router.replace('/auth/login');
+    router.replace('/auth/login');
   };
 
   return (
