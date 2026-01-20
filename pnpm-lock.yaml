@@ -59,6 +59,9 @@ importers:
       expo-document-picker:
         specifier: ~14.0.8
         version: 14.0.8(expo@54.0.30)
+      expo-file-system:
+        specifier: ~19.0.21
+        version: 19.0.21(expo@54.0.30)(react-native@0.81.5(@babel/core@7.26.0)(@types/react@19.1.17)(react@19.1.0))
       expo-font:
         specifier: ~14.0.10
         version: 14.0.10(expo@54.0.30)(react-native@0.81.5(@babel/core@7.26.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -179,6 +182,9 @@ importers:
       tailwind-variants:
         specifier: ^0.2.1
         version: 0.2.1(tailwindcss@3.4.4)
+      whisper.rn:
+        specifier: ^0.5.4
+        version: 0.5.4(react-native@0.81.5(@babel/core@7.26.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       zod:
         specifier: ^3.23.8
         version: 3.23.8
@@ -7492,6 +7498,13 @@ packages:
     resolution: {integrity: sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==}
     engines: {node: '>= 8'}
     hasBin: true
+
+  whisper.rn@0.5.4:
+    resolution: {integrity: sha512-4G3MFnC/EQoUFqv1k6EahERI6W3vAgfau2uyLidq0/axZPuHC4ZMhPEtTYaGljUN8OzD2W8erLRm/sA3jR5FBQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
 
   widest-line@5.0.0:
     resolution: {integrity: sha512-c9bZp7b5YtRj2wOe6dlj32MK+Bx/M/d+9VB2SHM1OtsUHR0aV0tdP6DWh/iMt0kWi1t5g1Iudu6hQRNd1A4PVA==}
@@ -16254,6 +16267,12 @@ snapshots:
   which@2.0.2:
     dependencies:
       isexe: 2.0.0
+
+  whisper.rn@0.5.4(react-native@0.81.5(@babel/core@7.26.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0):
+    dependencies:
+      react: 19.1.0
+      react-native: 0.81.5(@babel/core@7.26.0)(@types/react@19.1.17)(react@19.1.0)
+      safe-buffer: 5.2.1
 
   widest-line@5.0.0:
     dependencies:

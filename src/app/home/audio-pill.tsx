@@ -1,8 +1,7 @@
 /* eslint-disable max-lines-per-function */
 import { Audio } from 'expo-av';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator } from 'react-native'; // Import ActivityIndicator
 import { Modal } from 'react-native';
 import Animated, {
   interpolate,
@@ -17,88 +16,30 @@ import Animated, {
 import { initWhisper } from 'whisper.rn';
 
 import { type ChatResponse, useChat } from '@/api/chat';
-import { useGetChat } from '@/api/chat/use-get-chat';
-import {
-  FocusAwareStatusBar,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from '@/components/ui';
-import { Back } from '@/components/ui/icons/back';
+import { Text, TouchableOpacity, View } from '@/components/ui';
 import { Mic } from '@/components/ui/icons/mic';
-import { Mics } from '@/components/ui/icons/mics';
 
-const formatMessageTime = (dateString: string) => {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  }).format(date);
-};
+interface AudioPillProps {
+  transcription: string;
+  documentId: string;
+  currentPage?: any;
+  setTranscription: (transcription: string) => void;
+}
 
-const AIMessageCard = ({ text, time }: { text: string; time: string }) => {
-  return (
-    <View className="mb-5 rounded-2xl border-[0.5px] border-gray-200 bg-white p-5">
-      <View className="mb-3">
-        <View className="self-start rounded-full bg-[#FDF4CF] p-2 px-3">
-          <Text className="text-[11px] font-bold text-[#1A1A1A]">AI</Text>
-        </View>
-      </View>
-      <Text className="font-brownstd  text-[16px] leading-7 text-black">
-        {text}
-      </Text>
-      <Text className="mt-3 text-right text-[11px] text-gray-400">
-        {formatMessageTime(time)}
-      </Text>
-    </View>
-  );
-};
-
-const UserMessageCard = ({ text, time }: { text: string; time: string }) => {
-  return (
-    <View className="mb-5 rounded-2xl bg-[#FFFBEB] p-5">
-      <View className="mb-3">
-        <View className="self-start rounded-full bg-[#F3F4F6] p-2 px-3">
-          <Text className="text-[11px] font-bold text-[#1A1A1A]">You</Text>
-        </View>
-      </View>
-      <Text className="font-brownstd text-[16px] leading-7 text-black">
-        {text}
-      </Text>
-      <Text className="mt-3 text-right text-[11px] text-gray-500/60">
-        {formatMessageTime(time)}
-      </Text>
-    </View>
-  );
-};
-
-export default function Chats() {
-  const { documentId, batchOrder } = useLocalSearchParams<{
-    documentId: string;
-    batchOrder: string;
-  }>();
-
+export const AudioPill: React.FC<AudioPillProps> = ({
+  transcription,
+  documentId,
+  currentPage,
+  setTranscription,
+}) => {
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [isListening, setIsListening] = useState(false);
   const [whisperContext, setWhisperContext] = useState<any>(null);
-  const [transcription, setTranscription] = useState('');
 
   const volumeLevel = useSharedValue(1);
   const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const chatMutation = useChat();
-
-  const { data, isLoading, refetch } = useGetChat({
-    variables: { document_id: documentId ?? '' },
-  });
-
-  const messages = data?.messages ? [...data.messages].reverse() : [];
 
   useEffect(() => {
     const setup = async () => {
@@ -216,17 +157,25 @@ export default function Chats() {
           const finalResult = result?.result?.trim() || 'No speech detected';
           if (finalResult && finalResult !== 'No speech detected') {
             setTranscription(finalResult);
+
             // CALL MUTATION HERE directly using finalResult
             const response: ChatResponse = await chatMutation.mutateAsync({
               document_id: documentId || '',
-              batch_order: Number(batchOrder),
+              batch_order: currentPage?.batch_order,
               question: finalResult,
             });
 
             // Optional: clear text after some time
             setTimeout(() => setTranscription(''), 5000);
+
             if (response) {
-              await refetch();
+              router.push({
+                pathname: '/home/chats',
+                params: {
+                  documentId: documentId,
+                },
+              });
+              setTimeout(() => setTranscription(''), 5000);
             }
           } else {
             setTranscription('No speech detected');
@@ -256,64 +205,7 @@ export default function Chats() {
   }));
 
   return (
-    <View className="flex-1 bg-white">
-      <FocusAwareStatusBar />
-      <SafeAreaView className="flex-1">
-        <View className="flex-row items-center px-6 py-4">
-          <TouchableOpacity onPress={() => router.back()} className="pr-2">
-            <Back />
-          </TouchableOpacity>
-          <View className="flex-1 items-center">
-            <Text className="font-brownstd text-lg  text-black">
-              Conversation History
-            </Text>
-          </View>
-          <View style={{ width: 24 }} />
-        </View>
-
-        {isLoading ? (
-          <View className="flex-1 items-center justify-center">
-            <ActivityIndicator size="large" color="#1A1A1A" />
-            <Text className="mt-4 text-gray-500">Loading conversation...</Text>
-          </View>
-        ) : (
-          <ScrollView
-            className="flex-1 px-4"
-            contentContainerClassName="pt-3 pb-28"
-            showsVerticalScrollIndicator={false}
-          >
-            {messages.map((item, index) =>
-              item.role === 'ai' ? (
-                <AIMessageCard
-                  key={index}
-                  text={item.content}
-                  time={item.timestamp}
-                />
-              ) : (
-                <UserMessageCard
-                  key={index}
-                  text={item.content}
-                  time={item.timestamp}
-                />
-              )
-            )}
-          </ScrollView>
-        )}
-
-        {/* Footer Action */}
-        <View className="absolute inset-x-0 bottom-10 z-50 px-10">
-          <TouchableOpacity
-            onPress={startRecording}
-            className="flex-row items-center justify-center gap-3 rounded-full border border-[#FDF4CF] bg-[#FFFBEB] py-8 shadow-sm"
-          >
-            <Mics />
-            <Text className="font-brownstd text-base text-black">
-              {transcription ||
-                (whisperContext ? 'Tap to talk' : 'Loading model...')}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
+    <View className="flex-row items-center">
       <Modal transparent visible={isListening} animationType="fade">
         <View className="flex-1 items-center justify-center bg-black/60">
           <Animated.View
@@ -339,6 +231,23 @@ export default function Chats() {
           </View>
         </View>
       </Modal>
+
+      <TouchableOpacity
+        onPress={startRecording}
+        disabled={isListening || !whisperContext}
+        className="flex-row items-center gap-2 rounded-full bg-[#FDF4CF] px-4 py-2"
+      >
+        <View
+          className={`size-2 rounded-full ${whisperContext ? 'bg-green-500' : 'bg-slate-500'}`}
+        />
+        <Text
+          className="max-w-[150px] font-brownstd text-sm text-black"
+          numberOfLines={1}
+        >
+          {transcription ||
+            (whisperContext ? 'Click to talk' : 'Loading model...')}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
-}
+};

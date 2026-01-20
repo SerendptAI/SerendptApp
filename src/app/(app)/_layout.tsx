@@ -13,7 +13,7 @@ export default function AppLayout() {
     isError,
     error,
   } = useGetUser({
-    enabled: status === 'signIsn',
+    enabled: status === 'signIn',
   });
 
   const hideSplash = useCallback(async () => {
@@ -31,6 +31,7 @@ export default function AppLayout() {
   // Store user data in global state
   useEffect(() => {
     if (userData) {
+      console.log('uscccer', JSON.stringify(userData, null, 2));
       setUser(userData);
     }
   }, [userData]);

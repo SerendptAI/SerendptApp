@@ -163,7 +163,7 @@ export default function Home() {
   };
 
   const renderSkeletonItem = () => <DocumentSkeleton />;
-
+  console.log('user', JSON.stringify(user, null, 2));
   return (
     <View className="flex-1 bg-white">
       <FocusAwareStatusBar />
@@ -181,12 +181,10 @@ export default function Home() {
             <Logos color="#000000" />
           </View>
           <View className="flex-row items-center space-x-4">
-            <TouchableOpacity className="mr-5">
+            {/* <TouchableOpacity className="mr-5">
               <Search />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => router.push('/home/document-details')}
-            >
+            </TouchableOpacity> */}
+            <TouchableOpacity onPress={() => router.push('/')}>
               <Pen />
             </TouchableOpacity>
           </View>

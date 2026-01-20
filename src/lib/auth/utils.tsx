@@ -37,3 +37,18 @@ export type UserLocationType = {
 export const setUserLocation = (value: UserLocationType) =>
   setItem<UserLocationType>(USER_LOCATION, value);
 export const getUserLocation = () => getItem<UserLocationType>(USER_LOCATION);
+
+export function calculateWordCount(text: string): number {
+  if (!text || text.trim().length === 0) {
+    return 0;
+  }
+
+  // Remove extra whitespace and split by spaces
+  const words = text
+    .trim()
+    .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+    .split(' ')
+    .filter((word) => word.length > 0); // Filter out empty strings
+
+  return words.length;
+}

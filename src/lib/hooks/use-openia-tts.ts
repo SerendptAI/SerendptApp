@@ -4,6 +4,7 @@ const API_KEYS = [
   process.env.EXPO_PUBLIC_OPENAI_API_KEY_1,
   process.env.EXPO_PUBLIC_OPENAI_API_KEY_2,
   process.env.EXPO_PUBLIC_OPENAI_API_KEY_3,
+  process.env.EXPO_PUBLIC_OPENAI_API_KEY_4,
 ].filter((key): key is string => !!key);
 
 let currentKeyIndex = 0;

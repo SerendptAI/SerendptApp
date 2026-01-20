@@ -17,15 +17,46 @@ import {
 } from '@/components/ui';
 import { Close } from '@/components/ui/icons';
 import { Back } from '@/components/ui/icons/back';
-import { Mic } from '@/components/ui/icons/mic';
 import { PageNumber } from '@/components/ui/icons/page-number';
 import { PageSettings } from '@/components/ui/icons/page-settings';
 import { handleTTS } from '@/lib/hooks/use-tts';
 import { getItem, setItem } from '@/lib/storage';
 import { type AIVoice } from '@/lib/voice';
 
+import { AudioPill } from './audio-pill';
+
+// Simple highlighted word component (no Reanimated)
+const HighlightedWord = React.memo(
+  ({ word, isHighlighted }: { word: string; isHighlighted: boolean }) => {
+    // const handleWordLayout = useCallback((index: number, ref: any) => {
+    //   wordRefs.current[index] = ref;
+    // }, []);
+
+    return (
+      <View
+        style={{
+          backgroundColor: isHighlighted ? '#FFEB3B' : 'transparent',
+          paddingVertical: 1,
+          borderRadius: 3,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 16,
+            fontFamily: 'BrownStd',
+            color: '#000',
+            textAlign: 'left',
+          }}
+        >
+          {word}
+        </Text>
+      </View>
+    );
+  }
+);
+
 export default function DocumentDetails() {
-  const { title, progress, documentId } = useLocalSearchParams<{
+  const { title, documentId } = useLocalSearchParams<{
     title: string;
     progress: string;
     documentId: string;
@@ -38,17 +69,28 @@ export default function DocumentDetails() {
 
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isListening, setIsListening] = useState(true);
   const [pausedAudio, setPausedAudio] = useState(false);
   const [currentText, setCurrentText] = useState('Quiet');
   const [isChangePageNumberOpen, setIsChangePageNumberOpen] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-
   const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
+  const [transcription, setTranscription] = useState('');
+
+  // Word highlighting states
+  const [highlightedWords, setHighlightedWords] = useState<string[]>([]);
+  const [currentWordIndex, setCurrentWordIndex] = useState(-1);
+  const [_audioDuration, setAudioDuration] = useState(0);
+  const [isEnlarged, setIsEnlarged] = useState(false);
 
   // Audio player ref
   const soundRef = useRef<Audio.Sound | null>(null);
   const audioGenerationRef = useRef<string | null>(null);
+  const highlightIntervalRef = useRef<ReturnType<typeof setInterval> | null>(
+    null
+  );
+  const currentIndexRef = useRef<number>(0);
+  const scrollViewRef = useRef<any>(null);
+  // const wordRefs = useRef<{ [key: number]: any }>({});
 
   const [selectedVoice, _setSelectedVoice] = useState<any>(() => {
     const defaultVoice = {
@@ -63,7 +105,6 @@ export default function DocumentDetails() {
       const saved = getItem('selected_voice');
       if (saved) {
         const voice = saved as AIVoice;
-        console.log('[Page] Loaded voice from localStorage:', voice);
 
         const validVoiceIds = [
           'alloy',
@@ -79,7 +120,6 @@ export default function DocumentDetails() {
           !validVoiceIds.includes(voice.id) ||
           !validModels.includes(voice.model)
         ) {
-          console.warn('[Page] Invalid voice in localStorage, using default');
           setItem('selected_voice', defaultVoice);
           return defaultVoice;
         }
@@ -95,6 +135,17 @@ export default function DocumentDetails() {
 
   const currentPage = batchesContent?.[currentPageIndex];
   const totalPages = batchesContent?.length || 0;
+
+  // Split text into words when page changes
+  useEffect(() => {
+    if (currentPage?.batch_content.text) {
+      const words = currentPage.batch_content.text.split(/(\s+|\.)/);
+      setHighlightedWords(words);
+      setCurrentWordIndex(-1);
+      currentIndexRef.current = 0;
+      console.log('📝 Split text into', words.length, 'elements');
+    }
+  }, [currentPage?.batch_content.text]);
 
   // Setup audio mode on component mount
   useEffect(() => {
@@ -113,83 +164,179 @@ export default function DocumentDetails() {
 
     setupAudio();
 
-    // Cleanup on unmount
     return () => {
       if (soundRef.current) {
         soundRef.current.unloadAsync();
       }
+      if (highlightIntervalRef.current) {
+        clearInterval(highlightIntervalRef.current);
+      }
     };
   }, []);
 
-  // Play audio from blob
-  const playAudioFromBlob = useCallback(async (blob: Blob) => {
-    try {
-      if (soundRef.current) {
-        await soundRef.current.unloadAsync();
-        soundRef.current = null;
+  // Start word highlighting animation
+  const startWordHighlighting = useCallback(
+    (duration: number, startFromIndex: number = 0) => {
+      if (highlightIntervalRef.current) {
+        clearInterval(highlightIntervalRef.current);
       }
 
-      const reader = new FileReader();
+      const actualWords = highlightedWords.filter((w) => w.trim().length > 0);
+      const wordCount = actualWords.length;
 
-      reader.onloadend = async () => {
-        try {
-          const base64Audio = reader.result as string;
+      if (wordCount === 0) {
+        console.warn('⚠️ No words to highlight');
+        return;
+      }
 
-          const { sound } = await Audio.Sound.createAsync(
-            { uri: base64Audio },
-            { shouldPlay: true },
-            onPlaybackStatusUpdate
-          );
+      const wordsPerSecond = wordCount / (duration / 1000);
+      const intervalMs = Math.max(100, 1000 / wordsPerSecond);
 
-          soundRef.current = sound;
-          setIsPlaying(true);
+      console.log(
+        `📖 Highlighting ${wordCount} words over ${(duration / 1000).toFixed(1)}s (${intervalMs.toFixed(0)}ms per word)`
+      );
+
+      let currentIdx = startFromIndex;
+      while (
+        currentIdx < highlightedWords.length &&
+        highlightedWords[currentIdx].trim().length === 0
+      ) {
+        currentIdx++;
+      }
+
+      if (currentIdx >= highlightedWords.length) {
+        console.warn('⚠️ No valid starting word found');
+        return;
+      }
+
+      currentIndexRef.current = currentIdx;
+      setCurrentWordIndex(currentIdx);
+      console.log(
+        '✨ Starting highlight at index:',
+        currentIdx,
+        'word:',
+        highlightedWords[currentIdx]
+      );
+
+      highlightIntervalRef.current = setInterval(() => {
+        currentIndexRef.current++;
+
+        while (
+          currentIndexRef.current < highlightedWords.length &&
+          highlightedWords[currentIndexRef.current].trim().length === 0
+        ) {
+          currentIndexRef.current++;
+        }
+
+        if (currentIndexRef.current >= highlightedWords.length) {
+          console.log('✅ Highlighting complete');
+          if (highlightIntervalRef.current) {
+            clearInterval(highlightIntervalRef.current);
+            highlightIntervalRef.current = null;
+          }
+          setCurrentWordIndex(-1);
+        } else {
+          setCurrentWordIndex(currentIndexRef.current);
+        }
+      }, intervalMs);
+    },
+    [highlightedWords]
+  );
+
+  const stopWordHighlighting = useCallback(() => {
+    if (highlightIntervalRef.current) {
+      clearInterval(highlightIntervalRef.current);
+      highlightIntervalRef.current = null;
+    }
+    setCurrentWordIndex(-1);
+  }, []);
+
+  const onPlaybackStatusUpdate = useCallback(
+    (status: any) => {
+      if (status.isLoaded) {
+        if (status.isPlaying) {
+          setCurrentText('Playing...');
           setPausedAudio(false);
-          console.log('🎵 Audio playback started');
-        } catch (error) {
-          console.error('Error creating sound:', error);
+        } else if (status.didJustFinish) {
+          setIsPlaying(false);
+          setPausedAudio(false);
+          setCurrentText('Finished');
+          stopWordHighlighting();
+          console.log('🎵 Audio playback finished');
+        }
+      } else if (status.error) {
+        console.error('Playback error:', status.error);
+        setIsPlaying(false);
+        setPausedAudio(false);
+        setCurrentText('Playback error');
+        stopWordHighlighting();
+      }
+    },
+    [stopWordHighlighting]
+  );
+
+  const playAudioFromBlob = useCallback(
+    async (blob: Blob) => {
+      try {
+        if (soundRef.current) {
+          await soundRef.current.unloadAsync();
+          soundRef.current = null;
+        }
+
+        const reader = new FileReader();
+
+        reader.onloadend = async () => {
+          try {
+            const base64Audio = reader.result as string;
+
+            const { sound } = await Audio.Sound.createAsync(
+              { uri: base64Audio },
+              { shouldPlay: true },
+              onPlaybackStatusUpdate
+            );
+
+            soundRef.current = sound;
+
+            const status = await sound.getStatusAsync();
+            if (status.isLoaded && status.durationMillis) {
+              setAudioDuration(status.durationMillis);
+              console.log(
+                '🎵 Audio duration:',
+                (status.durationMillis / 1000).toFixed(1),
+                'seconds'
+              );
+              startWordHighlighting(status.durationMillis, 0);
+            }
+
+            setIsPlaying(true);
+            setPausedAudio(false);
+            console.log('🎵 Audio playback started');
+          } catch (error) {
+            console.error('Error creating sound:', error);
+            setCurrentText('Failed to play audio');
+            setIsPlaying(false);
+            setPausedAudio(false);
+          }
+        };
+
+        reader.onerror = () => {
+          console.error('Error reading blob');
           setCurrentText('Failed to play audio');
           setIsPlaying(false);
           setPausedAudio(false);
-        }
-      };
+        };
 
-      reader.onerror = () => {
-        console.error('Error reading blob');
+        reader.readAsDataURL(blob);
+      } catch (error) {
+        console.error('Error playing audio:', error);
         setCurrentText('Failed to play audio');
         setIsPlaying(false);
         setPausedAudio(false);
-      };
-
-      reader.readAsDataURL(blob);
-    } catch (error) {
-      console.error('Error playing audio:', error);
-      setCurrentText('Failed to play audio');
-      setIsPlaying(false);
-      setPausedAudio(false);
-    }
-  }, []);
-
-  // Playback status update callback
-  const onPlaybackStatusUpdate = (status: any) => {
-    if (status.isLoaded) {
-      if (status.isPlaying) {
-        setCurrentText('Playing...');
-        setPausedAudio(false);
-      } else if (status.didJustFinish) {
-        setIsPlaying(false);
-        setPausedAudio(false);
-        setCurrentText('Finished');
-        console.log('🎵 Audio playback finished');
       }
-    } else if (status.error) {
-      console.error('Playback error:', status.error);
-      setIsPlaying(false);
-      setPausedAudio(false);
-      setCurrentText('Playback error');
-    }
-  };
+    },
+    [onPlaybackStatusUpdate, startWordHighlighting]
+  );
 
-  // Generate audio function
   const generateAudioForCurrentPage = useCallback(async () => {
     if (!currentPage?.batch_content.text) {
       console.log('No text to generate audio for');
@@ -198,7 +345,6 @@ export default function DocumentDetails() {
 
     const pageKey = `${documentId}-${currentPageIndex}`;
 
-    // Prevent duplicate generation
     if (audioGenerationRef.current === pageKey || isGeneratingAudio) {
       console.log('Audio generation already in progress for this page');
       return;
@@ -234,7 +380,6 @@ export default function DocumentDetails() {
         setAudioBlob(blob);
         setCurrentText('Ready to play');
 
-        // Automatically start playing after generation
         await playAudioFromBlob(blob);
       }
     } catch (error) {
@@ -254,7 +399,6 @@ export default function DocumentDetails() {
     playAudioFromBlob,
   ]);
 
-  // Clear audio when page changes
   useEffect(() => {
     console.log('Page changed to:', currentPageIndex);
 
@@ -263,12 +407,14 @@ export default function DocumentDetails() {
       soundRef.current = null;
     }
 
+    stopWordHighlighting();
     setAudioBlob(null);
     setIsPlaying(false);
     setPausedAudio(false);
     setCurrentText('Quiet');
     audioGenerationRef.current = null;
-  }, [currentPageIndex]);
+    currentIndexRef.current = 0;
+  }, [currentPageIndex, stopWordHighlighting]);
 
   const goToNextPage = () => {
     if (currentPageIndex < totalPages - 1) {
@@ -294,14 +440,40 @@ export default function DocumentDetails() {
           await soundRef.current.pauseAsync();
           setPausedAudio(true);
           setCurrentText('Paused');
+          stopWordHighlighting();
+          console.log('⏸️ Paused at index:', currentIndexRef.current);
         } else {
           await soundRef.current.playAsync();
           setPausedAudio(false);
           setCurrentText('Playing...');
+
+          if (status.durationMillis && status.positionMillis) {
+            const progress = status.positionMillis / status.durationMillis;
+            const actualWords = highlightedWords.filter(
+              (w) => w.trim().length > 0
+            );
+            const targetWordCount = Math.floor(progress * actualWords.length);
+
+            let count = 0;
+            let resumeIndex = 0;
+            for (let i = 0; i < highlightedWords.length; i++) {
+              if (highlightedWords[i].trim().length > 0) {
+                if (count === targetWordCount) {
+                  resumeIndex = i;
+                  break;
+                }
+                count++;
+              }
+            }
+
+            console.log('▶️ Resuming from index:', resumeIndex);
+            const remainingDuration =
+              status.durationMillis - status.positionMillis;
+            startWordHighlighting(remainingDuration, resumeIndex);
+          }
         }
       }
     } else if (audioBlob && !soundRef.current) {
-      // Blob exists but no sound loaded - play it
       await playAudioFromBlob(audioBlob);
     }
   };
@@ -313,56 +485,61 @@ export default function DocumentDetails() {
     }
     setIsPlaying(false);
     setPausedAudio(false);
-    setIsListening(false);
     setCurrentText('Stopped');
+    stopWordHighlighting();
+    currentIndexRef.current = 0;
   };
 
   const handleChatPress = () => {
-    router.push('/home/chats');
+    router.push({
+      pathname: '/home/chats',
+      params: {
+        documentId: documentId,
+        batchOrder: currentPage?.batch_order,
+      },
+    });
   };
 
   return (
     <View className="flex-1 bg-white">
-      <FocusAwareStatusBar />
+      <FocusAwareStatusBar hidden={isEnlarged} />
       <SafeAreaView className="flex-1">
-        <View className="flex-row items-center justify-between px-6 py-4">
-          <TouchableOpacity onPress={() => router.back()}>
-            <Back />
-          </TouchableOpacity>
-
-          <Text
-            className="mx-16 flex-1 text-center font-garamond text-lg text-black"
-            numberOfLines={1}
-            ellipsizeMode="tail"
-          >
-            {title || 'Document Title'}
-          </Text>
-
-          <View className="flex-row items-center space-x-3">
-            {isListening && (
-              <View className="flex-row items-center gap-2 rounded-full bg-[#FDF4CF] p-2">
-                <Mic />
-                <Text className="font-brownstd text-sm text-black">
-                  Listening...
-                </Text>
-              </View>
-            )}
+        {!isEnlarged && (
+          <View className="flex-row items-center justify-between px-6 py-4">
+            <TouchableOpacity onPress={() => router.back()}>
+              <Back />
+            </TouchableOpacity>
+            <Text
+              className="mx-16 flex-1 text-center font-garamond text-lg text-black"
+              numberOfLines={1}
+            >
+              {title || 'Document Title'}
+            </Text>
+            <AudioPill
+              documentId={documentId}
+              currentPage={currentPage}
+              setTranscription={setTranscription}
+              transcription={transcription}
+            />
           </View>
-        </View>
+        )}
 
         <View className="flex-row items-center justify-between bg-gray-50 px-6 py-3">
           <TouchableOpacity
             className="flex-row items-center"
             onPress={() => setIsChangePageNumberOpen(true)}
           >
-            <View className=" mr-2 items-center justify-center">
+            <View className="mr-2 items-center justify-center">
               <PageNumber />
             </View>
             <Text className="font-brownstd text-[12px] text-black">
               {currentPage?.batch_title || `Page ${currentPageIndex + 1}`}
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity className="size-8 items-center justify-center rounded-full bg-black">
+          <TouchableOpacity
+            onPress={() => setIsEnlarged(!isEnlarged)}
+            className="size-8 items-center justify-center rounded-full bg-black"
+          >
             <PageSettings />
           </TouchableOpacity>
         </View>
@@ -376,6 +553,7 @@ export default function DocumentDetails() {
           />
 
           <ScrollView
+            ref={scrollViewRef}
             className="flex-1 p-6"
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 160 }}
@@ -392,12 +570,17 @@ export default function DocumentDetails() {
                   {currentPage.batch_title}
                 </Text>
 
-                <Text
-                  className="font-brownstd text-[16px] text-black"
-                  style={{ lineHeight: 16 * 1.91 }}
+                <View
+                  style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 2 }}
                 >
-                  {currentPage.batch_content.text}
-                </Text>
+                  {highlightedWords.map((word, index) => (
+                    <HighlightedWord
+                      key={`word-${index}`}
+                      word={word}
+                      isHighlighted={index === currentWordIndex}
+                    />
+                  ))}
+                </View>
               </>
             ) : (
               <View className="flex-1 items-center justify-center py-20">
@@ -417,7 +600,6 @@ export default function DocumentDetails() {
         </View>
 
         <FloatingAudioControl
-          isVisible={isListening || isPlaying}
           isPlaying={isPlaying}
           pausedAudio={pausedAudio}
           isGeneratingAudio={isGeneratingAudio}
@@ -426,11 +608,13 @@ export default function DocumentDetails() {
           selectedVoice={selectedVoice}
           currentText={currentText}
         />
-
-        <FloatingChatButton onPress={handleChatPress} />
+        {!isEnlarged && (
+          <>
+            <FloatingChatButton onPress={handleChatPress} />
+          </>
+        )}
       </SafeAreaView>
 
-      {/* Change page number */}
       <Modal
         transparent
         animationType="fade"
@@ -451,17 +635,15 @@ export default function DocumentDetails() {
                 <Text className="mb-4 font-garamond text-lg text-black">
                   Chapters
                 </Text>
-                <Close
-                  onPress={() => {
-                    setIsChangePageNumberOpen(false);
-                  }}
-                />
+                <Close onPress={() => setIsChangePageNumberOpen(false)} />
               </View>
               <View className="mb-5 h-px w-full bg-black/10" />
               {Array.from({ length: totalPages }).map((_, index) => (
                 <TouchableOpacity
                   key={index}
-                  className={`mb-1 flex-row items-center rounded-lg py-4 ${currentPageIndex === index ? 'bg-gray-100' : ''} `}
+                  className={`mb-1 flex-row items-center rounded-lg py-4 ${
+                    currentPageIndex === index ? 'bg-gray-100' : ''
+                  }`}
                   onPress={() => {
                     setCurrentPageIndex(index);
                     setIsChangePageNumberOpen(false);
