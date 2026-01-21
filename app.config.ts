@@ -62,6 +62,17 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   plugins: [
     [
+      'expo-build-properties',
+      {
+        android: {
+          ndkVersion: '27.0.12077973',
+          gradleVersion: '8.13',
+          kspVersion: '2.0.21-1.0.28',
+          kotlinVersion: '2.0.21',
+        },
+      },
+    ],
+    [
       'expo-splash-screen',
       {
         backgroundColor: '#ffffff',

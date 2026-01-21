@@ -1,4 +1,4 @@
-package com.faboent.development
+package com.serendptai.development
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build
