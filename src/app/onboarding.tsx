@@ -83,7 +83,7 @@ export default function Onboarding() {
               </Button>
             </View>
 
-            <Button
+            {/* <Button
               onPress={() => {
                 // Handle Google sign in
                 console.log('Google sign in');
@@ -96,7 +96,7 @@ export default function Onboarding() {
               <Text className="font-brownstd text-[16px] text-white">
                 Login/Sign up with google
               </Text>
-            </Button>
+            </Button> */}
           </View>
         </View>
       </View>
