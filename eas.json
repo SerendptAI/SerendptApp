@@ -33,13 +33,10 @@
       },
       "android": {
         "buildType": "apk",
-        "image": "latest"
+        "resourceClass": "default"
       },
-      "env": {
-        "APP_ENV": "staging",
-        "EXPO_NO_DOTENV": "1",
-        "FLIPPER_DISABLE": "1"
-      }
+      "environment": "preview",
+      "credentialsSource": "remote"
     },
     "development": {
       "channel": "development",
