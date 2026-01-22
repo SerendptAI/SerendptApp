@@ -68,7 +68,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           ndkVersion: '27.0.12077973',
           gradleVersion: '8.13',
           kspVersion: '2.0.21-1.0.28',
-          kotlinVersion: '2.0.21',
+          kotlinVersion: '2.1.20',
         },
       },
     ],
