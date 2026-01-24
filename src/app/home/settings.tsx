@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from 'expo-router';
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { Alert, ScrollView } from 'react-native';
+import { Alert, Modal, Pressable, ScrollView } from 'react-native';
 import * as z from 'zod';
 
 import { ConfirmationModal } from '@/components/modals/confirmation-modal';
@@ -19,6 +19,7 @@ import {
   View,
 } from '@/components/ui';
 import { Back } from '@/components/ui/icons/back';
+import { CloseLogout } from '@/components/ui/icons/close-logout';
 import { Plans } from '@/components/ui/icons/plans';
 import { signOut } from '@/lib';
 import { useUser } from '@/lib/user';
@@ -43,6 +44,8 @@ export default function Settings(): JSX.Element {
       plan: user?.plan || '',
     },
   });
+
+  const [showLogoutModal, setShowLogoutModal] = React.useState(false);
 
   const { ref: modalRef, present, dismiss } = useModal();
   const {
@@ -173,7 +176,7 @@ export default function Settings(): JSX.Element {
               label="Logout"
               className="rounded-2xl bg-red-500 py-4"
               textClassName="text-white font-brownstd text-lg"
-              onPress={handleLogout}
+              onPress={() => setShowLogoutModal(true)}
             />
           </View>
         </ScrollView>
@@ -186,6 +189,41 @@ export default function Settings(): JSX.Element {
         onSubmit={handleConfirmationSubmit}
       />
       <SuccessModal ref={successModalRef} onClose={dismissSuccess} />
+
+      <Modal transparent visible={showLogoutModal} animationType="fade">
+        <View className="flex-1 items-center justify-center bg-black/60">
+          <View className="h-[439px] items-center justify-center rounded-[24px] border border-dashed bg-white px-8 ">
+            <Pressable
+              className="absolute right-4 top-4"
+              onPress={() => setShowLogoutModal(false)}
+            >
+              <CloseLogout />
+            </Pressable>
+            <Text className="mb-5 max-w-[282px] text-center  font-garamond text-[35px] leading-10 text-black">
+              Are you sure you want to log out?
+            </Text>
+
+            <View className="w-full">
+              <Button
+                label="Yes, log me out "
+                className="mb-4 w-[259px] rounded-2xl bg-[#FFCC00] py-4"
+                textClassName="text-black font-brownstd text-base"
+                onPress={() => {
+                  signOut();
+                }}
+              />
+              <Button
+                label="Continue reading"
+                className=" w-[259px] items-center justify-center rounded-2xl bg-[#F1F1F1] py-4"
+                textClassName="text-black font-brownstd text-base text-center"
+                onPress={() => {
+                  setShowLogoutModal(false);
+                }}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

@@ -58,7 +58,7 @@ export function FloatingAudioControl({
       // Start 30-second timer when playing starts
       timer = setTimeout(() => {
         setShowMinimized(true);
-      }, 3000); // 30 seconds
+      }, 30000); // 30 seconds
     } else {
       // Reset to full view when not playing
       setShowMinimized(false);
@@ -164,9 +164,7 @@ export function FloatingAudioControl({
           <View className="relative mr-3 size-[75px] items-center justify-center overflow-hidden rounded-[14px] bg-[#FFFBEB]">
             <View className="size-16 overflow-hidden rounded-full">
               <Image
-                source={{
-                  uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
-                }}
+                source={require('../../assets/Nova.png')}
                 className="size-16 rounded-full"
                 contentFit="contain"
               />
@@ -216,15 +214,6 @@ export function FloatingAudioControl({
               </View>
             </View>
 
-            {/* Center - Current Text */}
-            {isPlaying && (
-              <View className="mx-10 flex-1">
-                <Text className="text-center text-base font-medium text-black">
-                  "{currentText}"
-                </Text>
-              </View>
-            )}
-
             {/* Right side - Controls */}
             {isPlaying && (
               <View className="flex-row items-center space-x-2">
@@ -248,6 +237,8 @@ export function FloatingAudioControl({
             {!isPlaying && (
               <TouchableOpacity
                 onPress={onPlayPause}
+                activeOpacity={0.9}
+                disabled={isGeneratingAudio}
                 className="h-[49px] w-[167px] flex-row items-center justify-center gap-2 rounded-[24px] bg-[#FFCC00] px-6 py-2"
               >
                 {isGeneratingAudio ? (

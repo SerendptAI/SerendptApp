@@ -1,26 +1,24 @@
+/* eslint-disable max-lines-per-function */
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from 'expo-router';
 import React from 'react';
 import type { SubmitHandler } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
+import { ImageBackground } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import * as z from 'zod';
 
 import {
   Button,
+  Checkbox,
   ControlledInput,
-  Image,
-  SafeAreaView,
   Text,
   TouchableOpacity,
   View,
-  Checkbox,
-  Input,
 } from '@/components/ui';
 
 import { AuthBack } from '../ui/icons/auth-back';
-import { ImageBackground } from 'react-native';
-import { Logos } from '../ui/icons/logos';
+import { Logo } from '../ui/icons/logo';
 
 const schema = z.object({
   full_name: z.string({
@@ -41,7 +39,7 @@ const schema = z.object({
       required_error: 'Confirm password is required',
     })
     .min(6, 'Password must be at least 6 characters'),
-    rememberMe: z.boolean().optional(),
+  rememberMe: z.boolean().optional(),
 });
 
 export type FormType = z.infer<typeof schema>;
@@ -51,7 +49,10 @@ export type SignupFormProps = {
   loading?: boolean;
 };
 
-export const SignupForm = ({ onSubmit = () => {}, loading = false }: SignupFormProps) => {
+export const SignupForm = ({
+  onSubmit = () => {},
+  loading = false,
+}: SignupFormProps) => {
   const { handleSubmit, control, watch, setValue } = useForm<FormType>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -59,7 +60,6 @@ export const SignupForm = ({ onSubmit = () => {}, loading = false }: SignupFormP
       email: '',
       password: '',
       confirm_password: '',
-    
     },
   });
 
@@ -72,15 +72,17 @@ export const SignupForm = ({ onSubmit = () => {}, loading = false }: SignupFormP
     >
       <View className="flex-1">
         <View className="h-8" />
-        <View className="px-6 py-4 flex-row items-center justify-between">
-          <TouchableOpacity onPress={() => router.replace('/onboarding')}>
+        <View className="flex-row items-center justify-between px-6 py-4">
+          {/* <TouchableOpacity onPress={() => router.replace('/onboarding')}>
             <AuthBack />
-          </TouchableOpacity>
-          <Logos />
+          </TouchableOpacity> */}
+        </View>
+        <View className="mt-10 items-center px-5 py-4">
+          <Logo />
         </View>
         <View className="flex-1 justify-end">
           <View
-            className="w-full rounded-t-3xl bg-white px-6 pt-8 pb-8"
+            className="w-full rounded-t-3xl bg-white px-6 py-8"
             style={{ height: '80%' }}
           >
             <KeyboardAwareScrollView
@@ -91,10 +93,10 @@ export const SignupForm = ({ onSubmit = () => {}, loading = false }: SignupFormP
             >
               {/* Header Text */}
               <View className="mb-8">
-                <Text className="text-[12px] font-brownstd uppercase tracking-wider text-[#000000]">
+                <Text className="font-brownstd text-[12px] uppercase tracking-wider text-black">
                   GET STARTED
                 </Text>
-                <Text className="mt-2 text-[25px] font-garamond-medium text-black">
+                <Text className="mt-2 font-garamond-medium text-[25px] text-black">
                   Create your Account
                 </Text>
               </View>
@@ -148,12 +150,12 @@ export const SignupForm = ({ onSubmit = () => {}, loading = false }: SignupFormP
                       }
                       accessibilityLabel="Remember me"
                     />
-                    <Text className="ml-2 text-sm text-[#424242] font-brownstd">
+                    <Text className="ml-2 font-brownstd text-sm text-[#424242]">
                       Remember me
                     </Text>
                   </View>
                   <TouchableOpacity>
-                    <Text className="text-sm text-[#424242] font-brownstd">
+                    <Text className="font-brownstd text-sm text-[#424242]">
                       Forgot Password?
                     </Text>
                   </TouchableOpacity>
@@ -166,7 +168,7 @@ export const SignupForm = ({ onSubmit = () => {}, loading = false }: SignupFormP
                     size="lg"
                     onPress={handleSubmit(onSubmit)}
                     textClassName="text-sm font-brownstd-bold uppercase"
-                    className="bg-[#212121] rounded-[8px]"
+                    className="rounded-[8px] bg-[#212121]"
                     loading={loading}
                   />
                 </View>
@@ -174,10 +176,16 @@ export const SignupForm = ({ onSubmit = () => {}, loading = false }: SignupFormP
 
               {/* Sign Up Link */}
               <View className="mt-4 items-center">
-                <TouchableOpacity>
-                  <Text className="text-[12px] text-[#424242] font-brownstd ">
+                <TouchableOpacity
+                  onPress={() => {
+                    router.replace('/auth/login');
+                  }}
+                >
+                  <Text className="font-brownstd text-[12px] text-[#424242] ">
                     Don't have an account?{' '}
-                    <Text className=" text-[#424242] text-[12px] font-brownstd">Login</Text>
+                    <Text className=" font-brownstd text-[12px] text-[#424242]">
+                      Login
+                    </Text>
                   </Text>
                 </TouchableOpacity>
               </View>

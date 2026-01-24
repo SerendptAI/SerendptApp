@@ -1,10 +1,11 @@
 import { Redirect, SplashScreen, Stack } from 'expo-router';
 import React, { useCallback, useEffect } from 'react';
 
-import { useAuth } from '@/lib';
-import { useUser, setUser } from '@/lib/user';
 import { useGetUser } from '@/api/users/users';
 import { showError } from '@/components/ui';
+import { useAuth } from '@/lib';
+import { setUser } from '@/lib/user';
+
 
 export default function AppLayout() {
   const status = useAuth.use.status();
@@ -31,7 +32,6 @@ export default function AppLayout() {
   // Store user data in global state
   useEffect(() => {
     if (userData) {
-      console.log('uscccer', JSON.stringify(userData, null, 2));
       setUser(userData);
     }
   }, [userData]);
@@ -48,13 +48,13 @@ export default function AppLayout() {
   }
 
   return (
-    <Stack>
-      <Stack.Screen
-        name="index"
-        options={{
-          headerShown: false,
-        }}
-      />
-    </Stack>
+      <Stack>
+        <Stack.Screen
+          name="home"
+          options={{
+            headerShown: false,
+          }}
+        />
+      </Stack>
   );
 }

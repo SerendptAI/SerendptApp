@@ -78,6 +78,86 @@ const UserMessageCard = ({ text, time }: { text: string; time: string }) => {
   );
 };
 
+const SkeletonLine = ({
+  width = '100%',
+  height = 14,
+  marginBottom = 10,
+  borderRadius = 4,
+}) => {
+  const opacity = useSharedValue(0.4);
+
+  useEffect(() => {
+    opacity.value = withRepeat(
+      withSequence(
+        withTiming(0.8, { duration: 800 }),
+        withTiming(0.4, { duration: 800 })
+      ),
+      -1,
+      true
+    );
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+  }));
+
+  return (
+    <Animated.View
+      style={[
+        animatedStyle,
+        {
+          width,
+          height,
+          marginBottom,
+          borderRadius,
+          backgroundColor: '#E5E7EB',
+        },
+      ]}
+    />
+  );
+};
+
+const ChatSkeleton = () => (
+  <ScrollView className="flex-1 px-4" contentContainerClassName="pt-3 pb-28">
+    {/* AI Message Skeleton */}
+    <View className="mb-5 rounded-2xl border-[0.5px] border-gray-200 bg-white p-5">
+      <SkeletonLine
+        width={40}
+        height={22}
+        borderRadius={100}
+        marginBottom={12}
+      />
+      <SkeletonLine width="90%" />
+      <SkeletonLine width="95%" />
+      <SkeletonLine width="40%" marginBottom={0} />
+    </View>
+
+    {/* User Message Skeleton */}
+    <View className="mb-5 rounded-2xl bg-[#FFFBEB] p-5">
+      <SkeletonLine
+        width={40}
+        height={22}
+        borderRadius={100}
+        marginBottom={12}
+      />
+      <SkeletonLine width="100%" />
+      <SkeletonLine width="70%" marginBottom={0} />
+    </View>
+
+    {/* AI Message Skeleton */}
+    <View className="mb-5 rounded-2xl border-[0.5px] border-gray-200 bg-white p-5">
+      <SkeletonLine
+        width={40}
+        height={22}
+        borderRadius={100}
+        marginBottom={12}
+      />
+      <SkeletonLine width="85%" />
+      <SkeletonLine width="30%" marginBottom={0} />
+    </View>
+  </ScrollView>
+);
+
 export default function Chats() {
   const { documentId, batchOrder } = useLocalSearchParams<{
     documentId: string;
@@ -260,7 +340,11 @@ export default function Chats() {
       <FocusAwareStatusBar />
       <SafeAreaView className="flex-1">
         <View className="flex-row items-center px-6 py-4">
-          <TouchableOpacity onPress={() => router.back()} className="pr-2">
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() => router.back()}
+            className="pr-2"
+          >
             <Back />
           </TouchableOpacity>
           <View className="flex-1 items-center">
@@ -272,10 +356,7 @@ export default function Chats() {
         </View>
 
         {isLoading ? (
-          <View className="flex-1 items-center justify-center">
-            <ActivityIndicator size="large" color="#1A1A1A" />
-            <Text className="mt-4 text-gray-500">Loading conversation...</Text>
-          </View>
+          <ChatSkeleton />
         ) : (
           <ScrollView
             className="flex-1 px-4"
@@ -303,13 +384,14 @@ export default function Chats() {
         {/* Footer Action */}
         <View className="absolute inset-x-0 bottom-10 z-50 px-10">
           <TouchableOpacity
+            activeOpacity={1}
             onPress={startRecording}
             className="flex-row items-center justify-center gap-3 rounded-full border border-[#FDF4CF] bg-[#FFFBEB] py-8 shadow-sm"
           >
             <Mics />
             <Text className="font-brownstd text-base text-black">
               {transcription ||
-                (whisperContext ? 'Tap to talk' : 'Loading model...')}
+                (whisperContext ? 'Tap to talk' : 'Loading Whisper model...')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -329,6 +411,7 @@ export default function Chats() {
               </Text>
             </View>
             <TouchableOpacity
+              activeOpacity={1}
               onPress={stopRecording}
               className="rounded-full border border-white/30 bg-white/20 px-8 py-3"
             >

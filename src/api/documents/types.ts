@@ -12,6 +12,7 @@ export type DocumentBatch = {
   batch_title: string;
   batch_content: {
     text: string;
+    markdown: string;
   };
   batch_order: number;
 };
@@ -54,4 +55,15 @@ export type EditDocumentResponse = {
 export type EditDocumentVariables = {
   documentId: string;
   documentTitle: string;
+};
+export type ExplainTermVariables = {
+  documentId: string;
+  batch_order: number;
+  term: string;
+};
+
+export type ExplainTermResponse = {
+  term: string;
+  actual_meaning: string;
+  contextual_meaning: string;
 };

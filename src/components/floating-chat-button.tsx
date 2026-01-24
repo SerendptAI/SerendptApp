@@ -15,18 +15,9 @@ export function FloatingChatButton({ onPress, isVisible = true }: Props) {
   return (
     <View className="absolute bottom-40 right-4 z-50 mb-10">
       <TouchableOpacity
+        activeOpacity={1}
         onPress={onPress}
-        className="size-16 items-center justify-center rounded-xl bg-[#FFCC00] shadow-lg"
-        style={{
-          shadowColor: '#000',
-          shadowOffset: {
-            width: 0,
-            height: 2,
-          },
-          shadowOpacity: 0.25,
-          shadowRadius: 3.84,
-          elevation: 5,
-        }}
+        className="size-16 items-center justify-center rounded-xl bg-[#FFCC00] "
       >
         <Chat />
       </TouchableOpacity>

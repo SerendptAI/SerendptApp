@@ -12,12 +12,12 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-//@ts-ignore
-import { initWhisper } from 'whisper.rn';
 
+//@ts-ignore
 import { type ChatResponse, useChat } from '@/api/chat';
 import { Text, TouchableOpacity, View } from '@/components/ui';
-import { Mic } from '@/components/ui/icons/mic';
+
+import { useWhisper } from '../../app/(app)/whisper-context';
 
 interface AudioPillProps {
   transcription: string;
@@ -34,27 +34,19 @@ export const AudioPill: React.FC<AudioPillProps> = ({
 }) => {
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [isListening, setIsListening] = useState(false);
-  const [whisperContext, setWhisperContext] = useState<any>(null);
-
+  const { whisperContext, isReady } = useWhisper();
+  useEffect(() => {
+    console.log(
+      '🎙️ AudioPill rendered - isReady:',
+      isReady,
+      'context:',
+      !!whisperContext
+    );
+  }, [isReady, whisperContext]);
   const volumeLevel = useSharedValue(1);
   const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const chatMutation = useChat();
-
-  useEffect(() => {
-    const setup = async () => {
-      try {
-        await Audio.requestPermissionsAsync();
-        const context = await initWhisper({
-          filePath: require('../../../assets/models/whisper-tiny.bin'),
-        });
-        setWhisperContext(context);
-      } catch (e) {
-        console.error('Whisper init failed:', e);
-      }
-    };
-    setup();
-  }, []);
 
   async function startRecording() {
     if (!whisperContext) return;
@@ -206,8 +198,13 @@ export const AudioPill: React.FC<AudioPillProps> = ({
 
   return (
     <View className="flex-row items-center">
-      <Modal transparent visible={isListening} animationType="fade">
-        <View className="flex-1 items-center justify-center bg-black/60">
+      <Modal
+        transparent
+        visible={isListening}
+        animationType="fade"
+        backdropColor="#000000E5"
+      >
+        <View className="flex-1 items-center justify-center bg-black/95">
           <Animated.View
             style={pulseStyle}
             className="size-60 rounded-full bg-yellow-400/40"
@@ -215,37 +212,37 @@ export const AudioPill: React.FC<AudioPillProps> = ({
 
           <View className="absolute items-center gap-6">
             <View className="flex-row items-center gap-3 rounded-full bg-[#FDF4CF] px-6 py-4 shadow-xl">
-              <Mic className="text-black" />
+              <View className={`size-2 rounded-full bg-red-500`} />
               <Text className="font-brownstd text-xl font-bold text-black">
                 Listening...
               </Text>
             </View>
-            <TouchableOpacity
-              onPress={stopRecording}
-              className="rounded-full border border-white/30 bg-white/20 px-8 py-3"
-            >
-              <Text className="font-brownstd font-semibold text-white">
-                Tap to finish
-              </Text>
-            </TouchableOpacity>
           </View>
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={stopRecording}
+            className=" absolute top-[615px] rounded-full border border-white/30 bg-white px-8 py-3 "
+          >
+            <Text className="font-brownstd  text-black">Tap to finish</Text>
+          </TouchableOpacity>
         </View>
       </Modal>
 
       <TouchableOpacity
+        activeOpacity={1}
         onPress={startRecording}
-        disabled={isListening || !whisperContext}
+        disabled={isListening || !isReady}
         className="flex-row items-center gap-2 rounded-full bg-[#FDF4CF] px-4 py-2"
       >
         <View
-          className={`size-2 rounded-full ${whisperContext ? 'bg-green-500' : 'bg-slate-500'}`}
+          className={`size-2 rounded-full ${isReady ? 'bg-slate-500' : 'bg-red-500'}`}
         />
         <Text
           className="max-w-[150px] font-brownstd text-sm text-black"
           numberOfLines={1}
         >
           {transcription ||
-            (whisperContext ? 'Click to talk' : 'Loading model...')}
+            (isReady ? 'Click to talk' : 'Loading Whisper model...')}
         </Text>
       </TouchableOpacity>
     </View>

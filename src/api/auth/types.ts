@@ -22,6 +22,9 @@ export type LoginRequest = {
   email?: string;
   password?: string;
 };
+export type GoogleLoginRequest = {
+  id_token?: string;
+};
 
 export type SignupResponse = {
   message: string;

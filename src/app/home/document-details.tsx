@@ -1,10 +1,21 @@
+/* eslint-disable max-params */
 /* eslint-disable max-lines-per-function */
 import { Audio } from 'expo-av';
 import { router, useLocalSearchParams } from 'expo-router';
+import { VideoCameraIcon, XIcon } from 'phosphor-react-native';
+import { BookOpenIcon } from 'phosphor-react-native/src/icons/BookOpen';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Modal } from 'react-native';
+import { Modal, Pressable, StyleSheet } from 'react-native';
+import Markdown from 'react-native-markdown-display';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 
-import { useGetDocumentBatchesContent } from '@/api/documents';
+import { explainTerm, useGetDocumentBatchesContent } from '@/api/documents';
 import { FloatingAudioControl } from '@/components/floating-audio-control';
 import { FloatingChatButton } from '@/components/floating-chat-button';
 import {
@@ -15,45 +26,218 @@ import {
   TouchableOpacity,
   View,
 } from '@/components/ui';
-import { Close } from '@/components/ui/icons';
+import { CaretDown, Close } from '@/components/ui/icons';
 import { Back } from '@/components/ui/icons/back';
-import { PageNumber } from '@/components/ui/icons/page-number';
 import { PageSettings } from '@/components/ui/icons/page-settings';
+import { Resize } from '@/components/ui/icons/resize';
 import { handleTTS } from '@/lib/hooks/use-tts';
 import { getItem, setItem } from '@/lib/storage';
 import { type AIVoice } from '@/lib/voice';
 
-import { AudioPill } from './audio-pill';
+import { AudioPill } from '../../components/home/audio-pill';
 
-// Simple highlighted word component (no Reanimated)
+// Simple highlighted word component with selection
 const HighlightedWord = React.memo(
-  ({ word, isHighlighted }: { word: string; isHighlighted: boolean }) => {
-    // const handleWordLayout = useCallback((index: number, ref: any) => {
-    //   wordRefs.current[index] = ref;
-    // }, []);
-
+  ({
+    word,
+    isHighlighted,
+    isSelected,
+    onPress,
+  }: {
+    word: string;
+    isHighlighted: boolean;
+    isSelected: boolean;
+    onPress: () => void;
+  }) => {
     return (
-      <View
+      <TouchableOpacity
+        onPress={onPress}
+        activeOpacity={0.9}
         style={{
-          backgroundColor: isHighlighted ? '#FFEB3B' : 'transparent',
-          paddingVertical: 1,
+          backgroundColor: isSelected
+            ? '#3B82F6' // Blue when selected
+            : isHighlighted
+              ? '#FFEB3B' // Yellow when playing
+              : 'transparent',
           borderRadius: 3,
+          paddingHorizontal: 1,
+          marginVertical: 1,
         }}
       >
         <Text
-          style={{
-            fontSize: 16,
-            fontFamily: 'BrownStd',
-            color: '#000',
-            textAlign: 'left',
-          }}
+          className="text-left font-brownstd text-[16px]"
+          style={{ color: isSelected ? '#FFFFFF' : '#000000' }}
         >
           {word}
         </Text>
-      </View>
+      </TouchableOpacity>
     );
   }
 );
+
+const SkeletonLine = ({ width = '100%', height = 16, marginBottom = 12 }) => {
+  const opacity = useSharedValue(0.3);
+
+  useEffect(() => {
+    opacity.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 800 }),
+        withTiming(0.3, { duration: 800 })
+      ),
+      -1,
+      true
+    );
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+  }));
+
+  return (
+    <Animated.View
+      style={[
+        animatedStyle,
+        {
+          width: typeof width === 'string' ? width : width,
+          height,
+          marginBottom,
+          backgroundColor: '#E5E7EB',
+          borderRadius: 4,
+        } as any,
+      ]}
+    />
+  );
+};
+
+const TextSkeleton = ({ numberOfLines = 16 }: { numberOfLines?: number }) => (
+  <View className="flex-1">
+    {[...Array(numberOfLines)].map((_, index) => (
+      <SkeletonLine key={index} marginBottom={24} />
+    ))}
+  </View>
+);
+
+// Word Selection Modal Component
+const WordSelectionModal = ({
+  visible,
+  documentId,
+  batch_order,
+  selectedWord,
+  showMeaning,
+  setShowMeaning,
+  onClose,
+}: {
+  visible: boolean;
+  documentId: string;
+  batch_order: number | null | undefined;
+  selectedWord: string;
+  showMeaning: boolean;
+  setShowMeaning: React.Dispatch<React.SetStateAction<boolean>>;
+  onClose: () => void;
+}) => {
+  const { mutateAsync, isPending, data } = explainTerm();
+
+  const handleCheckMeaning = useCallback(async () => {
+    if (batch_order === null || batch_order === undefined) return;
+    setShowMeaning(true);
+    await mutateAsync({ documentId, batch_order, term: selectedWord });
+  }, [batch_order, documentId, mutateAsync, selectedWord]);
+
+  return (
+    <Modal
+      transparent
+      animationType="fade"
+      visible={visible}
+      onRequestClose={onClose}
+    >
+      <TouchableOpacity activeOpacity={1} className="flex-1 " onPress={onClose}>
+        <View className="flex-1 items-center justify-center px-6">
+          <View
+            className={`${!showMeaning ? 'w-[240px] ' : 'w-full'} rounded-3xl border border-gray-300 bg-white px-3`}
+          >
+            {!showMeaning ? (
+              <View className="">
+                <View className="flex-row items-end justify-end pt-3">
+                  <TouchableOpacity activeOpacity={1} onPress={onClose}>
+                    <XIcon size={16} />
+                  </TouchableOpacity>
+                </View>
+                <Pressable
+                  onPress={handleCheckMeaning}
+                  className="flex flex-row gap-5 py-4"
+                >
+                  <View className="flex size-8 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+                    <BookOpenIcon size={16} color="#F59E0B" />
+                  </View>
+                  <Text className="font-brownstd text-lg text-black">
+                    Check meaning
+                  </Text>
+                </Pressable>
+
+                <View className=" h-px w-full bg-black/10" />
+
+                <View className="flex flex-row items-center gap-5 py-4">
+                  <View className="flex size-8 items-center justify-center rounded-full bg-slate-200">
+                    <VideoCameraIcon size={16} color="#6b7280" />
+                  </View>
+                  <View>
+                    <Text className=" font-brownstd text-lg text-gray-400">
+                      Generate tutorial
+                    </Text>
+                    <View className="items-center justify-center rounded-xl border border-gray-300 bg-slate-200">
+                      <Text className=" font-brownstd-bold text-sm text-gray-500">
+                        COMING SOON
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+            ) : (
+              <View>
+                <View className="flex flex-row items-center justify-between py-4">
+                  <Text className="font-brownstd text-xl text-black">
+                    {selectedWord}
+                  </Text>
+                  <View className="flex-row items-end justify-end ">
+                    <TouchableOpacity activeOpacity={1} onPress={onClose}>
+                      <XIcon size={13} />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+                <View className="pb-8">
+                  {isPending ? (
+                    <View>
+                      <TextSkeleton numberOfLines={1} />
+                    </View>
+                  ) : (
+                    <Text className=" font-brownstd text-base text-black">
+                      {data?.actual_meaning}
+                    </Text>
+                  )}
+                </View>
+                <View className=" h-px w-full bg-black/10" />
+                <Text className="py-4 font-brownstd text-sm text-gray-500">
+                  Contextual Meaning:
+                </Text>
+                <View className="pb-8">
+                  {isPending ? (
+                    <View>
+                      <TextSkeleton numberOfLines={1} />
+                    </View>
+                  ) : (
+                    <Text className=" font-brownstd text-base text-black">
+                      {data?.contextual_meaning}
+                    </Text>
+                  )}
+                </View>
+              </View>
+            )}
+          </View>
+        </View>
+      </TouchableOpacity>
+    </Modal>
+  );
+};
 
 export default function DocumentDetails() {
   const { title, documentId } = useLocalSearchParams<{
@@ -75,13 +259,21 @@ export default function DocumentDetails() {
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
   const [transcription, setTranscription] = useState('');
-
+  const [isAutoPlayEnabled, setIsAutoPlayEnabled] = useState(true);
   // Word highlighting states
   const [highlightedWords, setHighlightedWords] = useState<string[]>([]);
   const [currentWordIndex, setCurrentWordIndex] = useState(-1);
   const [_audioDuration, setAudioDuration] = useState(0);
   const [isEnlarged, setIsEnlarged] = useState(false);
 
+  // Word selection states
+  const [selectedWordIndex, setSelectedWordIndex] = useState<number | null>(
+    null
+  );
+  const [selectedWord, setSelectedWord] = useState('');
+  const [isWordModalOpen, setIsWordModalOpen] = useState(false);
+  const [selectedWordContent, setSelectedWordContent] = useState('');
+  const [showMeaning, setShowMeaning] = useState(false);
   // Audio player ref
   const soundRef = useRef<Audio.Sound | null>(null);
   const audioGenerationRef = useRef<string | null>(null);
@@ -90,7 +282,6 @@ export default function DocumentDetails() {
   );
   const currentIndexRef = useRef<number>(0);
   const scrollViewRef = useRef<any>(null);
-  // const wordRefs = useRef<{ [key: number]: any }>({});
 
   const [selectedVoice, _setSelectedVoice] = useState<any>(() => {
     const defaultVoice = {
@@ -136,13 +327,37 @@ export default function DocumentDetails() {
   const currentPage = batchesContent?.[currentPageIndex];
   const totalPages = batchesContent?.length || 0;
 
+  // Handle word selection
+  const handleWordPress = useCallback((index: number, word: string) => {
+    const trimmedWord = word.trim();
+    if (trimmedWord.length > 0) {
+      setSelectedWordIndex(index);
+      setSelectedWord(word); // Keep original word with spacing
+      setSelectedWordContent(trimmedWord); // Store trimmed content for display
+      setIsWordModalOpen(true);
+      console.log('Selected word:', trimmedWord, 'at index:', index);
+    }
+  }, []);
+
+  const handleCloseWordModal = useCallback(() => {
+    setIsWordModalOpen(false);
+    setShowMeaning(false);
+    // Don't clear selection immediately - delay it slightly so highlight is visible
+    setTimeout(() => {
+      setSelectedWordIndex(null);
+      setSelectedWord('');
+      setSelectedWordContent('');
+    }, 100);
+  }, []);
+
   // Split text into words when page changes
   useEffect(() => {
     if (currentPage?.batch_content.text) {
-      const words = currentPage.batch_content.text.split(/(\s+|\.)/);
+      const words = currentPage.batch_content.text.split(/(\s+|\.|\/)/);
       setHighlightedWords(words);
       setCurrentWordIndex(-1);
       currentIndexRef.current = 0;
+      setSelectedWordIndex(null);
       console.log('📝 Split text into', words.length, 'elements');
     }
   }, [currentPage?.batch_content.text]);
@@ -173,6 +388,22 @@ export default function DocumentDetails() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    const shouldAutoPlay =
+      isAutoPlayEnabled &&
+      currentPageIndex > 0 &&
+      !isGeneratingAudio &&
+      !isPlaying;
+
+    if (shouldAutoPlay) {
+      const timer = setTimeout(() => {
+        generateAudioForCurrentPage();
+      }, 300);
+
+      return () => clearTimeout(timer);
+    }
+  }, [currentPageIndex, isAutoPlayEnabled, isGeneratingAudio, isPlaying]);
 
   // Start word highlighting animation
   const startWordHighlighting = useCallback(
@@ -263,6 +494,15 @@ export default function DocumentDetails() {
           setCurrentText('Finished');
           stopWordHighlighting();
           console.log('🎵 Audio playback finished');
+
+          // Auto-progress to next page if enabled and not on last page
+          if (isAutoPlayEnabled && currentPageIndex < totalPages - 1) {
+            console.log('🔄 Auto-progressing to next page...');
+            // Small delay before moving to next page for better UX
+            setTimeout(() => {
+              setCurrentPageIndex((prev) => prev + 1);
+            }, 500);
+          }
         }
       } else if (status.error) {
         console.error('Playback error:', status.error);
@@ -272,7 +512,7 @@ export default function DocumentDetails() {
         stopWordHighlighting();
       }
     },
-    [stopWordHighlighting]
+    [stopWordHighlighting, isAutoPlayEnabled, currentPageIndex, totalPages]
   );
 
   const playAudioFromBlob = useCallback(
@@ -414,6 +654,7 @@ export default function DocumentDetails() {
     setCurrentText('Quiet');
     audioGenerationRef.current = null;
     currentIndexRef.current = 0;
+    setSelectedWordIndex(null);
   }, [currentPageIndex, stopWordHighlighting]);
 
   const goToNextPage = () => {
@@ -506,7 +747,7 @@ export default function DocumentDetails() {
       <SafeAreaView className="flex-1">
         {!isEnlarged && (
           <View className="flex-row items-center justify-between px-6 py-4">
-            <TouchableOpacity onPress={() => router.back()}>
+            <TouchableOpacity activeOpacity={1} onPress={() => router.back()}>
               <Back />
             </TouchableOpacity>
             <Text
@@ -524,63 +765,121 @@ export default function DocumentDetails() {
           </View>
         )}
 
-        <View className="flex-row items-center justify-between bg-gray-50 px-6 py-3">
+        <View className="flex-row items-center justify-between bg-[#FCFCFC] px-6 py-3">
           <TouchableOpacity
-            className="flex-row items-center"
+            activeOpacity={1}
+            className="flex-row items-center gap-3 rounded-[16px] bg-[#FFFAEA] px-4 py-3"
             onPress={() => setIsChangePageNumberOpen(true)}
           >
-            <View className="mr-2 items-center justify-center">
-              <PageNumber />
-            </View>
             <Text className="font-brownstd text-[12px] text-black">
               {currentPage?.batch_title || `Page ${currentPageIndex + 1}`}
             </Text>
+            <CaretDown />
           </TouchableOpacity>
           <TouchableOpacity
+            activeOpacity={1}
             onPress={() => setIsEnlarged(!isEnlarged)}
             className="size-8 items-center justify-center rounded-full bg-black"
           >
-            <PageSettings />
+            {isEnlarged ? <Resize /> : <PageSettings />}
           </TouchableOpacity>
         </View>
 
         <View className="flex-1 flex-row">
           <TouchableOpacity
+            activeOpacity={1}
             className="absolute inset-y-0 left-0 z-10 w-16"
             onPress={goToPreviousPage}
             disabled={currentPageIndex === 0}
-            activeOpacity={1}
           />
 
           <ScrollView
             ref={scrollViewRef}
+            keyboardShouldPersistTaps="handled"
             className="flex-1 p-6"
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 160 }}
           >
             {isLoadingBatches ? (
-              <View className="flex-1 items-center justify-center py-20">
-                <Text className="font-brownstd text-lg">
-                  Loading content...
-                </Text>
-              </View>
+              <TextSkeleton />
             ) : currentPage ? (
               <>
-                <Text className="mb-4 text-center font-garamond text-[12px] text-[#000000B2]">
-                  {currentPage.batch_title}
-                </Text>
+                {isPlaying ? (
+                  <View
+                    style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 2 }}
+                  >
+                    {highlightedWords.map((word, index) => (
+                      <HighlightedWord
+                        key={`word-${index}`}
+                        word={word}
+                        isHighlighted={index === currentWordIndex}
+                        isSelected={
+                          index === selectedWordIndex && word === selectedWord
+                        }
+                        onPress={() => handleWordPress(index, word)}
+                      />
+                    ))}
+                  </View>
+                ) : (
+                  <Markdown
+                    style={markdownStyles}
+                    rules={{
+                      text: (node, _children, _parent, _styles) => {
+                        const content = node.content;
+                        const words = content.split(/(\s+)/);
 
-                <View
-                  style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 2 }}
-                >
-                  {highlightedWords.map((word, index) => (
-                    <HighlightedWord
-                      key={`word-${index}`}
-                      word={word}
-                      isHighlighted={index === currentWordIndex}
-                    />
-                  ))}
-                </View>
+                        // Calculate starting index for this text node
+                        let startIndex = 0;
+                        const textBefore =
+                          currentPage.batch_content.markdown.substring(
+                            0,
+                            currentPage.batch_content.markdown.indexOf(content)
+                          );
+                        startIndex = textBefore.split(/(\s+)/).length;
+
+                        return (
+                          <Text key={node.key}>
+                            {words.map((word, i) => {
+                              const wordIndex = startIndex + i;
+                              const isSelected =
+                                wordIndex === selectedWordIndex &&
+                                word === selectedWord;
+                              const isHighlighted =
+                                wordIndex === currentWordIndex;
+
+                              if (word.trim().length === 0) {
+                                return <Text key={i}>{word}</Text>;
+                              }
+
+                              return (
+                                <Text
+                                  key={i}
+                                  onPress={() =>
+                                    handleWordPress(wordIndex, word)
+                                  }
+                                  style={{
+                                    backgroundColor: isSelected
+                                      ? '#3B82F6'
+                                      : isHighlighted
+                                        ? '#FFEB3B'
+                                        : 'transparent',
+                                    color: isSelected ? '#FFFFFF' : '#000000',
+                                    borderRadius: 3,
+                                    paddingHorizontal: 1,
+                                  }}
+                                >
+                                  {word}
+                                </Text>
+                              );
+                            })}
+                          </Text>
+                        );
+                      },
+                    }}
+                  >
+                    {currentPage.batch_content.markdown}
+                  </Markdown>
+                )}
               </>
             ) : (
               <View className="flex-1 items-center justify-center py-20">
@@ -615,6 +914,18 @@ export default function DocumentDetails() {
         )}
       </SafeAreaView>
 
+      {/* Word Selection Modal */}
+      <WordSelectionModal
+        documentId={documentId}
+        showMeaning={showMeaning}
+        setShowMeaning={setShowMeaning}
+        batch_order={currentPage?.batch_order}
+        visible={isWordModalOpen}
+        selectedWord={selectedWordContent}
+        onClose={handleCloseWordModal}
+      />
+
+      {/* Page Navigation Modal */}
       <Modal
         transparent
         animationType="fade"
@@ -624,36 +935,47 @@ export default function DocumentDetails() {
         <TouchableOpacity
           activeOpacity={1}
           className="flex-1 bg-black/50"
-          onPress={() => {
-            if (false) return;
-            setIsChangePageNumberOpen(false);
-          }}
+          onPress={() => setIsChangePageNumberOpen(false)}
         >
           <View className="flex-1 items-center justify-center px-6">
-            <View className="w-full rounded-3xl bg-white p-6">
+            <View className="max-h-[70%] w-full rounded-3xl bg-white p-6">
               <View className="mb-4 flex-row items-center justify-between">
-                <Text className="mb-4 font-garamond text-lg text-black">
+                <Text className="font-garamond text-xl text-black">
                   Chapters
                 </Text>
-                <Close onPress={() => setIsChangePageNumberOpen(false)} />
-              </View>
-              <View className="mb-5 h-px w-full bg-black/10" />
-              {Array.from({ length: totalPages }).map((_, index) => (
                 <TouchableOpacity
-                  key={index}
-                  className={`mb-1 flex-row items-center rounded-lg py-4 ${
-                    currentPageIndex === index ? 'bg-gray-100' : ''
-                  }`}
-                  onPress={() => {
-                    setCurrentPageIndex(index);
-                    setIsChangePageNumberOpen(false);
-                  }}
+                  onPress={() => setIsChangePageNumberOpen(false)}
                 >
-                  <Text className="ml-4 font-brownstd text-[14px] text-black">
-                    Page {index + 1}
-                  </Text>
+                  <Close />
                 </TouchableOpacity>
-              ))}
+              </View>
+              <View className="mb-2 h-px w-full bg-black/10" />
+
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {Array.from({ length: totalPages }).map((_, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    className={`mb-1 flex-row items-center rounded-xl p-4 ${
+                      currentPageIndex === index ? 'bg-amber-50' : ''
+                    }`}
+                    onPress={() => {
+                      setCurrentPageIndex(index);
+                      setIsChangePageNumberOpen(false);
+                    }}
+                  >
+                    <Text
+                      className={`font-brownstd text-base ${
+                        currentPageIndex === index
+                          ? 'font-bold text-amber-600'
+                          : 'text-black'
+                      }`}
+                    >
+                      {batchesContent?.[index]?.batch_title ||
+                        `Page ${index + 1}`}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
             </View>
           </View>
         </TouchableOpacity>
@@ -661,3 +983,15 @@ export default function DocumentDetails() {
     </View>
   );
 }
+
+const markdownStyles = StyleSheet.create({
+  body: { fontSize: 16, fontFamily: 'BrownStd', color: '#000', lineHeight: 24 },
+  heading1: {
+    fontSize: 24,
+    fontFamily: 'Garamond',
+    marginVertical: 10,
+    fontWeight: 'bold',
+  },
+  strong: { fontWeight: 'bold' },
+  paragraph: { marginBottom: 12 },
+});

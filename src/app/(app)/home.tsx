@@ -2,7 +2,7 @@
 import { FlashList } from '@shopify/flash-list';
 import * as DocumentPicker from 'expo-document-picker';
 import { router } from 'expo-router';
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   type GestureResponderEvent,
   Modal,
@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { showMessage } from 'react-native-flash-message';
 
+//@ts-ignore
 import type { Document } from '@/api/documents';
 import {
   deleteDocument,
@@ -28,10 +29,10 @@ import {
   View,
 } from '@/components/ui';
 import { DocumentSkeleton } from '@/components/ui/document-skeleton';
-import { Logos } from '@/components/ui/icons/logos';
+// import { Logos } from '@/components/ui/icons/logos';
 import { Options } from '@/components/ui/icons/options';
 import { Pen } from '@/components/ui/icons/pen';
-import { Search } from '@/components/ui/icons/search';
+// import { Search } from '@/components/ui/icons/search';
 import { showError } from '@/components/ui/utils';
 import { useUser } from '@/lib/user';
 
@@ -48,6 +49,16 @@ export default function Home() {
   const [isOptionsOpen, setIsOptionsOpen] = React.useState(false);
   const [isRenameOpen, setIsRenameOpen] = React.useState(false);
   const [newTitle, setNewTitle] = React.useState('');
+
+  const sortedDocuments = React.useMemo(() => {
+    if (!documentData) return [];
+
+    return [...documentData].sort((a, b) => {
+      return (
+        new Date(b.uploaded_at).getTime() - new Date(a.uploaded_at).getTime()
+      );
+    });
+  }, [documentData]);
   const calculateProgress = (lastReadPosition: number) => {
     return Math.min(Math.max(lastReadPosition, 0), 100);
   };
@@ -106,6 +117,8 @@ export default function Home() {
     }
   };
 
+  const [menuPosition, setMenuPosition] = React.useState({ x: 0, y: 0 });
+  const iconRef = useRef<any>(null);
   const renderDocumentItem = ({ item }: { item: Document }) => {
     const progress = calculateProgress(item.last_read_position);
 
@@ -147,10 +160,20 @@ export default function Home() {
 
             {/* Right side - Options Icon */}
             <RNTouchableOpacity
+              ref={iconRef}
               onPress={(e: GestureResponderEvent) => {
                 e.stopPropagation();
-                setSelectedDocId(item.document_id);
-                setIsOptionsOpen(true);
+                // Measure the specific element that was pressed
+                const target = e.currentTarget;
+                target.measureInWindow((x, y, width, height) => {
+                  // position: x - 200 (menu width) + width (align to right edge of icon)
+                  setMenuPosition({
+                    x: x - 180,
+                    y: y + height + 5, // 5px gap below icon
+                  });
+                  setSelectedDocId(item.document_id);
+                  setIsOptionsOpen(true);
+                });
               }}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
@@ -163,7 +186,6 @@ export default function Home() {
   };
 
   const renderSkeletonItem = () => <DocumentSkeleton />;
-  console.log('user', JSON.stringify(user, null, 2));
   return (
     <View className="flex-1 bg-white">
       <FocusAwareStatusBar />
@@ -173,18 +195,18 @@ export default function Home() {
             onPress={() => router.push('/home/settings')}
             className="size-10 items-center justify-center rounded-full bg-[#D9D9D9]"
           >
-            <Text className="text-[16px] font-bold text-black">
+            <Text className="font-brownstd text-[16px] text-black">
               {user?.full_name?.charAt(0)}
             </Text>
           </TouchableOpacity>
           <View className="flex-1 items-center">
-            <Logos color="#000000" />
+            {/* <Logos color="#000000" /> */}
           </View>
           <View className="flex-row items-center space-x-4">
             {/* <TouchableOpacity className="mr-5">
               <Search />
             </TouchableOpacity> */}
-            <TouchableOpacity onPress={() => router.push('/')}>
+            <TouchableOpacity onPress={handleUploadDocument}>
               <Pen />
             </TouchableOpacity>
           </View>
@@ -211,7 +233,7 @@ export default function Home() {
         </View> */}
 
         {/* Main Content */}
-        <View className=" mt-4 flex-1 px-6">
+        <View className=" mt-[44px] flex-1 px-6">
           {isLoading ? (
             <FlashList
               data={Array.from({ length: 3 }, (_, index) => ({ id: index }))}
@@ -236,7 +258,7 @@ export default function Home() {
             />
           ) : documentData && documentData.length > 0 ? (
             <FlashList
-              data={documentData}
+              data={sortedDocuments}
               renderItem={renderDocumentItem}
               keyExtractor={(item) => item.document_id}
               showsVerticalScrollIndicator={false}
@@ -279,11 +301,14 @@ export default function Home() {
       </SafeAreaView>
       <OptionsMenu
         visible={isOptionsOpen}
+        position={menuPosition}
         onClose={() => setIsOptionsOpen(false)}
         isDeleting={isDeleting}
         onEdit={() => {
           setIsOptionsOpen(false);
-          setIsRenameOpen(true);
+          setTimeout(() => {
+            setIsRenameOpen(true);
+          }, 500);
         }}
         onDelete={() => {
           if (!selectedDocId || isDeleting) return;
@@ -306,13 +331,14 @@ export default function Home() {
       {/* Rename Modal */}
       <Modal
         transparent
+        backdropColor="white"
         animationType="fade"
         visible={isRenameOpen}
         onRequestClose={() => setIsRenameOpen(false)}
       >
         <RNTouchableOpacity
           activeOpacity={1}
-          className="flex-1 bg-black/50"
+          className="flex-1 bg-transparent"
           onPress={() => setIsRenameOpen(false)}
         >
           <View className="flex-1 items-center justify-center px-6">

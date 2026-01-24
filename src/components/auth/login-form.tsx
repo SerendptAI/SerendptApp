@@ -55,6 +55,7 @@ export const LoginForm = ({
   });
 
   const rememberMe = watch('rememberMe');
+
   return (
     <ImageBackground
       source={require('/assets/bgimg.png')}
@@ -65,9 +66,9 @@ export const LoginForm = ({
         <View className="h-8" />
 
         <View className="px-6 py-4">
-          <TouchableOpacity onPress={() => router.replace('/onboarding')}>
+          {/* <TouchableOpacity onPress={() => router.replace('/onboarding')}>
             <AuthBack />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
         <View className="mt-10 items-center px-5 py-4">
           <Logo />
@@ -150,7 +151,11 @@ export const LoginForm = ({
 
               {/* Sign Up Link */}
               <View className="mt-8 items-center">
-                <TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    router.replace('/auth/signup');
+                  }}
+                >
                   <Text className="font-brownstd text-[12px] text-[#424242] ">
                     Don't have an account?{' '}
                     <Text className=" font-brownstd text-[12px] text-[#424242]">

@@ -1,14 +1,24 @@
 /* eslint-disable max-lines-per-function */
+import {
+  GoogleSignin,
+  isErrorWithCode,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { Image } from 'react-native';
+import { showMessage } from 'react-native-flash-message';
 
+import { type AuthResponse } from '@/api/auth';
+import { useGoogleLogin } from '@/api/auth/auth';
 import { Button, SafeAreaView, Text, View } from '@/components/ui';
 import { Google, Tick } from '@/components/ui/icons';
+import { useAuth } from '@/lib';
 import { useIsFirstTime } from '@/lib/hooks';
 
 export default function Onboarding() {
   const [, setIsFirstTime] = useIsFirstTime();
+  const signIn = useAuth.use.signIn();
   const router = useRouter();
 
   const handleSignUp = () => {
@@ -21,6 +31,67 @@ export default function Onboarding() {
     router.replace('/auth/login');
   };
 
+  const { mutateAsync, isPending } = useGoogleLogin();
+
+  const signInWithGoogle = async () => {
+    try {
+      await GoogleSignin.signOut();
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      const payload = {
+        id_token: userInfo?.data?.idToken || userInfo?.data?.idToken,
+      };
+      //@ts-ignore
+      const response: AuthResponse = await mutateAsync(payload);
+
+      if (response.otp_required) {
+        showMessage({
+          message: 'OTP Required',
+          description: response.message,
+          type: 'info',
+          duration: 3000,
+        });
+
+        router.replace(
+          `/auth/verify-otp?email=${encodeURIComponent(response.user_email)}&flow=email-login`
+        );
+        return;
+      }
+
+      signIn(
+        {
+          access: response.access_token,
+          refresh: response.access_token,
+        },
+        {
+          email: response.user_email,
+        }
+      );
+
+      showMessage({
+        message: 'Login Successful',
+        description: 'Welcome back!',
+        type: 'success',
+        duration: 3000,
+      });
+
+      router.replace('/');
+    } catch (error: any) {
+      if (isErrorWithCode(error)) {
+        switch (error.code) {
+          case statusCodes.SIGN_IN_CANCELLED:
+            break;
+          case statusCodes.IN_PROGRESS:
+            break;
+          case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+            break;
+          default:
+        }
+      } else {
+      }
+      throw error;
+    }
+  };
   return (
     <SafeAreaView className="flex-1 bg-white">
       <View className="flex-1">
@@ -83,11 +154,9 @@ export default function Onboarding() {
               </Button>
             </View>
 
-            {/* <Button
-              onPress={() => {
-                // Handle Google sign in
-                console.log('Google sign in');
-              }}
+            <Button
+              loading={isPending}
+              onPress={signInWithGoogle}
               className="flex-row items-center justify-center gap-4 rounded-[17px] bg-black py-4"
             >
               <View>
@@ -96,7 +165,7 @@ export default function Onboarding() {
               <Text className="font-brownstd text-[16px] text-white">
                 Login/Sign up with google
               </Text>
-            </Button> */}
+            </Button>
           </View>
         </View>
       </View>

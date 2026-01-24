@@ -1,10 +1,9 @@
 import React from 'react';
-import { Modal, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { ActivityIndicator, Modal, TouchableOpacity } from 'react-native';
 
 import { Text, View } from '@/components/ui';
-import { Pen } from '@/components/ui/icons/pen';
-import { Close } from '@/components/ui/icons/close';
 import { Delete } from '@/components/ui/icons/delete';
+import { Pen } from '@/components/ui/icons/pen';
 
 type Props = {
   visible: boolean;
@@ -12,35 +11,64 @@ type Props = {
   onEdit: () => void;
   onDelete: () => void;
   isDeleting?: boolean;
+  position: { x: number; y: number };
 };
 
-export function OptionsMenu({ visible, onClose, onEdit, onDelete, isDeleting = false }: Props) {
+export function OptionsMenu({
+  visible,
+  onClose,
+  onEdit,
+  onDelete,
+  isDeleting = false,
+  position,
+}: Props) {
   return (
-    <Modal transparent animationType="fade" visible={visible} onRequestClose={onClose}>
+    <Modal
+      transparent
+      animationType="fade"
+      visible={visible}
+      onRequestClose={onClose}
+    >
       <TouchableOpacity
         activeOpacity={1}
-        className="flex-1 bg-black/50"
+        className=" flex-1 "
         onPress={() => {
           if (isDeleting) return;
           onClose();
         }}
       >
-        <View className="flex-1 items-center justify-center px-6">
-          <View className="w-full rounded-3xl bg-white p-6">
-            <TouchableOpacity className="flex-row items-center mb-5" onPress={onEdit} disabled={isDeleting}>
+        <View
+          className="px-1"
+          style={{ position: 'absolute', top: position.y, left: position.x }}
+        >
+          <View className="w-[210px] rounded-3xl border border-[#00000033] bg-white p-6">
+            <TouchableOpacity
+              className="mb-5 flex-row items-center"
+              onPress={onEdit}
+              disabled={isDeleting}
+            >
               <Pen />
-              <Text className="ml-4 text-[14px] text-black font-brownstd">Edit name</Text>
+              <Text className="ml-4 font-brownstd text-[14px] text-black">
+                Edit name
+              </Text>
             </TouchableOpacity>
 
-            <View className="h-[1px] w-full bg-black/10 mb-5" />
+            <View className="mb-5 h-px w-full bg-black/10" />
 
-            <TouchableOpacity className="flex-row items-center" onPress={onDelete} disabled={isDeleting}>
+            <TouchableOpacity
+              className="flex-row items-center"
+              onPress={onDelete}
+              disabled={isDeleting}
+            >
               {isDeleting ? (
                 <ActivityIndicator size="small" color="#FF3B30" />
               ) : (
                 <Delete />
               )}
-              <Text className="ml-4 text-[14px] font-brownstd" style={{ color: '#FF3B30' }}>
+              <Text
+                className="ml-4 font-brownstd text-[14px]"
+                style={{ color: '#FF3B30' }}
+              >
                 {isDeleting ? 'Deleting…' : 'Delete project'}
               </Text>
             </TouchableOpacity>
@@ -50,5 +78,3 @@ export function OptionsMenu({ visible, onClose, onEdit, onDelete, isDeleting = f
     </Modal>
   );
 }
-
-

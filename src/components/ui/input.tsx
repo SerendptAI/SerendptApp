@@ -1,3 +1,6 @@
+/* eslint-disable max-lines-per-function */
+import { EyeIcon } from 'phosphor-react-native/src/icons/Eye';
+import { EyeSlashIcon } from 'phosphor-react-native/src/icons/EyeSlash';
 import * as React from 'react';
 import type {
   Control,
@@ -16,7 +19,6 @@ import {
 } from 'react-native';
 import { tv } from 'tailwind-variants';
 
-import { Eye } from './icons/eye';
 import { Text } from './text';
 
 const inputTv = tv({
@@ -176,6 +178,7 @@ export const Input = React.forwardRef<NTextInput, NInputProps>((props, ref) => {
 
         {showPasswordToggle && (
           <TouchableOpacity
+            activeOpacity={0.9}
             className={styles.endIconContainer()}
             onPress={togglePasswordVisibility}
             accessibilityRole="button"
@@ -183,7 +186,7 @@ export const Input = React.forwardRef<NTextInput, NInputProps>((props, ref) => {
               isPasswordVisible ? 'Hide password' : 'Show password'
             }
           >
-            {isPasswordVisible ? <Eye /> : <Eye />}
+            {isPasswordVisible ? <EyeIcon /> : <EyeSlashIcon />}
           </TouchableOpacity>
         )}
 

@@ -11,6 +11,8 @@ import type {
   DeleteDocumentVariables,
   EditDocumentResponse,
   EditDocumentVariables,
+  ExplainTermResponse,
+  ExplainTermVariables,
   GetDocumentBatchesContentResponse,
   GetDocumentsByEmailResponse,
   UploadDocumentResponse,
@@ -132,5 +134,27 @@ export const uploadDocument = createMutation<
       console.error('Upload error:', error);
       throw new Error(error.message || 'Upload failed');
     }
+  },
+});
+
+export const explainTerm = createMutation<
+  ExplainTermResponse,
+  ExplainTermVariables,
+  Error
+>({
+  mutationKey: ['documents', 'edit'],
+  mutationFn: async ({ documentId, batch_order, term }) => {
+    console.log('documentId', documentId);
+    console.log('batch_order', batch_order);
+    console.log('term', term);
+    return client({
+      url: `explain_term/`,
+      data: {
+        document_id: documentId,
+        batch_order: batch_order,
+        term: term,
+      },
+      method: 'POST',
+    }).then((response) => response.data);
   },
 });
