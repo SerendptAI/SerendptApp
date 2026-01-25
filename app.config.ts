@@ -105,6 +105,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           './assets/fonts/Roboto-SemiBold.ttf',
           './assets/fonts/Roboto-Bold.ttf',
           './assets/fonts/Roboto-ExtraBold.ttf',
+          './assets/fonts/Biro/Biro_Script_reduced.ttf',
         ],
       },
     ],

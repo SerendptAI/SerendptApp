@@ -53,6 +53,7 @@ export default function RootLayout() {
           'Roboto-ExtraBold': require('../../assets/fonts/Roboto-ExtraBold.ttf'),
           'BrownStd-Regular': require('../../assets/fonts/Brown-Font/BrownStd-Regular.otf'),
           'brownstd-Bold': require('../../assets/fonts/Brown-Font/brownstd-bold.ttf'),
+          'biro-script': require('../../assets/fonts/Biro/Biro_Script_reduced.ttf'),
         });
       } catch (e) {
         console.warn('Font loading error:', e);

@@ -136,12 +136,36 @@ const WordSelectionModal = ({
   onClose: () => void;
 }) => {
   const { mutateAsync, isPending, data } = explainTerm();
+  const [displayedText, setDisplayedText] = useState('');
+  const [isStreaming, setIsStreaming] = useState(false);
 
   const handleCheckMeaning = useCallback(async () => {
     if (batch_order === null || batch_order === undefined) return;
     setShowMeaning(true);
     await mutateAsync({ documentId, batch_order, term: selectedWord });
   }, [batch_order, documentId, mutateAsync, selectedWord]);
+
+  useEffect(() => {
+    if (data?.contextual_meaning && showMeaning) {
+      setIsStreaming(true);
+      setDisplayedText('');
+
+      const text = data.contextual_meaning;
+      let currentIndex = 0;
+
+      const intervalId = setInterval(() => {
+        if (currentIndex < text.length) {
+          setDisplayedText(text.slice(0, currentIndex + 1));
+          currentIndex++;
+        } else {
+          setIsStreaming(false);
+          clearInterval(intervalId);
+        }
+      }, 20); // Adjust speed here (lower = faster)
+
+      return () => clearInterval(intervalId);
+    }
+  }, [data?.contextual_meaning, showMeaning]);
 
   return (
     <Modal
@@ -225,8 +249,8 @@ const WordSelectionModal = ({
                       <TextSkeleton numberOfLines={1} />
                     </View>
                   ) : (
-                    <Text className=" font-brownstd text-base text-black">
-                      {data?.contextual_meaning}
+                    <Text className="font-biro-script text-lg text-[#1E40AF]">
+                      {displayedText}
                     </Text>
                   )}
                 </View>

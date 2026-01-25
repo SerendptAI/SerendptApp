@@ -23,6 +23,7 @@ module.exports = {
         'roboto-extrabold': ['Roboto-ExtraBold'],
         brownstd: ['BrownStd-Regular'],
         'brownstd-bold': ['brownstd-Bold'],
+        'biro-script': ['biro-script'],
       },
       colors,
     },

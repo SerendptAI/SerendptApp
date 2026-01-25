@@ -40,7 +40,7 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>com.googleusercontent.apps._some_id_here_</string>
+          <string>com.googleusercontent.apps.6432411175-6hp32s7eqevqb168m51gcf51f383iqsk</string>
         </array>
       </dict>
     </array>
@@ -87,6 +87,7 @@
       <string>Roboto-SemiBold.ttf</string>
       <string>Roboto-Bold.ttf</string>
       <string>Roboto-ExtraBold.ttf</string>
+      <string>Biro_Script_reduced.ttf</string>
     </array>
     <key>UILaunchStoryboardName</key>
     <string>SplashScreen</string>
