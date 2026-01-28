@@ -8,7 +8,9 @@ export function getItem<T>(key: string): T | null {
 }
 
 export async function setItem<T>(key: string, value: T) {
+  console.log('sett', value);
   storage.set(key, JSON.stringify(value));
+  console.log('succcess');
 }
 
 export async function removeItem(key: string) {

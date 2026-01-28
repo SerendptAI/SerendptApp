@@ -50,14 +50,7 @@ export const WhisperProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   // Log whenever state changes
-  useEffect(() => {
-    console.log(
-      '📊 WhisperProvider state - isReady:',
-      isReady,
-      'context:',
-      !!whisperContext
-    );
-  }, [isReady, whisperContext]);
+  useEffect(() => {}, [isReady, whisperContext]);
 
   return (
     <WhisperContext.Provider value={{ whisperContext, isReady }}>
@@ -68,11 +61,5 @@ export const WhisperProvider: React.FC<{ children: React.ReactNode }> = ({
 
 export const useWhisper = () => {
   const context = useContext(WhisperContext);
-  console.log(
-    '🎯 useWhisper called - isReady:',
-    context.isReady,
-    'context:',
-    !!context.whisperContext
-  );
   return context;
 };

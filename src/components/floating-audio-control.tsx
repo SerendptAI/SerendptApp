@@ -8,7 +8,13 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 
-import { Image, Text, TouchableOpacity, View } from '@/components/ui';
+import {
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from '@/components/ui';
 
 import { Play, SpeakerIcon } from './ui/icons';
 import { MoreOption } from './ui/icons/more-option';
@@ -27,13 +33,21 @@ type Props = {
   voiceName?: string;
   voiceType?: string;
   currentText?: string;
+  setSelectedVoice?: (voice: {
+    id: string;
+    name: string;
+    image_url: string;
+    tag: string;
+    disabled: boolean;
+  }) => void;
   selectedVoice?: {
     id: string;
     name: string;
-    avatar: string;
-    model: string;
-    isOffline: boolean;
+    image_url: string;
+    tag: string;
+    disabled: boolean;
   };
+  audioVoices?: any;
 };
 
 export function FloatingAudioControl({
@@ -43,24 +57,25 @@ export function FloatingAudioControl({
   isGeneratingAudio = false,
   pausedAudio,
   isPlaying = false,
-  voiceName = 'Alloy',
-  voiceType = 'HD Voice',
-  currentText = 'Quiet',
   selectedVoice,
+  setSelectedVoice,
+  audioVoices,
 }: Props) {
+  const [showVoicePicker, setShowVoicePicker] = useState(false);
+
+  const toggleVoicePicker = () => setShowVoicePicker(!showVoicePicker);
   const [showMinimized, setShowMinimized] = useState(false);
   const animationProgress = useSharedValue(0);
+  const pickerAnimation = useSharedValue(0);
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
 
     if (isPlaying) {
-      // Start 30-second timer when playing starts
       timer = setTimeout(() => {
         setShowMinimized(true);
       }, 30000); // 30 seconds
     } else {
-      // Reset to full view when not playing
       setShowMinimized(false);
     }
 
@@ -85,6 +100,22 @@ export function FloatingAudioControl({
       });
     }
   }, [isPlaying, showMinimized]);
+
+  useEffect(() => {
+    pickerAnimation.value = withSpring(showVoicePicker ? 1 : 0, {
+      damping: 20,
+      stiffness: 100,
+    });
+  }, [showVoicePicker]);
+
+  const pickerStyle = useAnimatedStyle(() => ({
+    opacity: pickerAnimation.value,
+    transform: [
+      { translateY: interpolate(pickerAnimation.value, [0, 1], [20, 0]) },
+      { scale: interpolate(pickerAnimation.value, [0, 1], [0.95, 1]) },
+    ],
+    pointerEvents: showVoicePicker ? 'auto' : 'none',
+  }));
 
   // Animated styles for minimized view
   const minimizedStyle = useAnimatedStyle(() => {
@@ -143,6 +174,72 @@ export function FloatingAudioControl({
 
   return (
     <View className="absolute inset-x-4 bottom-20 z-50">
+      <Animated.View
+        style={[
+          { position: 'absolute', bottom: '110%', left: 0, right: 0 },
+          pickerStyle,
+        ]}
+      >
+        <View className="rounded-3xl border-[0.5px] border-[#ede2b6] bg-white p-5 shadow-2xl">
+          <View className="mb-4 flex-row items-center justify-between">
+            <Text className="font-brownstd-bold text-lg text-black">
+              Select Voice
+            </Text>
+            <TouchableOpacity
+              onPress={() => setShowVoicePicker(false)}
+              className="p-1"
+            >
+              <Text className="text-xl text-gray-400">✕</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View className="gap-y-3">
+            <Text className="font-brownstd text-xs uppercase tracking-widest text-gray-400">
+              Online Voices
+            </Text>
+            <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
+              {audioVoices?.map((voice: any) => (
+                <TouchableOpacity
+                  key={voice.name}
+                  activeOpacity={1}
+                  disabled={voice.disabled}
+                  onPress={() => {
+                    setSelectedVoice?.(voice);
+                    setShowVoicePicker(false);
+                  }}
+                  className={`mb-3 flex-row items-center rounded-2xl border-2 p-3 ${
+                    selectedVoice?.name?.toLowerCase() ===
+                    voice.name.toLowerCase()
+                      ? 'border-amber-400 bg-amber-100'
+                      : 'border-gray-100 bg-gray-50'
+                  }`}
+                >
+                  <Image
+                    source={{
+                      uri: `https://api.serendptai.com${voice.image_url}`,
+                    }}
+                    className="mr-3 size-12 rounded-full"
+                  />
+                  <View className="flex-1">
+                    <Text className="font-brownstd-bold text-base text-black">
+                      {voice.name}
+                    </Text>
+                    <Text className="font-brownstd text-xs text-gray-500">
+                      {voice.tag}
+                    </Text>
+                  </View>
+                  {selectedVoice?.name?.toLowerCase() ===
+                    voice.name.toLowerCase() && (
+                    <View className="size-5 items-center justify-center rounded-full">
+                      <Text className="text-[20px] text-amber-400">✓</Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Animated.View>
       {/* Minimized view */}
       <Animated.View
         style={[
@@ -164,9 +261,11 @@ export function FloatingAudioControl({
           <View className="relative mr-3 size-[75px] items-center justify-center overflow-hidden rounded-[14px] bg-[#FFFBEB]">
             <View className="size-16 overflow-hidden rounded-full">
               <Image
-                source={require('../../assets/Nova.png')}
+                source={{
+                  uri: `https://api.serendptai.com${selectedVoice?.image_url}`,
+                }}
                 className="size-16 rounded-full"
-                contentFit="contain"
+                contentFit="cover"
               />
               <View className="absolute inset-0 bg-black/50" />
             </View>
@@ -194,22 +293,26 @@ export function FloatingAudioControl({
           <View className="flex-row items-center justify-between">
             {/* Left side - Profile and Voice Info */}
             <View className="flex-1 flex-row items-center">
-              <View className="mr-3 size-12 overflow-hidden rounded-full">
+              <TouchableOpacity
+                activeOpacity={1}
+                onPress={toggleVoicePicker} // Add this trigger
+                className="mr-3 size-12 overflow-hidden rounded-full active:opacity-70"
+              >
                 <Image
-                  source={require('../../assets/Nova.png')}
+                  source={{
+                    uri: `https://api.serendptai.com${selectedVoice?.image_url}`,
+                  }}
                   className="size-full"
                   contentFit="cover"
                 />
-              </View>
+              </TouchableOpacity>
 
               <View className="flex-1">
                 <Text className="font-brownstd-bold text-base text-black">
-                  {selectedVoice?.name || voiceName}
+                  {selectedVoice?.name}
                 </Text>
                 <Text className="font-brownstd text-sm text-gray-600">
-                  {selectedVoice?.model === 'offline'
-                    ? 'Offline Voice'
-                    : voiceType}
+                  {selectedVoice?.tag}
                 </Text>
               </View>
             </View>

@@ -3,9 +3,8 @@ import React, { useCallback, useEffect } from 'react';
 
 import { useGetUser } from '@/api/users/users';
 import { showError } from '@/components/ui';
-import { useAuth } from '@/lib';
+import { signOut, useAuth } from '@/lib';
 import { setUser } from '@/lib/user';
-
 
 export default function AppLayout() {
   const status = useAuth.use.status();
@@ -39,6 +38,7 @@ export default function AppLayout() {
   // Handle errors
   useEffect(() => {
     if (isError && error) {
+      signOut();
       showError(error);
     }
   }, [isError, error]);
@@ -48,13 +48,13 @@ export default function AppLayout() {
   }
 
   return (
-      <Stack>
-        <Stack.Screen
-          name="home"
-          options={{
-            headerShown: false,
-          }}
-        />
-      </Stack>
+    <Stack>
+      <Stack.Screen
+        name="home"
+        options={{
+          headerShown: false,
+        }}
+      />
+    </Stack>
   );
 }

@@ -5,8 +5,11 @@ import { createMutation } from 'react-query-kit';
 import { client } from '../common';
 import type {
   AuthResponse,
+  ForgotPasswordRequest,
   GoogleLoginRequest,
   LoginRequest,
+  ResendOtpRequest,
+  ResetPasswordRequest,
   SignupRequest,
   SignupResponse,
   VerifyOtpRequest,
@@ -28,8 +31,6 @@ export const useSignup = createMutation<
       method: 'POST',
       data: variables,
     }).then((response) => {
-      console.log('variables', JSON.stringify(variables, null, 2));
-      console.log('first', JSON.stringify(response, null, 2));
       return response.data;
     }),
 });
@@ -38,6 +39,19 @@ export const useLogin = createMutation<AuthResponse, LoginRequest, AxiosError>({
   mutationFn: async (variables) =>
     client({
       url: 'login',
+      method: 'POST',
+      data: variables,
+    }).then((response) => response.data),
+});
+
+export const useForgotPassword = createMutation<
+  AuthResponse,
+  ForgotPasswordRequest,
+  AxiosError
+>({
+  mutationFn: async (variables) =>
+    client({
+      url: 'send-forgot-password-otp',
       method: 'POST',
       data: variables,
     }).then((response) => response.data),
@@ -77,6 +91,45 @@ export const useVerifyLoginOtp = createMutation<
   mutationFn: async (variables) =>
     client({
       url: '/verify-login-otp',
+      method: 'POST',
+      data: variables,
+    }).then((response) => response.data),
+});
+
+export const useResendOtp = createMutation<
+  AuthResponse,
+  ResendOtpRequest,
+  AxiosError
+>({
+  mutationFn: async (variables) =>
+    client({
+      url: 'resend-otp',
+      method: 'POST',
+      data: variables,
+    }).then((response) => response.data),
+});
+
+
+export const useVerifyForgotPassword = createMutation<
+  AuthResponse,
+  VerifyOtpRequest,
+  AxiosError
+>({
+  mutationFn: async (variables) =>
+    client({
+      url: 'verify-forgot-password-otp',
+      method: 'POST',
+      data: variables,
+    }).then((response) => response.data),
+});
+export const useResetPassword = createMutation<
+  AuthResponse,
+  ResetPasswordRequest,
+  AxiosError
+>({
+  mutationFn: async (variables) =>
+    client({
+      url: 'forgot-password-reset',
       method: 'POST',
       data: variables,
     }).then((response) => response.data),

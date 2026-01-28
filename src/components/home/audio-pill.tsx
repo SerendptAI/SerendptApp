@@ -36,12 +36,7 @@ export const AudioPill: React.FC<AudioPillProps> = ({
   const [isListening, setIsListening] = useState(false);
   const { whisperContext, isReady } = useWhisper();
   useEffect(() => {
-    console.log(
-      '🎙️ AudioPill rendered - isReady:',
-      isReady,
-      'context:',
-      !!whisperContext
-    );
+   
   }, [isReady, whisperContext]);
   const volumeLevel = useSharedValue(1);
   const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -196,11 +191,19 @@ export const AudioPill: React.FC<AudioPillProps> = ({
     opacity: interpolate(volumeLevel.value, [1, 2.5], [0.3, 0.8]),
   }));
 
+  const handleCLickPill = () => {
+    if (isListening) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  };
+
   return (
     <View className="flex-row items-center">
       <Modal
         transparent
-        visible={isListening}
+        visible={false}
         animationType="fade"
         backdropColor="#000000E5"
       >
@@ -230,19 +233,18 @@ export const AudioPill: React.FC<AudioPillProps> = ({
 
       <TouchableOpacity
         activeOpacity={1}
-        onPress={startRecording}
-        disabled={isListening || !isReady}
+        onPress={handleCLickPill}
+        disabled={!isReady}
         className="flex-row items-center gap-2 rounded-full bg-[#FDF4CF] px-4 py-2"
       >
         <View
-          className={`size-2 rounded-full ${isReady ? 'bg-slate-500' : 'bg-red-500'}`}
+          className={`size-2 rounded-full ${isListening ? 'bg-[#EF4A48]' : 'bg-[#9CA3AF]'}`}
         />
         <Text
           className="max-w-[150px] font-brownstd text-sm text-black"
           numberOfLines={1}
         >
-          {transcription ||
-            (isReady ? 'Click to talk' : 'Loading Whisper model...')}
+          {transcription || (isListening ? 'Listening...' : 'Click to talk')}
         </Text>
       </TouchableOpacity>
     </View>

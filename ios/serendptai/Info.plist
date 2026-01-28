@@ -88,6 +88,7 @@
       <string>Roboto-Bold.ttf</string>
       <string>Roboto-ExtraBold.ttf</string>
       <string>Biro_Script_reduced.ttf</string>
+      <string>georgia.ttf</string>
     </array>
     <key>UILaunchStoryboardName</key>
     <string>SplashScreen</string>

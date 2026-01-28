@@ -22,6 +22,21 @@ export type LoginRequest = {
   email?: string;
   password?: string;
 };
+
+export type ForgotPasswordRequest = {
+  email?: string;
+};
+
+export type ResetPasswordRequest = {
+  email?: string;
+  new_password?: string;
+  confirm_new_password?: string;
+};
+
+export type VerifyForgotPasswordRequest = {
+  email?: string;
+  otp?: string;
+};
 export type GoogleLoginRequest = {
   id_token?: string;
 };
@@ -29,6 +44,10 @@ export type GoogleLoginRequest = {
 export type SignupResponse = {
   message: string;
   email: string;
+};
+export type ResendOtpRequest = {
+  email: string;
+  purpose: string;
 };
 
 export type AuthResponse = {

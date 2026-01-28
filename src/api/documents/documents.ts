@@ -7,12 +7,15 @@ import { Env } from '@/lib/env';
 
 import { client } from '../common';
 import type {
+  AudioStreamResponse,
+  AudioStreamVariables,
   DeleteDocumentResponse,
   DeleteDocumentVariables,
   EditDocumentResponse,
   EditDocumentVariables,
   ExplainTermResponse,
   ExplainTermVariables,
+  GetAudioVoicesResponse,
   GetDocumentBatchesContentResponse,
   GetDocumentsByEmailResponse,
   UploadDocumentResponse,
@@ -86,15 +89,12 @@ export const uploadDocument = createMutation<
   mutationKey: ['documents', 'upload'],
   mutationFn: async ({ document, user_email }) => {
     try {
-      console.log('Starting upload with RNFetchBlob...');
-      console.log('Document:', document);
-      console.log('User email:', user_email);
+    
 
       const token = getToken();
 
       // Remove 'file://' prefix if present
       const filePath = document.uri.replace('file://', '');
-      console.log('File path:', filePath);
 
       const response = await RNFetchBlob.fetch(
         'POST',
@@ -117,10 +117,8 @@ export const uploadDocument = createMutation<
         ]
       );
 
-      console.log('Response status:', response.respInfo.status);
 
       const responseData = response.json();
-      console.log('Response data:', responseData);
 
       if (response.respInfo.status >= 400) {
         throw new Error(
@@ -144,9 +142,6 @@ export const explainTerm = createMutation<
 >({
   mutationKey: ['documents', 'edit'],
   mutationFn: async ({ documentId, batch_order, term }) => {
-    console.log('documentId', documentId);
-    console.log('batch_order', batch_order);
-    console.log('term', term);
     return client({
       url: `explain_term/`,
       data: {
@@ -155,6 +150,39 @@ export const explainTerm = createMutation<
         term: term,
       },
       method: 'POST',
+    }).then((response) => response.data);
+  },
+});
+
+export const audioStream = createMutation<
+  AudioStreamResponse,
+  AudioStreamVariables,
+  Error
+>({
+  mutationKey: ['documents', 'batch_order'],
+  mutationFn: async ({ documentId, batch_order, language, speaker }) => {
+    return client({
+      url: `audio/stream`,
+      data: {
+        document_id: documentId,
+        batch_order: batch_order,
+        language: language,
+        speaker: speaker,
+      },
+      method: 'POST',
+    }).then((response) => response.data);
+  },
+});
+
+export const useGetAudioVoices = createQuery<
+  GetAudioVoicesResponse,
+  AxiosError
+>({
+  queryKey: ['documents', 'batches-content'],
+  fetcher: async () => {
+    return client({
+      url: `audio/voices`,
+      method: 'GET',
     }).then((response) => response.data);
   },
 });

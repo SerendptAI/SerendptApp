@@ -79,14 +79,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           'com.googleusercontent.apps.6432411175-6hp32s7eqevqb168m51gcf51f383iqsk',
       },
     ],
-    [
-      'expo-splash-screen',
-      {
-        backgroundColor: '#ffffff',
-        image: './assets/splash-icon.png',
-        imageWidth: 150,
-      },
-    ],
+    // [
+    //   'expo-splash-screen',
+    //   {
+    //     backgroundColor: '#ffffff',
+    //     image: './assets/splash-icon.png',
+    //     imageWidth: 150,
+    //   },
+    // ],
     [
       'expo-font',
       {
@@ -106,6 +106,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           './assets/fonts/Roboto-Bold.ttf',
           './assets/fonts/Roboto-ExtraBold.ttf',
           './assets/fonts/Biro/Biro_Script_reduced.ttf',
+          './assets/fonts/Georgia/georgia.ttf',
         ],
       },
     ],

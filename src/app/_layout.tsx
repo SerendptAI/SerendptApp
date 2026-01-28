@@ -30,7 +30,7 @@ export const unstable_settings = {
 hydrateAuth();
 loadSelectedTheme();
 // Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.hideAsync();
+SplashScreen.hide();
 export default function RootLayout() {
   const [appIsReady, setAppIsReady] = useState(false);
 
@@ -54,6 +54,7 @@ export default function RootLayout() {
           'BrownStd-Regular': require('../../assets/fonts/Brown-Font/BrownStd-Regular.otf'),
           'brownstd-Bold': require('../../assets/fonts/Brown-Font/brownstd-bold.ttf'),
           'biro-script': require('../../assets/fonts/Biro/Biro_Script_reduced.ttf'),
+          'georgia-regular': require('../../assets/fonts/Georgia/georgia.ttf'),
         });
       } catch (e) {
         console.warn('Font loading error:', e);
@@ -78,6 +79,14 @@ export default function RootLayout() {
         <Stack.Screen name="auth/login" options={{ headerShown: false }} />
         <Stack.Screen name="auth/verify-otp" options={{ headerShown: false }} />
         <Stack.Screen name="auth/signup" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="auth/forgot-password"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="auth/reset-password"
+          options={{ headerShown: false }}
+        />
         <Stack.Screen name="home" options={{ headerShown: false }} />
         <Stack.Screen
           name="auth/emaillogins"

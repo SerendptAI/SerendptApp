@@ -67,3 +67,20 @@ export type ExplainTermResponse = {
   actual_meaning: string;
   contextual_meaning: string;
 };
+
+export type AudioStreamVariables = {
+  batch_order: number;
+  documentId: string;
+  language: string;
+  speaker: string;
+};
+
+export type AudioStreamResponse = {
+  batch_order: number;
+  batch_title: string;
+  audio_base64: string;
+};
+
+export type GetAudioVoicesResponse = {
+  voices: [];
+};

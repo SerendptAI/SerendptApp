@@ -60,7 +60,6 @@ export default function Settings(): JSX.Element {
   });
 
   const onSubmit = (data: FormType) => {
-    console.log('Form data:', data);
     // Handle save changes
     dismiss();
     // Show success modal after a brief delay

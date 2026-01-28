@@ -17,7 +17,6 @@ import {
   View,
 } from '@/components/ui';
 
-import { AuthBack } from '../ui/icons/auth-back';
 import { Logo } from '../ui/icons/logo';
 
 const schema = z.object({
@@ -129,7 +128,11 @@ export const LoginForm = ({
                       Remember me
                     </Text>
                   </View>
-                  <TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => {
+                      router.replace('/auth/forgot-password');
+                    }}
+                  >
                     <Text className="font-brownstd text-sm text-[#424242]">
                       Forgot Password?
                     </Text>

@@ -24,6 +24,7 @@ module.exports = {
         brownstd: ['BrownStd-Regular'],
         'brownstd-bold': ['brownstd-Bold'],
         'biro-script': ['biro-script'],
+        'georgia-regular': ['georgia-regular'],
       },
       colors,
     },
