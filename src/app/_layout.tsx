@@ -19,18 +19,18 @@ import { hydrateAuth, loadSelectedTheme } from '@/lib';
 // import { usePermissions } from '@/lib/hooks/use-permissions';
 import { useThemeConfig } from '@/lib/use-theme-config';
 
-import { WhisperProvider } from './(app)/whisper-context';
-
 export { ErrorBoundary } from 'expo-router';
 
 export const unstable_settings = {
   initialRouteName: '(app)',
 };
 
+SplashScreen.hide();
+
 hydrateAuth();
 loadSelectedTheme();
 // Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.hide();
+
 export default function RootLayout() {
   const [appIsReady, setAppIsReady] = useState(false);
 
@@ -109,7 +109,7 @@ function Providers({ children }: { children: React.ReactNode }) {
         <ThemeProvider value={theme}>
           <APIProvider>
             <BottomSheetModalProvider>
-              <WhisperProvider>{children}</WhisperProvider>
+              {children}
               <FlashMessage position="top" />
             </BottomSheetModalProvider>
           </APIProvider>

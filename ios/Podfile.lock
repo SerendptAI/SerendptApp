@@ -1823,6 +1823,8 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
+  - react-native-voice (3.2.4):
+    - React-Core
   - React-NativeModulesApple (0.81.5):
     - hermes-engine
     - React-callinvoker
@@ -2612,6 +2614,7 @@ DEPENDENCIES:
   - "react-native-keyboard-controller (from `../node_modules/.pnpm/react-native-keyboard-controller@1.18.5_react-native-reanimated@4.2.1_react-native-worklets@0_ovoj3r7vqr6wrsglqh7myg6n7i/node_modules/react-native-keyboard-controller`)"
   - "react-native-restart (from `../node_modules/.pnpm/react-native-restart@0.0.27_react-native@0.81.5_@babel+core@7.26.0_@types+react@19.1.17_react@19.1.0__react@19.1.0/node_modules/react-native-restart`)"
   - "react-native-safe-area-context (from `../node_modules/.pnpm/react-native-safe-area-context@5.6.2_react-native@0.81.5_@babel+core@7.26.0_@types+react@19.1_ub3uci7apoa27eggqcbvofvqxa/node_modules/react-native-safe-area-context`)"
+  - "react-native-voice (from `../node_modules/.pnpm/@react-native-voice+voice@3.2.4_react-native@0.81.5_@babel+core@7.26.0_@types+react@19.1.17_react@19.1.0_/node_modules/@react-native-voice/voice`)"
   - "React-NativeModulesApple (from `../node_modules/.pnpm/react-native@0.81.5_@babel+core@7.26.0_@types+react@19.1.17_react@19.1.0/node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)"
   - "React-oscompat (from `../node_modules/.pnpm/react-native@0.81.5_@babel+core@7.26.0_@types+react@19.1.17_react@19.1.0/node_modules/react-native/ReactCommon/oscompat`)"
   - "React-perflogger (from `../node_modules/.pnpm/react-native@0.81.5_@babel+core@7.26.0_@types+react@19.1.17_react@19.1.0/node_modules/react-native/ReactCommon/reactperflogger`)"
@@ -2823,6 +2826,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/.pnpm/react-native-restart@0.0.27_react-native@0.81.5_@babel+core@7.26.0_@types+react@19.1.17_react@19.1.0__react@19.1.0/node_modules/react-native-restart"
   react-native-safe-area-context:
     :path: "../node_modules/.pnpm/react-native-safe-area-context@5.6.2_react-native@0.81.5_@babel+core@7.26.0_@types+react@19.1_ub3uci7apoa27eggqcbvofvqxa/node_modules/react-native-safe-area-context"
+  react-native-voice:
+    :path: "../node_modules/.pnpm/@react-native-voice+voice@3.2.4_react-native@0.81.5_@babel+core@7.26.0_@types+react@19.1.17_react@19.1.0_/node_modules/@react-native-voice/voice"
   React-NativeModulesApple:
     :path: "../node_modules/.pnpm/react-native@0.81.5_@babel+core@7.26.0_@types+react@19.1.17_react@19.1.0/node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios"
   React-oscompat:
@@ -2993,6 +2998,7 @@ SPEC CHECKSUMS:
   react-native-keyboard-controller: 5587bad7f102125e2020720c4e37e0b58ff5e52e
   react-native-restart: 7595693413fe3ca15893702f2c8306c62a708162
   react-native-safe-area-context: 53f796cb6c814661bbe99fbdfd0585d07b996cdd
+  react-native-voice: f5e8eec2278451d0017eb6a30a6ccc726aca34e0
   React-NativeModulesApple: 1664340b8750d64e0ef3907c5e53d9481f74bcbd
   React-oscompat: ce47230ed20185e91de62d8c6d139ae61763d09c
   React-perflogger: b1af3cfb3f095f819b2814910000392a8e17ba9f

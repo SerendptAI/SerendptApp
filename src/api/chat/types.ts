@@ -17,3 +17,10 @@ export type GetChatResponse = {
   user_email: string;
   messages: any[];
 };
+
+export type DeleteChatResponse = {
+  id: string;
+  document_id: string;
+  user_email: string;
+  message: any;
+};

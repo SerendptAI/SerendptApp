@@ -1,7 +1,14 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable max-params */
 /* eslint-disable max-lines-per-function */
+import Voice, {
+  type SpeechErrorEvent,
+  type SpeechResultsEvent,
+} from '@react-native-voice/voice';
+import { useQueryClient } from '@tanstack/react-query';
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system/legacy';
+import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { BookOpenIcon, VideoCameraIcon, XIcon } from 'phosphor-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -22,6 +29,9 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+//@ts-ignore
+import { type ChatResponse, useChat } from '@/api/chat';
+import { useDeleteChat, useGetChat } from '@/api/chat/use-get-chat';
 import {
   audioStream,
   explainTerm,
@@ -31,6 +41,7 @@ import {
 import { FloatingAudioControl } from '@/components/floating-audio-control';
 import { FloatingChatButton } from '@/components/floating-chat-button';
 import {
+  Button,
   FocusAwareStatusBar,
   SafeAreaView,
   Text,
@@ -42,7 +53,7 @@ import { CloseSmall } from '@/components/ui/icons/closesmall';
 import { Resize } from '@/components/ui/icons/resize';
 
 import { AudioPill } from '../../components/home/audio-pill';
-
+import { AIMessageCard, UserMessageCard } from './chats';
 interface WordTiming {
   word: string;
   start: number;
@@ -168,6 +179,7 @@ const HighlightedWord = React.memo(
 );
 
 export default function DocumentDetails() {
+  const queryClient = useQueryClient();
   const { title, documentId } = useLocalSearchParams<{
     title: string;
     documentId: string;
@@ -203,6 +215,18 @@ export default function DocumentDetails() {
   const totalPages = batchesContent?.length || 0;
   const currentPage = batchesContent?.[currentPageIndex];
 
+  const [showSelectVoiceModal, setShowSelectVoiceModal] = useState(false);
+  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+
+  const chatMutation = useChat();
+
+  const currentBatchOrderRef = useRef<number | null>(null);
+  const lastProcessedTextRef = useRef('');
+
+  useEffect(() => {
+    currentBatchOrderRef.current = currentPage?.batch_order ?? null;
+  }, [currentPageIndex, batchesContent]);
   useEffect(() => {
     if (audioVoices && audioVoices?.voices.length > 0) {
       const defaultVoice =
@@ -254,6 +278,18 @@ export default function DocumentDetails() {
   );
 
   const statusUpdateRef = useRef(handlePlaybackStatusUpdate);
+  const lastSpeechTimeRef = useRef(0);
+  const {
+    data,
+    isLoading: isLoadingChat,
+    refetch,
+  } = useGetChat({
+    variables: { document_id: documentId ?? '' },
+  });
+
+  const deleteChatMutation = useDeleteChat();
+
+  const messages = data?.messages ? [...data.messages].reverse() : [];
 
   // Update it whenever the function changes
   useEffect(() => {
@@ -379,6 +415,141 @@ export default function DocumentDetails() {
     }
   }, [generateAndPlay]);
 
+  const handleFinal = async (text: string) => {
+    const trimmedText = text?.trim();
+    if (!trimmedText) return;
+
+    const now = Date.now();
+    if (now - lastSpeechTimeRef.current < 2000) {
+      return;
+    }
+
+    if (
+      trimmedText === lastProcessedTextRef.current ||
+      chatMutation.isPending
+    ) {
+      return;
+    }
+
+    const batchOrder = currentBatchOrderRef.current;
+    if (!documentId || batchOrder == null) return;
+
+    lastProcessedTextRef.current = trimmedText;
+    lastSpeechTimeRef.current = now; // Lock the handler
+    setIsListening(false);
+
+    try {
+      const response = await chatMutation.mutateAsync({
+        document_id: documentId,
+        batch_order: batchOrder,
+        question: trimmedText,
+      });
+
+      if (response) {
+        setIsChatModalOpen(true);
+        refetch();
+        setTimeout(() => {
+          lastProcessedTextRef.current = '';
+        }, 3000);
+      }
+    } catch (error) {
+      console.error('Chat Error:', error);
+      lastProcessedTextRef.current = '';
+    }
+  };
+  const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    const setupAudio = async () => {
+      try {
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: true,
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: false,
+        });
+      } catch (e) {
+        console.error('Audio Setup Error:', e);
+      }
+    };
+
+    setupAudio();
+
+    // 2. Setup Voice Listeners
+    Voice.onSpeechStart = () => setIsListening(true);
+    Voice.onSpeechEnd = () => setIsListening(false);
+    Voice.onSpeechError = handleSpeechError;
+    Voice.onSpeechResults = handleSpeechResults;
+    Voice.onSpeechPartialResults = handlePartialResults;
+    Voice.onSpeechVolumeChanged = () => {
+      resetSilenceTimeout();
+    };
+
+    return () => {
+      Voice.destroy().then(Voice.removeAllListeners);
+      if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
+    };
+  }, []);
+
+  const handleSpeechError = (e: SpeechErrorEvent) => {
+    console.error('Speech Error:', e);
+    setIsListening(false);
+  };
+
+  const handlePartialResults = (e: SpeechResultsEvent) => {
+    const partialResult = e.value?.[0];
+    if (partialResult && partialResult.trim().length > 0) {
+    }
+  };
+
+  const handleSpeechResults = async (e: SpeechResultsEvent) => {
+    const finalResult = e.value?.[0];
+    if (finalResult && finalResult.trim().length > 0) {
+
+      handleFinal?.(finalResult);
+    }
+  };
+
+  const resetSilenceTimeout = () => {
+    if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
+    silenceTimeoutRef.current = setTimeout(() => {
+      if (isListening) stopListening();
+    }, 2500);
+  };
+
+  const startListening = async () => {
+    try {
+      // Stop document audio if it's playing
+      if (isPlaying) await stopAudio();
+
+      const isAlreadyRecognizing = await Voice.isRecognizing();
+      if (isAlreadyRecognizing) await Voice.stop();
+
+      // Reset internal state
+      lastProcessedTextRef.current = '';
+
+      await Voice.start('en-US');
+      setIsListening(true);
+    } catch (e) {
+      console.error('Start Voice Error:', e);
+    }
+  };
+
+  const stopListening = async () => {
+    try {
+      await Voice.stop();
+    } catch (e) {
+      console.error('Stop Voice Error:', e);
+    }
+  };
+
+  const toggleListeningAndProcessing = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  };
+
   return (
     <View className="flex-1 bg-white">
       <FocusAwareStatusBar hidden={isEnlarged} />
@@ -399,15 +570,17 @@ export default function DocumentDetails() {
               </Text>
             </TouchableOpacity>
             <AudioPill
-              documentId={documentId}
-              currentPage={currentPage}
-              setTranscription={() => {}}
-              transcription={''}
+              isChatModalOpen={isChatModalOpen}
+              isListening={isListening}
+              toggleListeningAndProcessing={toggleListeningAndProcessing}
+              setIsChatModalOpen={setIsChatModalOpen}
             />
           </View>
         )}
 
-        <View style={{ height: 2 }}>{isGeneratingAudio && <LoadingBar />}</View>
+        <View style={{ height: 2 }}>
+          {isGeneratingAudio || (isLoadingBatches && <LoadingBar />)}
+        </View>
 
         <View className="flex-row items-center justify-between bg-[#FCFCFC] px-6 py-3">
           <TouchableOpacity
@@ -520,6 +693,7 @@ export default function DocumentDetails() {
           isGeneratingAudio={isGeneratingAudio}
           onPlayPause={togglePlayPause}
           onStop={stopAudio}
+          setShowSelectVoiceModal={setShowSelectVoiceModal}
           selectedVoice={selectedVoice}
           audioVoices={audioVoices?.voices || []}
           setSelectedVoice={setSelectedVoice}
@@ -555,6 +729,36 @@ export default function DocumentDetails() {
         }}
         onClose={() => setIsChangePageNumberOpen(false)}
         batches={batchesContent}
+      />
+      <SelectVoiceModal
+        visible={showSelectVoiceModal}
+        selectedVoice={selectedVoice}
+        audioVoices={audioVoices?.voices || []}
+        setSelectedVoice={setSelectedVoice}
+        onClose={() => setShowSelectVoiceModal(false)}
+      />
+
+      <ChatModal
+        visible={isChatModalOpen && !isLoadingChat && messages.length > 0}
+        onClose={async () => {
+          try {
+            const response = await deleteChatMutation.mutateAsync({
+              document_id: documentId!,
+            });
+            if (response?.message) {
+              queryClient.invalidateQueries({
+                queryKey: ['get-chat', { document_id: documentId }],
+              });
+
+              setIsChatModalOpen(false);
+            }
+          } catch (error) {}
+        }}
+        messages={messages}
+        isloadingDeleteChat={deleteChatMutation.isPending}
+        isListening={isListening}
+        setIsListening={setIsListening}
+        toggleListeningAndProcessing={toggleListeningAndProcessing}
       />
     </View>
   );
@@ -729,7 +933,7 @@ function PageNavigationModal({
         onPress={onClose}
       >
         <View className="h-3/4 w-full rounded-t-3xl bg-white ">
-          <View className="flex-row items-center justify-between bg-[#F9FAFB]  p-4">
+          <View className="flex-row items-center justify-between rounded-t-3xl bg-[#F9FAFB]  p-4">
             <Text className="font-brownstd-bold text-[14px] text-black">
               Chapters
             </Text>
@@ -759,6 +963,143 @@ function PageNavigationModal({
   );
 }
 
+function SelectVoiceModal({
+  visible,
+  onClose,
+  audioVoices,
+  setSelectedVoice,
+  selectedVoice,
+}: any) {
+  return (
+    <Modal transparent visible={visible} animationType="fade">
+      <View className=" flex-1 justify-end bg-black/30">
+        <View className=" rounded-t-3xl bg-white">
+          <View className="flex-row items-center justify-between rounded-t-3xl bg-[#F9FAFB] p-4  ">
+            <Text className="font-brownstd-bold text-[14px] text-black">
+              Select Voice
+            </Text>
+
+            <TouchableOpacity activeOpacity={1} onPress={onClose}>
+              <CloseSmall />
+            </TouchableOpacity>
+          </View>
+
+          <View className="gap-y-3 p-4">
+            <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
+              {audioVoices?.map((voice: any) => (
+                <TouchableOpacity
+                  key={voice.name}
+                  activeOpacity={1}
+                  disabled={voice.disabled}
+                  onPress={() => {
+                    setSelectedVoice?.(voice);
+                    onClose();
+                  }}
+                  className={`mb-3 flex-row items-center rounded-2xl p-3 ${
+                    selectedVoice?.name?.toLowerCase() ===
+                    voice.name.toLowerCase()
+                      ? ' bg-[#F9FAFB]'
+                      : ''
+                  }`}
+                >
+                  <Image
+                    source={{
+                      uri: `https://api.serendptai.com${voice.image_url}`,
+                    }}
+                    className="mr-3 size-12 rounded-full"
+                  />
+                  <View className="flex-1">
+                    <Text className="font-brownstd-bold text-base text-black">
+                      {voice.name}
+                    </Text>
+                    <Text className="font-brownstd text-xs text-gray-500">
+                      {voice.tag}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+function ChatModal({
+  visible,
+  onClose,
+  messages,
+  isListening,
+  setIsChatModalOpen,
+  toggleListeningAndProcessing,
+  isloadingDeleteChat,
+  isChatModalOpen,
+}: any) {
+  return (
+    <Modal transparent visible={visible} animationType="fade">
+      <View className=" flex-1 bg-black/80  pt-[75px]">
+        <View className="mr-4 self-end pb-3">
+          <AudioPill
+            isChatModalOpen={isChatModalOpen}
+            isListening={isListening}
+            toggleListeningAndProcessing={toggleListeningAndProcessing}
+            setIsChatModalOpen={setIsChatModalOpen}
+          />
+        </View>
+        <ScrollView
+          className=" px-4"
+          contentContainerClassName="mt-[45px] pb-28"
+          showsVerticalScrollIndicator={false}
+        >
+          {messages?.length > 0 ? (
+            messages
+              .slice()
+              .reverse()
+              .map((item: any, index: number) =>
+                item.role === 'ai' ? (
+                  <AIMessageCard
+                    key={index}
+                    text={item.content}
+                    time={item.timestamp}
+                  />
+                ) : (
+                  <UserMessageCard
+                    key={index}
+                    text={item.content}
+                    time={item.timestamp}
+                  />
+                )
+              )
+          ) : (
+            <View className="flex-1 items-center justify-center">
+              <Image
+                source={require('../../../assets/emptymessage.png')}
+                style={{ height: 246, width: 246 }}
+              />
+              <Text className="mt-10 text-center font-brownstd text-[16px]">
+                No messages yet
+              </Text>
+            </View>
+          )}
+        </ScrollView>
+
+        <View className="items-center justify-center">
+          <Button
+            label="Clear all messages"
+            size="lg"
+            disabled={isloadingDeleteChat}
+            loading={isloadingDeleteChat}
+            onPress={onClose}
+            className="mb-6 w-[182px] rounded-[22px] bg-[#FFCC00]"
+            textClassName="text-[14px] font-brownstd text-[#000]"
+          />
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
 const markdownStyles = StyleSheet.create({
   body: {
     fontSize: 18,
@@ -767,6 +1108,6 @@ const markdownStyles = StyleSheet.create({
     lineHeight: 28,
   },
   paragraph: { marginBottom: 16 },
-  heading1: { fontSize: 24, fontWeight: 'bold', marginBottom: 12 },
+  heading1: { fontSize: 24, fontFamily: 'bold', marginBottom: 12 },
   heading2: { fontSize: 20, fontWeight: 'bold', marginBottom: 8 },
 });

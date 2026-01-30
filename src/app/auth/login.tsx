@@ -47,12 +47,6 @@ export default function Login() {
         }
       );
 
-      showMessage({
-        message: 'Login Successful',
-        description: 'Welcome back!',
-        type: 'success',
-        duration: 3000,
-      });
 
       router.replace('/home');
     } catch (error) {

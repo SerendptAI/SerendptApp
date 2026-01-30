@@ -50,18 +50,6 @@ export default function Verifyotp() {
         }
       );
 
-      showMessage({
-        message: 'Success',
-        description:
-          flow === 'email-login'
-            ? 'Login successful!'
-            : flow === 'forgot-password'
-              ? 'Password reset successful!'
-              : 'Email verified successfully!',
-        type: 'success',
-        duration: 3000,
-      });
-
       if (flow === 'email-login') {
         router.replace('/');
       } else if (flow === 'forgot-password') {

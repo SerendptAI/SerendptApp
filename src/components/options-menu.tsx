@@ -11,7 +11,6 @@ type Props = {
   onEdit: () => void;
   onDelete: () => void;
   isDeleting?: boolean;
-  position: { x: number; y: number };
 };
 
 export function OptionsMenu({
@@ -20,7 +19,6 @@ export function OptionsMenu({
   onEdit,
   onDelete,
   isDeleting = false,
-  position,
 }: Props) {
   return (
     <Modal
@@ -31,17 +29,14 @@ export function OptionsMenu({
     >
       <TouchableOpacity
         activeOpacity={1}
-        className=" flex-1 "
+        className=" flex-1  "
         onPress={() => {
           if (isDeleting) return;
           onClose();
         }}
       >
-        <View
-          className="px-1"
-          style={{ position: 'absolute', top: position.y, left: position.x }}
-        >
-          <View className="w-[210px] rounded-3xl border border-[#00000033] bg-white p-6">
+        <View className="flex-1 items-center justify-center bg-black/50 px-1">
+          <View className=" w-[96%] rounded-3xl border border-[#00000033] bg-white p-6">
             <TouchableOpacity
               className="mb-5 flex-row items-center"
               onPress={onEdit}

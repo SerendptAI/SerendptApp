@@ -115,6 +115,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ['app-icon-badge', appIconBadgeConfig],
     ['react-native-edge-to-edge'],
     ['@react-native-community/datetimepicker'],
+    [
+      '@react-native-voice/voice',
+      {
+        microphonePermission:
+          'CUSTOM: Allow Serendptai to access the microphone',
+        speechRecognitionPermission:
+          'CUSTOM: Allow Serendptai to securely recognize user speech',
+      },
+    ],
     'expo-document-picker',
   ],
   extra: {

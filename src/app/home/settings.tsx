@@ -100,14 +100,14 @@ export default function Settings(): JSX.Element {
 
   return (
     <View className="flex-1 bg-white">
-      <FocusAwareStatusBar color="#FFFBEB" />
+      <FocusAwareStatusBar />
       <SafeAreaView className="flex-1">
         <ScrollView
           className="flex-1"
           contentContainerStyle={{ flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
         >
-          <View className="bg-[#FFFBEB] px-6 py-4">
+          <View className="bg-[#FFF7D7] px-6 py-4">
             <View className="mb-6 flex-row items-center">
               <TouchableOpacity onPress={() => router.back()} className="pr-2">
                 <Back />
@@ -173,8 +173,8 @@ export default function Settings(): JSX.Element {
 
             <Button
               label="Logout"
-              className="rounded-2xl bg-red-500 py-4"
-              textClassName="text-white font-brownstd text-lg"
+              className="rounded-2xl bg-[#F1F1F1] py-4"
+              textClassName="text-black font-brownstd text-lg"
               onPress={() => setShowLogoutModal(true)}
             />
           </View>
@@ -191,7 +191,7 @@ export default function Settings(): JSX.Element {
 
       <Modal transparent visible={showLogoutModal} animationType="fade">
         <View className="flex-1 items-center justify-center bg-black/60">
-          <View className="h-[439px] items-center justify-center rounded-[24px] border border-dashed bg-white px-8 ">
+          <View className="h-[439px] w-[95%] items-center justify-center rounded-[24px] border border-dashed bg-white px-8 ">
             <Pressable
               className="absolute right-4 top-4"
               onPress={() => setShowLogoutModal(false)}
@@ -205,7 +205,7 @@ export default function Settings(): JSX.Element {
             <View className="w-full">
               <Button
                 label="Yes, log me out "
-                className="mb-4 w-[259px] rounded-2xl bg-[#FFCC00] py-4"
+                className="mb-4 rounded-2xl bg-[#FFCC00] py-4"
                 textClassName="text-black font-brownstd text-base"
                 onPress={() => {
                   signOut();
@@ -213,7 +213,7 @@ export default function Settings(): JSX.Element {
               />
               <Button
                 label="Continue reading"
-                className=" w-[259px] items-center justify-center rounded-2xl bg-[#F1F1F1] py-4"
+                className=" items-center justify-center rounded-2xl bg-[#F1F1F1] py-4"
                 textClassName="text-black font-brownstd text-base text-center"
                 onPress={() => {
                   setShowLogoutModal(false);

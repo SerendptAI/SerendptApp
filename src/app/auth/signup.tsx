@@ -1,13 +1,11 @@
 import { useRouter } from 'expo-router';
 import React from 'react';
 
+import { useSignup } from '@/api/auth/auth';
 import type { SignupFormProps } from '@/components/auth/signup-form';
 import { SignupForm } from '@/components/auth/signup-form';
 import { FocusAwareStatusBar, showError } from '@/components/ui';
-import { signIn, useAuth } from '@/lib';
-import { useSignup } from '@/api/auth/auth';
-import { AuthResponse } from '@/api/auth/types';
-import { showMessage } from 'react-native-flash-message';
+import { useAuth } from '@/lib';
 
 export default function Signup() {
   const router = useRouter();
@@ -23,12 +21,15 @@ export default function Signup() {
         password: data.password,
       });
 
-      showMessage({
-        message: 'Signup Successful',
-        description: response.message,
-        type: 'success',
-        duration: 3000,
-      });
+      signUp(
+        {
+          access: response.access_token,
+          refresh: response.refresh_token,
+        },
+        {
+          email: response.email,
+        }
+      );
 
       router.replace(
         `/auth/verify-otp?email=${encodeURIComponent(response.email)}&flow=signup`

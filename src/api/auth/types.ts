@@ -44,6 +44,10 @@ export type GoogleLoginRequest = {
 export type SignupResponse = {
   message: string;
   email: string;
+  access_token: string;
+  refresh_token: string;
+  token_type: 'bearer';
+  otp_required?: boolean;
 };
 export type ResendOtpRequest = {
   email: string;

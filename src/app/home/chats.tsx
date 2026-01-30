@@ -1,9 +1,13 @@
 /* eslint-disable max-lines-per-function */
+import Voice, {
+  type SpeechErrorEvent,
+  type SpeechResultsEvent,
+} from '@react-native-voice/voice';
 import { Audio } from 'expo-av';
+import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator } from 'react-native'; // Import ActivityIndicator
-import { Modal } from 'react-native';
+// Import ActivityIndicator
 import Animated, {
   interpolate,
   useAnimatedStyle,
@@ -13,9 +17,8 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-//@ts-ignore
-import { initWhisper } from 'whisper.rn';
 
+//@ts-ignore
 import { type ChatResponse, useChat } from '@/api/chat';
 import { useGetChat } from '@/api/chat/use-get-chat';
 import {
@@ -27,7 +30,6 @@ import {
   View,
 } from '@/components/ui';
 import { Back } from '@/components/ui/icons/back';
-import { Mic } from '@/components/ui/icons/mic';
 import { Mics } from '@/components/ui/icons/mics';
 
 const formatMessageTime = (dateString: string) => {
@@ -42,9 +44,15 @@ const formatMessageTime = (dateString: string) => {
   }).format(date);
 };
 
-const AIMessageCard = ({ text, time }: { text: string; time: string }) => {
+export const AIMessageCard = ({
+  text,
+  time,
+}: {
+  text: string;
+  time: string;
+}) => {
   return (
-    <View className="mb-5 rounded-2xl border-[0.5px] border-gray-200 bg-white p-5">
+    <View className="mb-5 w-[95%] rounded-2xl border-[0.5px] border-gray-200 bg-white p-5">
       <View className="mb-3">
         <View className="self-start rounded-full bg-[#FDF4CF] p-2 px-3">
           <Text className="text-[11px] font-bold text-[#1A1A1A]">AI</Text>
@@ -60,9 +68,15 @@ const AIMessageCard = ({ text, time }: { text: string; time: string }) => {
   );
 };
 
-const UserMessageCard = ({ text, time }: { text: string; time: string }) => {
+export const UserMessageCard = ({
+  text,
+  time,
+}: {
+  text: string;
+  time: string;
+}) => {
   return (
-    <View className="mb-5 rounded-2xl bg-[#FFFBEB] p-5">
+    <View className="mb-5 w-4/5 self-end rounded-2xl bg-[#FFFBEB] p-5">
       <View className="mb-3">
         <View className="self-start rounded-full bg-[#F3F4F6] p-2 px-3">
           <Text className="text-[11px] font-bold text-[#1A1A1A]">You</Text>
@@ -105,6 +119,7 @@ const SkeletonLine = ({
     <Animated.View
       style={[
         animatedStyle,
+        //@ts-ignore
         {
           width,
           height,
@@ -122,7 +137,7 @@ const ChatSkeleton = () => (
     {/* AI Message Skeleton */}
     <View className="mb-5 rounded-2xl border-[0.5px] border-gray-200 bg-white p-5">
       <SkeletonLine
-        width={40}
+        width={'40%'}
         height={22}
         borderRadius={100}
         marginBottom={12}
@@ -135,7 +150,7 @@ const ChatSkeleton = () => (
     {/* User Message Skeleton */}
     <View className="mb-5 rounded-2xl bg-[#FFFBEB] p-5">
       <SkeletonLine
-        width={40}
+        width={'40%'}
         height={22}
         borderRadius={100}
         marginBottom={12}
@@ -147,7 +162,7 @@ const ChatSkeleton = () => (
     {/* AI Message Skeleton */}
     <View className="mb-5 rounded-2xl border-[0.5px] border-gray-200 bg-white p-5">
       <SkeletonLine
-        width={40}
+        width={'40%'}
         height={22}
         borderRadius={100}
         marginBottom={12}
@@ -164,13 +179,9 @@ export default function Chats() {
     batchOrder: string;
   }>();
 
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [isListening, setIsListening] = useState(false);
-  const [whisperContext, setWhisperContext] = useState<any>(null);
-  const [transcription, setTranscription] = useState('');
 
   const volumeLevel = useSharedValue(1);
-  const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const chatMutation = useChat();
 
@@ -180,160 +191,109 @@ export default function Chats() {
 
   const messages = data?.messages ? [...data.messages].reverse() : [];
 
+  const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
-    const setup = async () => {
+    const setupAudio = async () => {
       try {
-        await Audio.requestPermissionsAsync();
-        const context = await initWhisper({
-          filePath: require('../../../assets/models/whisper-tiny.bin'),
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: true,
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: false,
         });
-        setWhisperContext(context);
       } catch (e) {
-        console.error('Whisper init failed:', e);
+        console.error('Audio Setup Error:', e);
       }
     };
-    setup();
+
+    setupAudio();
+
+    // 2. Setup Voice Listeners
+    Voice.onSpeechStart = () => setIsListening(true);
+    Voice.onSpeechEnd = () => setIsListening(false);
+    Voice.onSpeechError = handleSpeechError;
+    Voice.onSpeechResults = handleSpeechResults;
+    Voice.onSpeechPartialResults = handlePartialResults;
+    Voice.onSpeechVolumeChanged = (e: any) => {
+      const normalized = interpolate(e.value, [0, 10], [1, 2.2], 'clamp');
+      volumeLevel.value = withSpring(normalized);
+      resetSilenceTimeout();
+    };
+
+    return () => {
+      Voice.destroy().then(Voice.removeAllListeners);
+      if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
+    };
   }, []);
 
-  async function startRecording() {
-    if (!whisperContext) return;
+  const handleSpeechError = (e: SpeechErrorEvent) => {
+    console.error('Speech Error:', e);
+    setIsListening(false);
+  };
 
-    try {
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: false,
-        shouldDuckAndroid: true,
+  const handlePartialResults = (e: SpeechResultsEvent) => {
+    const partialResult = e.value?.[0];
+    if (partialResult && partialResult.trim().length > 0) {
+    }
+  };
+
+  const handleSpeechResults = async (e: SpeechResultsEvent) => {
+    const finalResult = e.value?.[0];
+    if (finalResult && finalResult.trim().length > 0) {
+      console.log('Final Speech Result:', finalResult);
+
+      const response: ChatResponse = await chatMutation.mutateAsync({
+        document_id: documentId,
+        batch_order: Number(batchOrder),
+        question: finalResult,
       });
 
-      // Reset values
-      volumeLevel.value = withRepeat(
-        withSequence(
-          withTiming(1.1, { duration: 500 }),
-          withTiming(1, { duration: 500 })
-        ),
-        -1,
-        true
-      );
-
-      setIsListening(true);
-      setTranscription('');
-
-      const recordingOptions: any = {
-        isMeteringEnabled: true, // CRITICAL: This enables the status.metering values
-        android: {
-          extension: '.wav',
-          outputFormat: Audio.AndroidOutputFormat.MPEG_4,
-          audioEncoder: Audio.AndroidAudioEncoder.AAC,
-          sampleRate: 16000,
-          numberOfChannels: 1,
-          bitRate: 128000,
-        },
-        ios: {
-          extension: '.wav',
-          audioQuality: Audio.IOSAudioQuality.HIGH,
-          sampleRate: 16000,
-          numberOfChannels: 1,
-          bitRate: 128000,
-          linearPCMBitDepth: 16,
-          linearPCMIsBigEndian: false,
-          linearPCMIsFloat: false,
-        },
-      };
-
-      const { recording: newRecording } = await Audio.Recording.createAsync(
-        recordingOptions,
-        (status) => {
-          // status.metering will now be populated because isMeteringEnabled is true
-          if (status.metering !== undefined && status.metering > -160) {
-            const normalized = interpolate(
-              status.metering,
-              [-50, -10], // Silence to Loud range
-              [1, 2.5],
-              'clamp'
-            );
-
-            volumeLevel.value = withSpring(normalized, {
-              damping: 12,
-              stiffness: 120,
-            });
-
-            if (status.metering > -35) resetSilenceTimeout();
-          }
-        },
-        100
-      );
-
-      setRecording(newRecording);
-      resetSilenceTimeout();
-    } catch (err) {
-      console.error('Failed to start recording:', err);
-      setIsListening(false);
-    }
-  }
-
-  async function stopRecording() {
-    if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
-    if (!recording) return;
-
-    setIsListening(false);
-    volumeLevel.value = withTiming(1);
-    setTranscription('Processing...');
-
-    try {
-      const status = await recording.getStatusAsync();
-      if (status.canRecord) {
-        await recording.stopAndUnloadAsync();
-        const uri = recording.getURI();
-
-        if (uri && whisperContext) {
-          const filePath = uri.replace('file://', '');
-          const { promise } = whisperContext.transcribe(filePath, {
-            language: 'en',
-          });
-
-          const result = await promise;
-          const finalResult = result?.result?.trim() || 'No speech detected';
-          if (finalResult && finalResult !== 'No speech detected') {
-            setTranscription(finalResult);
-            // CALL MUTATION HERE directly using finalResult
-            const response: ChatResponse = await chatMutation.mutateAsync({
-              document_id: documentId || '',
-              batch_order: Number(batchOrder),
-              question: finalResult,
-            });
-
-            // Optional: clear text after some time
-            setTimeout(() => setTranscription(''), 5000);
-            if (response) {
-              await refetch();
-            }
-          } else {
-            setTranscription('No speech detected');
-          }
-        }
+      if (response) {
+        setIsListening(false);
+        refetch();
       }
-    } catch (error) {
-      console.error('Transcription error:', error);
-      setTranscription('Error transcribing');
-      setTimeout(() => setTranscription(''), 3000);
-    } finally {
-      setRecording(null);
     }
-  }
+  };
 
   const resetSilenceTimeout = () => {
     if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
     //@ts-ignore
     silenceTimeoutRef.current = setTimeout(() => {
-      stopRecording();
+      if (isListening) stopListening();
     }, 2500);
   };
 
-  const pulseStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: volumeLevel.value }],
-    opacity: interpolate(volumeLevel.value, [1, 2.5], [0.3, 0.8]),
-  }));
+  const startListening = async () => {
+    try {
+      const isAlreadyRecognizing = await Voice.isRecognizing();
+      if (isAlreadyRecognizing) {
+        return;
+      }
+
+      await Voice.destroy();
+      await Voice.start('en-US');
+      setIsListening(true);
+    } catch (e) {
+      console.error('Start Voice Error:', e);
+    }
+  };
+
+  const stopListening = async () => {
+    try {
+      await Voice.stop();
+      volumeLevel.value = withTiming(1);
+    } catch (e) {
+      console.error('Stop Voice Error:', e);
+    }
+  };
+
+  const toggleListeningAndProcessing = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  };
 
   return (
     <View className="flex-1 bg-white">
@@ -363,20 +323,35 @@ export default function Chats() {
             contentContainerClassName="pt-3 pb-28"
             showsVerticalScrollIndicator={false}
           >
-            {messages.map((item, index) =>
-              item.role === 'ai' ? (
-                <AIMessageCard
-                  key={index}
-                  text={item.content}
-                  time={item.timestamp}
+            {messages?.length > 0 ? (
+              messages
+                .slice()
+                .reverse()
+                .map((item: any, index: number) =>
+                  item.role === 'ai' ? (
+                    <AIMessageCard
+                      key={index}
+                      text={item.content}
+                      time={item.timestamp}
+                    />
+                  ) : (
+                    <UserMessageCard
+                      key={index}
+                      text={item.content}
+                      time={item.timestamp}
+                    />
+                  )
+                )
+            ) : (
+              <View className="flex-1 items-center justify-center">
+                <Image
+                  source={require('../../../assets/emptymessage.png')}
+                  style={{ height: 246, width: 246 }}
                 />
-              ) : (
-                <UserMessageCard
-                  key={index}
-                  text={item.content}
-                  time={item.timestamp}
-                />
-              )
+                <Text className="mt-10 text-center font-brownstd text-[16px]">
+                  No messages yet
+                </Text>
+              </View>
             )}
           </ScrollView>
         )}
@@ -385,43 +360,16 @@ export default function Chats() {
         <View className="absolute inset-x-0 bottom-10 z-50 px-10">
           <TouchableOpacity
             activeOpacity={1}
-            onPress={startRecording}
+            onPress={toggleListeningAndProcessing}
             className="flex-row items-center justify-center gap-3 rounded-full border border-[#FDF4CF] bg-[#FFFBEB] py-8 shadow-sm"
           >
             <Mics />
             <Text className="font-brownstd text-base text-black">
-              {transcription ||
-                (whisperContext ? 'Tap to talk' : 'Loading Whisper model...')}
+              {isListening ? 'Listening...' : 'Click to talk'}
             </Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
-      <Modal transparent visible={isListening} animationType="fade">
-        <View className="flex-1 items-center justify-center bg-black/60">
-          <Animated.View
-            style={pulseStyle}
-            className="size-60 rounded-full bg-yellow-400/40"
-          />
-
-          <View className="absolute items-center gap-6">
-            <View className="flex-row items-center gap-3 rounded-full bg-[#FDF4CF] px-6 py-4 shadow-xl">
-              <Mic className="text-black" />
-              <Text className="font-brownstd text-xl font-bold text-black">
-                Listening...
-              </Text>
-            </View>
-            <TouchableOpacity
-              activeOpacity={1}
-              onPress={stopRecording}
-              className="rounded-full border border-white/30 bg-white/20 px-8 py-3"
-            >
-              <Text className="font-brownstd font-semibold text-white">
-                Tap to finish
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }

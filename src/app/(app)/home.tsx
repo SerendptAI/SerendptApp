@@ -117,7 +117,6 @@ export default function Home() {
     }
   };
 
-  const [menuPosition, setMenuPosition] = React.useState({ x: 0, y: 0 });
   const iconRef = useRef<any>(null);
   const renderDocumentItem = ({ item }: { item: Document }) => {
     const progress = calculateProgress(item.last_read_position);
@@ -163,17 +162,8 @@ export default function Home() {
               ref={iconRef}
               onPress={(e: GestureResponderEvent) => {
                 e.stopPropagation();
-                // Measure the specific element that was pressed
-                const target = e.currentTarget;
-                target.measureInWindow((x, y, width, height) => {
-                  // position: x - 200 (menu width) + width (align to right edge of icon)
-                  setMenuPosition({
-                    x: x - 180,
-                    y: y + height + 5, // 5px gap below icon
-                  });
-                  setSelectedDocId(item.document_id);
-                  setIsOptionsOpen(true);
-                });
+                setSelectedDocId(item.document_id);
+                setIsOptionsOpen(true);
               }}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
@@ -301,7 +291,6 @@ export default function Home() {
       </SafeAreaView>
       <OptionsMenu
         visible={isOptionsOpen}
-        position={menuPosition}
         onClose={() => setIsOptionsOpen(false)}
         isDeleting={isDeleting}
         onEdit={() => {
@@ -341,53 +330,47 @@ export default function Home() {
           className="flex-1 bg-transparent"
           onPress={() => setIsRenameOpen(false)}
         >
-          <View className="flex-1 items-center justify-center px-6">
-            <View className="w-full rounded-3xl bg-white p-6">
-              <Text className="mb-4 font-brownstd text-[16px] text-black">
-                Edit name
-              </Text>
-              <Input
-                placeholder="Enter new name"
-                value={newTitle}
-                onChangeText={setNewTitle}
-                inputContainerClassName="mb-4"
-              />
-              <View className="flex-row justify-end gap-3">
-                <Button
-                  label="Cancel"
-                  className="rounded-xl bg-gray-200 px-4 py-3"
-                  textClassName="text-black font-brownstd"
-                  onPress={() => setIsRenameOpen(false)}
+          <View className="flex-1 items-center justify-center bg-black/50 px-1">
+            <View className="w-[96%] rounded-3xl bg-white p-6">
+              <View className="relative">
+                <Input
+                  placeholder="Enter new name"
+                  value={newTitle}
+                  onChangeText={setNewTitle}
+                  inputContainerClassName=" border-[#424242]"
                 />
-                <Button
-                  label={isEditing ? 'Saving…' : 'Save'}
-                  className="rounded-xl bg-black px-4 py-3"
-                  textClassName="text-white font-brownstd"
-                  onPress={() => {
-                    if (!selectedDocId || !newTitle.trim() || isEditing) return;
-                    editDocumentMutation(
-                      {
-                        documentId: selectedDocId,
-                        documentTitle: newTitle.trim(),
-                      },
-                      {
-                        onSuccess: () => {
-                          setIsRenameOpen(false);
-                          setNewTitle('');
-                          showMessage({
-                            message: 'Name updated',
-                            type: 'success',
-                          });
-                          refetch();
+                <View className="absolute right-3 top-3">
+                  <Button
+                    label={isEditing ? 'Saving…' : 'Rename doc'}
+                    className="h-[23px] w-[100px] rounded-[5px] bg-[#FFCC00] px-5 py-1"
+                    textClassName="text-black text-[10px] font-brownstd"
+                    onPress={() => {
+                      if (!selectedDocId || !newTitle.trim() || isEditing)
+                        return;
+                      editDocumentMutation(
+                        {
+                          documentId: selectedDocId,
+                          documentTitle: newTitle.trim(),
                         },
-                        onError: (error) => {
-                          showError(error as any);
-                        },
-                      }
-                    );
-                  }}
-                  disabled={isEditing}
-                />
+                        {
+                          onSuccess: () => {
+                            setIsRenameOpen(false);
+                            setNewTitle('');
+                            showMessage({
+                              message: 'Name updated',
+                              type: 'success',
+                            });
+                            refetch();
+                          },
+                          onError: (error) => {
+                            showError(error as any);
+                          },
+                        }
+                      );
+                    }}
+                    disabled={isEditing}
+                  />
+                </View>
               </View>
             </View>
           </View>

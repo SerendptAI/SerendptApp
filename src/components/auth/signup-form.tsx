@@ -4,20 +4,19 @@ import { router } from 'expo-router';
 import React from 'react';
 import type { SubmitHandler } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
-import { ImageBackground } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { ImageBackground, ScrollView } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import * as z from 'zod';
 
 import {
   Button,
-  Checkbox,
   ControlledInput,
   Text,
   TouchableOpacity,
   View,
 } from '@/components/ui';
 
-import { AuthBack } from '../ui/icons/auth-back';
+// import { AuthBack } from '../ui/icons/auth-back';
 import { Logo } from '../ui/icons/logo';
 
 const schema = z.object({
@@ -53,7 +52,7 @@ export const SignupForm = ({
   onSubmit = () => {},
   loading = false,
 }: SignupFormProps) => {
-  const { handleSubmit, control, watch, setValue } = useForm<FormType>({
+  const { handleSubmit, control } = useForm<FormType>({
     resolver: zodResolver(schema),
     defaultValues: {
       full_name: '',
@@ -63,136 +62,116 @@ export const SignupForm = ({
     },
   });
 
-  const rememberMe = watch('rememberMe');
   return (
-    <ImageBackground
-      source={require('/assets/bgimg.png')}
-      resizeMode="cover"
+    <ScrollView
+      contentContainerStyle={{ flexGrow: 1, paddingBottom: 150 }}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
       className="flex-1"
     >
-      <View className="flex-1">
-        <View className="h-8" />
-        <View className="flex-row items-center justify-between px-6 py-4">
-          {/* <TouchableOpacity onPress={() => router.replace('/onboarding')}>
+      <ImageBackground
+        source={require('/assets/bgimg.png')}
+        resizeMode="cover"
+        className="flex-1"
+      >
+        <View className="flex-1">
+          <View className="h-8" />
+          <View className="flex-row items-center justify-between px-6 py-4">
+            {/* <TouchableOpacity onPress={() => router.replace('/onboarding')}>
             <AuthBack />
           </TouchableOpacity> */}
-        </View>
-        <View className="mt-10 items-center px-5 py-4">
-          <Logo />
-        </View>
-        <View className="flex-1 justify-end">
-          <View
-            className="w-full rounded-t-3xl bg-white px-6 py-8"
-            style={{ height: '80%' }}
-          >
-            <KeyboardAwareScrollView
-              bottomOffset={62}
-              contentContainerStyle={{ flexGrow: 1 }}
-              keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator={false}
+          </View>
+          <View className="mt-10 items-center px-5 py-4">
+            <Logo />
+          </View>
+          <View className="flex-1 justify-end">
+            <View
+              className="w-full rounded-t-3xl bg-white px-6 py-8"
+              style={{ height: '80%' }}
             >
-              {/* Header Text */}
-              <View className="mb-8">
-                <Text className="font-brownstd text-[12px] uppercase tracking-wider text-black">
-                  GET STARTED
-                </Text>
-                <Text className="mt-2 font-garamond-medium text-[25px] text-black">
-                  Create your Account
-                </Text>
-              </View>
-
-              {/* Form Fields */}
-              <View className="w-full gap-y-4">
-                <View className="w-full">
-                  <ControlledInput
-                    name="full_name"
-                    control={control}
-                    label="Full Name"
-                    placeholder="John Doe"
-                    keyboardType="default"
-                  />
-                </View>
-                <View className="w-full">
-                  <ControlledInput
-                    name="email"
-                    control={control}
-                    label="Email"
-                    placeholder="johnsondoe@nomail.com"
-                    keyboardType="email-address"
-                  />
-                </View>
-                <View className="w-full">
-                  <ControlledInput
-                    name="password"
-                    control={control}
-                    label="Password"
-                    placeholder="Enter your password"
-                    isPassword={true}
-                  />
-                </View>
-                <View className="w-full">
-                  <ControlledInput
-                    name="confirm_password"
-                    control={control}
-                    label="Repear Password"
-                    placeholder="Enter your password"
-                    isPassword={true}
-                  />
+              <KeyboardAvoidingView>
+                {/* Header Text */}
+                <View className="mb-8">
+                  <Text className="font-brownstd text-[12px] uppercase tracking-wider text-black">
+                    GET STARTED
+                  </Text>
+                  <Text className="mt-2 font-garamond-medium text-[25px] text-black">
+                    Create your Account
+                  </Text>
                 </View>
 
-                {/* Remember Me and Forgot Password */}
-                <View className="flex-row items-center justify-between">
-                  <View className="flex-row items-center">
-                    <Checkbox
-                      checked={rememberMe}
-                      onChange={(checked: boolean) =>
-                        setValue('rememberMe', checked)
-                      }
-                      accessibilityLabel="Remember me"
+                {/* Form Fields */}
+                <View className="w-full gap-y-4">
+                  <View className="w-full">
+                    <ControlledInput
+                      name="full_name"
+                      control={control}
+                      label="Full Name"
+                      placeholder="John Doe"
+                      keyboardType="default"
                     />
-                    <Text className="ml-2 font-brownstd text-sm text-[#424242]">
-                      Remember me
-                    </Text>
                   </View>
-                  <TouchableOpacity>
-                    <Text className="font-brownstd text-sm text-[#424242]">
-                      Forgot Password?
+                  <View className="w-full">
+                    <ControlledInput
+                      name="email"
+                      control={control}
+                      label="Email"
+                      placeholder="johnsondoe@nomail.com"
+                      keyboardType="email-address"
+                    />
+                  </View>
+                  <View className="w-full">
+                    <ControlledInput
+                      name="password"
+                      control={control}
+                      label="Password"
+                      placeholder="Enter your password"
+                      isPassword={true}
+                    />
+                  </View>
+                  <View className="w-full">
+                    <ControlledInput
+                      name="confirm_password"
+                      control={control}
+                      label="Repear Password"
+                      placeholder="Enter your password"
+                      isPassword={true}
+                    />
+                  </View>
+
+                  {/* Continue Button */}
+                  <View className="mt-6">
+                    <Button
+                      label="CONTINUE"
+                      size="lg"
+                      onPress={handleSubmit(onSubmit)}
+                      textClassName="text-sm font-brownstd-bold uppercase"
+                      className="rounded-[8px] bg-[#212121]"
+                      loading={loading}
+                    />
+                  </View>
+                </View>
+
+                {/* Sign Up Link */}
+                <View className="mt-4 items-center">
+                  <TouchableOpacity
+                    onPress={() => {
+                      router.replace('/auth/login');
+                    }}
+                  >
+                    <Text className="font-brownstd text-[12px] text-[#424242] ">
+                      Don't have an account?{' '}
+                      <Text className=" font-brownstd text-[12px] text-[#FFCC00]">
+                        Login
+                      </Text>
                     </Text>
                   </TouchableOpacity>
                 </View>
-
-                {/* Continue Button */}
-                <View className="mt-6">
-                  <Button
-                    label="CONTINUE"
-                    size="lg"
-                    onPress={handleSubmit(onSubmit)}
-                    textClassName="text-sm font-brownstd-bold uppercase"
-                    className="rounded-[8px] bg-[#212121]"
-                    loading={loading}
-                  />
-                </View>
-              </View>
-
-              {/* Sign Up Link */}
-              <View className="mt-4 items-center">
-                <TouchableOpacity
-                  onPress={() => {
-                    router.replace('/auth/login');
-                  }}
-                >
-                  <Text className="font-brownstd text-[12px] text-[#424242] ">
-                    Don't have an account?{' '}
-                    <Text className=" font-brownstd text-[12px] text-[#424242]">
-                      Login
-                    </Text>
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </KeyboardAwareScrollView>
+              </KeyboardAvoidingView>
+            </View>
           </View>
         </View>
-      </View>
-    </ImageBackground>
+      </ImageBackground>
+    </ScrollView>
   );
 };
