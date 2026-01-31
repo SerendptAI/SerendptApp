@@ -1,29 +1,30 @@
-import React from 'react';
+/* eslint-disable max-lines-per-function */
 import { router } from 'expo-router';
+import React from 'react';
+
 import {
-  FocusAwareStatusBar,
-  Text,
-  View,
-  TouchableOpacity,
   Button,
+  FocusAwareStatusBar,
   Image,
-  ScrollView,
   SafeAreaView,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from '@/components/ui';
-import { Back } from '@/components/ui/icons/back';
-import { Close } from '@/components/ui/icons/close';
 import { Check } from '@/components/ui/icons/check';
+import { Close } from '@/components/ui/icons/close';
 import { Uncheck } from '@/components/ui/icons/uncheck';
 
 type Plan = {
   id: string;
   name: string;
   price: string;
-  features: Array<{
+  features: {
     text: string;
     included: boolean;
     comingSoon?: boolean;
-  }>;
+  }[];
   buttonText: string;
   buttonStyle: 'current' | 'upgrade';
 };
@@ -100,19 +101,22 @@ export default function Pricing(): JSX.Element {
       <SafeAreaView className="flex-1">
         <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
           <View className="px-6 py-4">
-            <View className="flex-row justify-end mb-4">
+            <View className="mb-4 flex-row justify-end">
               <TouchableOpacity onPress={() => router.back()}>
                 <Close />
               </TouchableOpacity>
             </View>
             {/* Page Header */}
             <View className="items-center">
-              <Text className="text-center text-[35px] font-garamond text-black">
+              <Text className="text-center font-brownstd text-[35px] text-black">
                 Unlock more with {'\n'} premium
               </Text>
-               <Text className="text-center text-[14px] text-[#000000] px-4 mt-5" style={{ lineHeight: 20 }}>
-                Listen to your documents seamlessly, {'\n'} like music — with more
-                words,{'\n'} more answers, and more freedom.
+              <Text
+                className="mt-5 px-4 text-center font-brownstd text-[14px] text-black"
+                style={{ lineHeight: 20 }}
+              >
+                Listen to your documents seamlessly, {'\n'} like music — with
+                more words,{'\n'} more answers, and more freedom.
               </Text>
 
               {/* Illustration */}
@@ -130,11 +134,11 @@ export default function Pricing(): JSX.Element {
               {plans.map((plan) => (
                 <View
                   key={plan.id}
-                  className="bg-white border border-[#000000] rounded-[20px] p-6 mb-4"
+                  className="mb-4 rounded-[20px] border border-black bg-white p-6"
                 >
                   {/* Plan Header */}
                   <View className="mb-4">
-                    <Text className="text-[20px] font-bold text-black mb-2">
+                    <Text className="mb-2 text-[20px] font-brownstd-bold text-black">
                       {plan.name}
                     </Text>
                     <Text className="text-[18px] text-gray-600">
@@ -145,11 +149,11 @@ export default function Pricing(): JSX.Element {
                   {/* Features List */}
                   <View className="mb-6">
                     {plan.features.map((feature, index) => (
-                      <View key={index} className="flex-row items-start mb-3">
-                        <Text className="text-[16px] mr-3">
+                      <View key={index} className="mb-3 flex-row items-start">
+                        <Text className="mr-3 text-[16px] font-brownstd">
                           {feature.included ? <Check /> : <Uncheck />}
                         </Text>
-                        <Text className="text-[16px] flex-1">
+                        <Text className="flex-1 text-[16px] font-brownstd">
                           {feature.text}
                         </Text>
                       </View>
@@ -159,12 +163,12 @@ export default function Pricing(): JSX.Element {
                   {/* Action Button */}
                   <Button
                     label={plan.buttonText}
-                    className={`rounded-2xl py-4 w-full ${
+                    className={`w-full rounded-2xl py-4 ${
                       plan.buttonStyle === 'current'
                         ? 'bg-black'
                         : 'bg-[#FFCC00]'
                     }`}
-                    textClassName={`font-semibold text-lg ${
+                    textClassName={`font-brownstd-bold text-lg ${
                       plan.buttonStyle === 'current'
                         ? 'text-white'
                         : 'text-black'

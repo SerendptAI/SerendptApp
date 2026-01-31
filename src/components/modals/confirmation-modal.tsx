@@ -23,7 +23,7 @@ export const ConfirmationModal = React.forwardRef<any, ConfirmationModalProps>(
           contentContainerStyle={{ flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
         >
-          <View className="flex-1 items-center">
+          <View className="flex-1 items-center pb-16">
             <View className="items-center">
               <Image
                 source={require('../../../assets/settings.png')}

@@ -6,7 +6,7 @@ import Voice, {
   type SpeechResultsEvent,
 } from '@react-native-voice/voice';
 import { useQueryClient } from '@tanstack/react-query';
-import { Audio } from 'expo-av';
+import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
 import * as FileSystem from 'expo-file-system/legacy';
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -30,7 +30,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 //@ts-ignore
-import { type ChatResponse, useChat } from '@/api/chat';
+import { useChat } from '@/api/chat';
 import { useDeleteChat, useGetChat } from '@/api/chat/use-get-chat';
 import {
   audioStream,
@@ -223,6 +223,8 @@ export default function DocumentDetails() {
 
   const currentBatchOrderRef = useRef<number | null>(null);
   const lastProcessedTextRef = useRef('');
+
+  const isProcessingRef = useRef(false);
 
   useEffect(() => {
     currentBatchOrderRef.current = currentPage?.batch_order ?? null;
@@ -420,13 +422,17 @@ export default function DocumentDetails() {
     if (!trimmedText) return;
 
     const now = Date.now();
+
+    // Prevent duplicate calls within 2 seconds
     if (now - lastSpeechTimeRef.current < 2000) {
       return;
     }
 
+    // Prevent duplicate processing
     if (
       trimmedText === lastProcessedTextRef.current ||
-      chatMutation.isPending
+      chatMutation.isPending ||
+      isProcessingRef.current
     ) {
       return;
     }
@@ -434,8 +440,10 @@ export default function DocumentDetails() {
     const batchOrder = currentBatchOrderRef.current;
     if (!documentId || batchOrder == null) return;
 
+    // Set processing flag BEFORE any async operations
+    isProcessingRef.current = true;
     lastProcessedTextRef.current = trimmedText;
-    lastSpeechTimeRef.current = now; // Lock the handler
+    lastSpeechTimeRef.current = now;
     setIsListening(false);
 
     try {
@@ -450,13 +458,16 @@ export default function DocumentDetails() {
         refetch();
         setTimeout(() => {
           lastProcessedTextRef.current = '';
+          isProcessingRef.current = false; // Reset after delay
         }, 3000);
       }
     } catch (error) {
       console.error('Chat Error:', error);
       lastProcessedTextRef.current = '';
+      isProcessingRef.current = false; // Reset on error
     }
   };
+
   const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -466,6 +477,10 @@ export default function DocumentDetails() {
           allowsRecordingIOS: true,
           playsInSilentModeIOS: true,
           staysActiveInBackground: false,
+          interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+          shouldDuckAndroid: true,
+          interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+          playThroughEarpieceAndroid: false,
         });
       } catch (e) {
         console.error('Audio Setup Error:', e);
@@ -474,19 +489,18 @@ export default function DocumentDetails() {
 
     setupAudio();
 
-    // 2. Setup Voice Listeners
+    // Setup Voice Listeners
     Voice.onSpeechStart = () => setIsListening(true);
     Voice.onSpeechEnd = () => setIsListening(false);
     Voice.onSpeechError = handleSpeechError;
     Voice.onSpeechResults = handleSpeechResults;
-    Voice.onSpeechPartialResults = handlePartialResults;
-    Voice.onSpeechVolumeChanged = () => {
-      resetSilenceTimeout();
-    };
+    Voice.onSpeechVolumeChanged = () => resetSilenceTimeout();
 
     return () => {
       Voice.destroy().then(Voice.removeAllListeners);
       if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
+      if (highlightIntervalRef.current)
+        clearInterval(highlightIntervalRef.current);
     };
   }, []);
 
@@ -495,17 +509,14 @@ export default function DocumentDetails() {
     setIsListening(false);
   };
 
-  const handlePartialResults = (e: SpeechResultsEvent) => {
-    const partialResult = e.value?.[0];
-    if (partialResult && partialResult.trim().length > 0) {
-    }
-  };
-
   const handleSpeechResults = async (e: SpeechResultsEvent) => {
     const finalResult = e.value?.[0];
-    if (finalResult && finalResult.trim().length > 0) {
-
-      handleFinal?.(finalResult);
+    if (
+      finalResult &&
+      finalResult.trim().length > 0 &&
+      !isProcessingRef.current
+    ) {
+      await handleFinal(finalResult);
     }
   };
 
@@ -513,22 +524,18 @@ export default function DocumentDetails() {
     if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
     silenceTimeoutRef.current = setTimeout(() => {
       if (isListening) stopListening();
-    }, 2500);
+    }, 5000); // 5 seconds silence timeout
   };
 
   const startListening = async () => {
     try {
-      // Stop document audio if it's playing
       if (isPlaying) await stopAudio();
 
-      const isAlreadyRecognizing = await Voice.isRecognizing();
-      if (isAlreadyRecognizing) await Voice.stop();
+      await Voice.stop();
+      await Voice.destroy();
 
-      // Reset internal state
-      lastProcessedTextRef.current = '';
-
+      // Start listening
       await Voice.start('en-US');
-      setIsListening(true);
     } catch (e) {
       console.error('Start Voice Error:', e);
     }
@@ -723,7 +730,7 @@ export default function DocumentDetails() {
         visible={isChangePageNumberOpen}
         total={totalPages}
         current={currentPageIndex}
-        onSelect={(i) => {
+        onSelect={(i: React.SetStateAction<number>) => {
           setCurrentPageIndex(i);
           setIsChangePageNumberOpen(false);
         }}

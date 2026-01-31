@@ -45,6 +45,22 @@ export default function HomeLayout() {
           headerShown: false,
         }}
       />
+
+      <Stack.Screen
+        name="website"
+        options={{
+          title: 'Website',
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="function"
+        options={{
+          title: 'Function',
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }

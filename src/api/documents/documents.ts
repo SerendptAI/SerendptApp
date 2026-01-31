@@ -18,6 +18,7 @@ import type {
   GetAudioVoicesResponse,
   GetDocumentBatchesContentResponse,
   GetDocumentsByEmailResponse,
+  ProcessLinkVariables,
   UploadDocumentResponse,
   UploadDocumentVariables,
 } from './types';
@@ -89,8 +90,6 @@ export const uploadDocument = createMutation<
   mutationKey: ['documents', 'upload'],
   mutationFn: async ({ document, user_email }) => {
     try {
-    
-
       const token = getToken();
 
       // Remove 'file://' prefix if present
@@ -116,7 +115,6 @@ export const uploadDocument = createMutation<
           },
         ]
       );
-
 
       const responseData = response.json();
 
@@ -183,6 +181,24 @@ export const useGetAudioVoices = createQuery<
     return client({
       url: `audio/voices`,
       method: 'GET',
+    }).then((response) => response.data);
+  },
+});
+
+export const useProcessLink = createMutation<
+  ExplainTermResponse,
+  ProcessLinkVariables,
+  Error
+>({
+  mutationKey: ['link'],
+  mutationFn: async ({ url }) => {
+    console.log('tt', url);
+    return client({
+  
+      data: {
+        url: url,
+      },
+      method: 'POST',
     }).then((response) => response.data);
   },
 });

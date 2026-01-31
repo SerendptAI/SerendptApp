@@ -35,7 +35,7 @@ type FormType = z.infer<typeof schema>;
 
 export default function Settings(): JSX.Element {
   const user = useUser.use.user();
-  const { control, handleSubmit, watch } = useForm<FormType>({
+  const { control, handleSubmit } = useForm<FormType>({
     resolver: zodResolver(schema),
     defaultValues: {
       fullname: user?.full_name || '',

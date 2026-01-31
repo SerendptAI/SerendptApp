@@ -61,6 +61,9 @@ export type ExplainTermVariables = {
   batch_order: number;
   term: string;
 };
+export type ProcessLinkVariables = {
+  url: string;
+};
 
 export type ExplainTermResponse = {
   term: string;

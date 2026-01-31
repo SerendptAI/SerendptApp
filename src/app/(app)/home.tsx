@@ -6,6 +6,7 @@ import React, { useRef } from 'react';
 import {
   type GestureResponderEvent,
   Modal,
+  Pressable,
   TouchableOpacity as RNTouchableOpacity,
 } from 'react-native';
 import { showMessage } from 'react-native-flash-message';
@@ -29,12 +30,15 @@ import {
   View,
 } from '@/components/ui';
 import { DocumentSkeleton } from '@/components/ui/document-skeleton';
+import { FunctionIcon } from '@/components/ui/icons/function-icon';
 // import { Logos } from '@/components/ui/icons/logos';
 import { Options } from '@/components/ui/icons/options';
 import { Pen } from '@/components/ui/icons/pen';
+import { WebsiteIcon } from '@/components/ui/icons/website-icon';
 // import { Search } from '@/components/ui/icons/search';
 import { showError } from '@/components/ui/utils';
 import { useUser } from '@/lib/user';
+import { ImportLinkIcon } from '@/components/ui/icons/imort-link-icon';
 
 export default function Home() {
   const user = useUser.use.user();
@@ -209,6 +213,36 @@ export default function Home() {
         >
           Welcome back, {user?.full_name.split(' ')[0] || 'User'}!
         </Text>
+
+        <View className="mt-10 flex-row items-center justify-center gap-4">
+          <Pressable
+            onPress={() => {
+              router.push('/home/website');
+            }}
+            className="flex-row items-center justify-center gap-2 rounded-[21.5px] border border-[#F4F4F3] px-4 py-2"
+          >
+            <WebsiteIcon />
+            <Text className="font-brownstd leading-6 text-[#70706F] ">
+              Website
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              router.push('/home/function');
+            }}
+            className="flex-row items-center justify-center gap-2 rounded-[21.5px] border border-[#F4F4F3] px-4 py-2"
+          >
+            <View className="flex-row items-center">
+              <FunctionIcon />
+              <View className="-ml-3">
+                <FunctionIcon />
+              </View>
+            </View>
+            <Text className="font-brownstd leading-6 text-[#70706F] ">
+              Fanfiction
+            </Text>
+          </Pressable>
+        </View>
 
         {/* <View className="px-6">
           <ControlledInput

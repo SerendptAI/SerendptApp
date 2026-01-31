@@ -109,7 +109,6 @@ export const useResendOtp = createMutation<
     }).then((response) => response.data),
 });
 
-
 export const useVerifyForgotPassword = createMutation<
   AuthResponse,
   VerifyOtpRequest,
@@ -132,5 +131,16 @@ export const useResetPassword = createMutation<
       url: 'forgot-password-reset',
       method: 'POST',
       data: variables,
+    }).then((response) => response.data),
+});
+
+export const useUserChangePasswordOtp = createMutation<
+  AuthResponse,
+  AxiosError
+>({
+  mutationFn: async () =>
+    client({
+      url: 'send-change-password-otp',
+      method: 'POST',
     }).then((response) => response.data),
 });

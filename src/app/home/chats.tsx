@@ -12,6 +12,7 @@ import Animated, {
   interpolate,
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
   withRepeat,
   withSequence,
   withSpring,
@@ -31,6 +32,54 @@ import {
 } from '@/components/ui';
 import { Back } from '@/components/ui/icons/back';
 import { Mics } from '@/components/ui/icons/mics';
+import { SmallLogo } from '@/components/ui/icons/small-logo';
+
+const TypingIndicator = () => {
+  const Dot = ({ delay }: { delay: number }) => {
+    const opacity = useSharedValue(0.3); // Start dim
+
+    useEffect(() => {
+      opacity.value = withRepeat(
+        withSequence(
+          withDelay(delay, withTiming(1, { duration: 400 })),
+          withTiming(0.3, { duration: 400 })
+        ),
+        -1,
+        false
+      );
+    }, [delay, opacity]);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+      opacity: opacity.value,
+    }));
+
+    return (
+      <Animated.View
+        style={[
+          animatedStyle,
+          {
+            width: 8,
+            height: 8,
+            borderRadius: 4,
+            backgroundColor: '#1A1A1A',
+            marginHorizontal: 3,
+          },
+        ]}
+      />
+    );
+  };
+
+  return (
+    <View className="mb-5 ml-2 flex-row items-center self-start ">
+      <SmallLogo />
+      <View className="flex-row items-center justify-center">
+        <Dot delay={0} />
+        <Dot delay={200} />
+        <Dot delay={400} />
+      </View>
+    </View>
+  );
+};
 
 const formatMessageTime = (dateString: string) => {
   if (!dateString) return '';
@@ -145,6 +194,30 @@ const ChatSkeleton = () => (
       <SkeletonLine width="90%" />
       <SkeletonLine width="95%" />
       <SkeletonLine width="40%" marginBottom={0} />
+    </View>
+
+    {/* User Message Skeleton */}
+    <View className="mb-5 rounded-2xl bg-[#FFFBEB] p-5">
+      <SkeletonLine
+        width={'40%'}
+        height={22}
+        borderRadius={100}
+        marginBottom={12}
+      />
+      <SkeletonLine width="100%" />
+      <SkeletonLine width="70%" marginBottom={0} />
+    </View>
+
+    {/* AI Message Skeleton */}
+    <View className="mb-5 rounded-2xl border-[0.5px] border-gray-200 bg-white p-5">
+      <SkeletonLine
+        width={'40%'}
+        height={22}
+        borderRadius={100}
+        marginBottom={12}
+      />
+      <SkeletonLine width="85%" />
+      <SkeletonLine width="30%" marginBottom={0} />
     </View>
 
     {/* User Message Skeleton */}
@@ -324,24 +397,28 @@ export default function Chats() {
             showsVerticalScrollIndicator={false}
           >
             {messages?.length > 0 ? (
-              messages
-                .slice()
-                .reverse()
-                .map((item: any, index: number) =>
-                  item.role === 'ai' ? (
-                    <AIMessageCard
-                      key={index}
-                      text={item.content}
-                      time={item.timestamp}
-                    />
-                  ) : (
-                    <UserMessageCard
-                      key={index}
-                      text={item.content}
-                      time={item.timestamp}
-                    />
-                  )
-                )
+              <>
+                {messages
+                  .slice()
+                  .reverse()
+                  .map((item: any, index: number) =>
+                    item.role === 'ai' ? (
+                      <AIMessageCard
+                        key={index}
+                        text={item.content}
+                        time={item.timestamp}
+                      />
+                    ) : (
+                      <UserMessageCard
+                        key={index}
+                        text={item.content}
+                        time={item.timestamp}
+                      />
+                    )
+                  )}
+
+                {chatMutation.isPending && <TypingIndicator />}
+              </>
             ) : (
               <View className="flex-1 items-center justify-center">
                 <Image
@@ -365,7 +442,7 @@ export default function Chats() {
           >
             <Mics />
             <Text className="font-brownstd text-base text-black">
-              {isListening ? 'Listening...' : 'Click to talk'}
+              {isListening ? 'Listening...' : 'Tap to talk'}
             </Text>
           </TouchableOpacity>
         </View>
