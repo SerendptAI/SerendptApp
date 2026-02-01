@@ -194,7 +194,7 @@ export const useProcessLink = createMutation<
   mutationFn: async ({ url }) => {
     console.log('tt', url);
     return client({
-  
+      url: 'process_ebony_story/',
       data: {
         url: url,
       },
