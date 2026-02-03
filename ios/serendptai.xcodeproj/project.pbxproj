@@ -7,61 +7,61 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0390941D8DD3D1350CD94184 /* libPods-serendptai.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C72F2477A85042079FEC4826 /* libPods-serendptai.a */; };
-		0BE040348DEA4BB7999E1BD4 /* BrownStd-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = A2D4C84FC6044E648D947034 /* BrownStd-Regular.otf */; };
-		1101FF2C9E2C4523B242C658 /* EBGaramond-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2B40F196E7874C28A8C3FCD5 /* EBGaramond-SemiBold.ttf */; };
-		11FA17F28A034ADBBD8F8402 /* Roboto-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 4C61884E4FB241C89E3AA5FD /* Roboto-ExtraBold.ttf */; };
+		0D34C876A8CA4FF68190012F /* Roboto-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CD5574C3D85B486CB065B416 /* Roboto-Bold.ttf */; };
+		0DA874CAAD154F8C909ABEE5 /* Inter.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 40B41AB6CC0141A68F49E85D /* Inter.ttf */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
-		2C8D5942A6044B159DB819AB /* Roboto-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D2D2C873325442ADBDC34488 /* Roboto-Medium.ttf */; };
-		2FA79FDDA6A04374B255DCD4 /* georgia.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 786084977DC645DBB9082BBC /* georgia.ttf */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
-		403388AB423A4416B00ADB92 /* EBGaramond-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2AADC08244894C0190112023 /* EBGaramond-Medium.ttf */; };
-		41DFC32520CE4E6F994D6CCF /* Roboto-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7D3276794D8C4AFD80B04E98 /* Roboto-Bold.ttf */; };
-		58A6FA07C3C0D8EFBBAD7033 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C4F890E6F4AACAC575B3B8 /* ExpoModulesProvider.swift */; };
-		67800A76589C4710A46E5C96 /* Roboto-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EC7F2030ECC5422AB14577E3 /* Roboto-SemiBold.ttf */; };
-		6BD1612AC44B4FA39BB1253F /* Biro_Script_reduced.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0FB517445E444E7AB65DF0F6 /* Biro_Script_reduced.ttf */; };
-		7F2D89A6D47742238DA4EDCC /* Roboto-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 4E86DCEA932A434686BD1323 /* Roboto-Regular.ttf */; };
-		80F7A488B9D84B7C8AD8C15C /* EBGaramond-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6FD4CAFB76874A2194D12316 /* EBGaramond-ExtraBold.ttf */; };
-		8D2EBD287243042B03EDA7CE /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5A4D06A16699AEC5DBFC7E52 /* PrivacyInfo.xcprivacy */; };
-		A8EC2390F6C144708106199B /* Roboto-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B50528688A19436EBA63133C /* Roboto-Light.ttf */; };
+		3F2923291288429F994D7CEB /* brownstd-bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C0EED33F8FB24BBB91589AB4 /* brownstd-bold.ttf */; };
+		451FA99E39A946B0AFE689EB /* Roboto-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0B0E777F3D084182AB1FEC6C /* Roboto-Medium.ttf */; };
+		4FEEC422C6171F758112B3B2 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 9FCD6D55DAC7DAB6CA637B0E /* PrivacyInfo.xcprivacy */; };
+		71B7605B30FC73528EFB69F1 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92ECC71CD39802E7F57DE238 /* ExpoModulesProvider.swift */; };
+		8ACC163F04964D8F94083C4C /* EBGaramond-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0A8A0920C7B347BF8F646C98 /* EBGaramond-ExtraBold.ttf */; };
+		9A329B96306541598D5BB1E9 /* EBGaramond-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 56F3FD55885C43BBAE0DEE9C /* EBGaramond-SemiBold.ttf */; };
+		9F0C56FCC56148E089BDF409 /* EBGaramond-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B357181247C74EDC9E71946F /* EBGaramond-Regular.ttf */; };
+		AB5E5D7482A940E79A7233B2 /* Roboto-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B2FC2D708DA04B3F83C87530 /* Roboto-Regular.ttf */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
-		BD54AC9B6656457EB53C3615 /* EBGaramond-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DED4941100594D33B2EE36BA /* EBGaramond-Bold.ttf */; };
-		C92C3703370B4558A313408A /* brownstd-bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B3735B2A17044A0D8374FFE6 /* brownstd-bold.ttf */; };
-		DA3ABD25F9F84F8E9DDAAE85 /* EBGaramond-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0C19540B516449F993600B1D /* EBGaramond-Regular.ttf */; };
+		BB7C85DFDF374CC9A8FF3620 /* EBGaramond-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5FB6CDBA7CFD4119B64D31E1 /* EBGaramond-Medium.ttf */; };
+		C797DF4BF3944F2386513930 /* Roboto-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 82569D4B1E2943CB9FA71006 /* Roboto-SemiBold.ttf */; };
+		DB733294F4D9468E94C85045 /* Roboto-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6C4B1E0082754BD18D2D6113 /* Roboto-Light.ttf */; };
+		DEC47E69C4814043BB1FBD4E /* BrownStd-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 66DA60BFF1794840A45EB14F /* BrownStd-Regular.otf */; };
+		DFA3097767CC4809989DA66A /* georgia.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 05ACCCE0F10140198183995F /* georgia.ttf */; };
+		E8CB625201F14E75A8BA19AA /* Roboto-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 89666D9B6F6B47A19C2F667A /* Roboto-ExtraBold.ttf */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
-		FD0486D233184D0085861CB3 /* Inter.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 48C35D3627864256A54BD1FD /* Inter.ttf */; };
+		F7936385CF090F0F2AC9D8DD /* libPods-serendptai.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E9F2CAE9146E2002E730DF79 /* libPods-serendptai.a */; };
+		FC9D439EFA1C493CBCF88EBA /* Biro_Script_reduced.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DF0E674A5A1B4C48B53A853B /* Biro_Script_reduced.ttf */; };
+		FCBE9C47EAD74196BB6FB0BF /* EBGaramond-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 40361188A7274E629DCFB9A5 /* EBGaramond-Bold.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		0998D2B9AF00541C2BB99078 /* Pods-serendptai.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-serendptai.release.xcconfig"; path = "Target Support Files/Pods-serendptai/Pods-serendptai.release.xcconfig"; sourceTree = "<group>"; };
-		0C19540B516449F993600B1D /* EBGaramond-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "EBGaramond-Regular.ttf"; path = "../assets/fonts/EBGaramond/EBGaramond-Regular.ttf"; sourceTree = "<group>"; };
-		0FB517445E444E7AB65DF0F6 /* Biro_Script_reduced.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = Biro_Script_reduced.ttf; path = ../assets/fonts/Biro/Biro_Script_reduced.ttf; sourceTree = "<group>"; };
+		05ACCCE0F10140198183995F /* georgia.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = georgia.ttf; path = ../assets/fonts/Georgia/georgia.ttf; sourceTree = "<group>"; };
+		0A8A0920C7B347BF8F646C98 /* EBGaramond-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "EBGaramond-ExtraBold.ttf"; path = "../assets/fonts/EBGaramond/EBGaramond-ExtraBold.ttf"; sourceTree = "<group>"; };
+		0B0E777F3D084182AB1FEC6C /* Roboto-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-Medium.ttf"; path = "../assets/fonts/Roboto-Medium.ttf"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* serendptai.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = serendptai.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = serendptai/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = serendptai/Info.plist; sourceTree = "<group>"; };
-		2AADC08244894C0190112023 /* EBGaramond-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "EBGaramond-Medium.ttf"; path = "../assets/fonts/EBGaramond/EBGaramond-Medium.ttf"; sourceTree = "<group>"; };
-		2B40F196E7874C28A8C3FCD5 /* EBGaramond-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "EBGaramond-SemiBold.ttf"; path = "../assets/fonts/EBGaramond/EBGaramond-SemiBold.ttf"; sourceTree = "<group>"; };
-		3D7A0A1FBE3461A15F4A85AA /* Pods-serendptai.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-serendptai.debug.xcconfig"; path = "Target Support Files/Pods-serendptai/Pods-serendptai.debug.xcconfig"; sourceTree = "<group>"; };
-		48C35D3627864256A54BD1FD /* Inter.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = Inter.ttf; path = ../assets/fonts/Inter.ttf; sourceTree = "<group>"; };
-		4C61884E4FB241C89E3AA5FD /* Roboto-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-ExtraBold.ttf"; path = "../assets/fonts/Roboto-ExtraBold.ttf"; sourceTree = "<group>"; };
-		4E86DCEA932A434686BD1323 /* Roboto-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-Regular.ttf"; path = "../assets/fonts/Roboto-Regular.ttf"; sourceTree = "<group>"; };
-		5A4D06A16699AEC5DBFC7E52 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = serendptai/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		6FD4CAFB76874A2194D12316 /* EBGaramond-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "EBGaramond-ExtraBold.ttf"; path = "../assets/fonts/EBGaramond/EBGaramond-ExtraBold.ttf"; sourceTree = "<group>"; };
-		786084977DC645DBB9082BBC /* georgia.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = georgia.ttf; path = ../assets/fonts/Georgia/georgia.ttf; sourceTree = "<group>"; };
-		7D3276794D8C4AFD80B04E98 /* Roboto-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-Bold.ttf"; path = "../assets/fonts/Roboto-Bold.ttf"; sourceTree = "<group>"; };
-		A2D4C84FC6044E648D947034 /* BrownStd-Regular.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "BrownStd-Regular.otf"; path = "../assets/fonts/Brown-Font/BrownStd-Regular.otf"; sourceTree = "<group>"; };
+		40361188A7274E629DCFB9A5 /* EBGaramond-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "EBGaramond-Bold.ttf"; path = "../assets/fonts/EBGaramond/EBGaramond-Bold.ttf"; sourceTree = "<group>"; };
+		40B41AB6CC0141A68F49E85D /* Inter.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = Inter.ttf; path = ../assets/fonts/Inter.ttf; sourceTree = "<group>"; };
+		4A59002E22FEDF71AA9550DF /* Pods-serendptai.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-serendptai.release.xcconfig"; path = "Target Support Files/Pods-serendptai/Pods-serendptai.release.xcconfig"; sourceTree = "<group>"; };
+		56F3FD55885C43BBAE0DEE9C /* EBGaramond-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "EBGaramond-SemiBold.ttf"; path = "../assets/fonts/EBGaramond/EBGaramond-SemiBold.ttf"; sourceTree = "<group>"; };
+		5FB6CDBA7CFD4119B64D31E1 /* EBGaramond-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "EBGaramond-Medium.ttf"; path = "../assets/fonts/EBGaramond/EBGaramond-Medium.ttf"; sourceTree = "<group>"; };
+		63C95DB681CB648CBE600F5C /* Pods-serendptai.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-serendptai.debug.xcconfig"; path = "Target Support Files/Pods-serendptai/Pods-serendptai.debug.xcconfig"; sourceTree = "<group>"; };
+		66DA60BFF1794840A45EB14F /* BrownStd-Regular.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "BrownStd-Regular.otf"; path = "../assets/fonts/Brown-Font/BrownStd-Regular.otf"; sourceTree = "<group>"; };
+		6C4B1E0082754BD18D2D6113 /* Roboto-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-Light.ttf"; path = "../assets/fonts/Roboto-Light.ttf"; sourceTree = "<group>"; };
+		82569D4B1E2943CB9FA71006 /* Roboto-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-SemiBold.ttf"; path = "../assets/fonts/Roboto-SemiBold.ttf"; sourceTree = "<group>"; };
+		89666D9B6F6B47A19C2F667A /* Roboto-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-ExtraBold.ttf"; path = "../assets/fonts/Roboto-ExtraBold.ttf"; sourceTree = "<group>"; };
+		92ECC71CD39802E7F57DE238 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-serendptai/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		9FCD6D55DAC7DAB6CA637B0E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = serendptai/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = serendptai/SplashScreen.storyboard; sourceTree = "<group>"; };
-		B3735B2A17044A0D8374FFE6 /* brownstd-bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "brownstd-bold.ttf"; path = "../assets/fonts/Brown-Font/brownstd-bold.ttf"; sourceTree = "<group>"; };
-		B50528688A19436EBA63133C /* Roboto-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-Light.ttf"; path = "../assets/fonts/Roboto-Light.ttf"; sourceTree = "<group>"; };
+		B2FC2D708DA04B3F83C87530 /* Roboto-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-Regular.ttf"; path = "../assets/fonts/Roboto-Regular.ttf"; sourceTree = "<group>"; };
+		B357181247C74EDC9E71946F /* EBGaramond-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "EBGaramond-Regular.ttf"; path = "../assets/fonts/EBGaramond/EBGaramond-Regular.ttf"; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
-		C72F2477A85042079FEC4826 /* libPods-serendptai.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-serendptai.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		D2D2C873325442ADBDC34488 /* Roboto-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-Medium.ttf"; path = "../assets/fonts/Roboto-Medium.ttf"; sourceTree = "<group>"; };
-		DED4941100594D33B2EE36BA /* EBGaramond-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "EBGaramond-Bold.ttf"; path = "../assets/fonts/EBGaramond/EBGaramond-Bold.ttf"; sourceTree = "<group>"; };
-		EC7F2030ECC5422AB14577E3 /* Roboto-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-SemiBold.ttf"; path = "../assets/fonts/Roboto-SemiBold.ttf"; sourceTree = "<group>"; };
+		C0EED33F8FB24BBB91589AB4 /* brownstd-bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "brownstd-bold.ttf"; path = "../assets/fonts/Brown-Font/brownstd-bold.ttf"; sourceTree = "<group>"; };
+		CD5574C3D85B486CB065B416 /* Roboto-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-Bold.ttf"; path = "../assets/fonts/Roboto-Bold.ttf"; sourceTree = "<group>"; };
+		DF0E674A5A1B4C48B53A853B /* Biro_Script_reduced.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = Biro_Script_reduced.ttf; path = ../assets/fonts/Biro/Biro_Script_reduced.ttf; sourceTree = "<group>"; };
+		E9F2CAE9146E2002E730DF79 /* libPods-serendptai.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-serendptai.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = serendptai/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* serendptai-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "serendptai-Bridging-Header.h"; path = "serendptai/serendptai-Bridging-Header.h"; sourceTree = "<group>"; };
-		F6C4F890E6F4AACAC575B3B8 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-serendptai/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,7 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0390941D8DD3D1350CD94184 /* libPods-serendptai.a in Frameworks */,
+				F7936385CF090F0F2AC9D8DD /* libPods-serendptai.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -85,50 +85,58 @@
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				5A4D06A16699AEC5DBFC7E52 /* PrivacyInfo.xcprivacy */,
+				9FCD6D55DAC7DAB6CA637B0E /* PrivacyInfo.xcprivacy */,
 			);
 			name = serendptai;
 			sourceTree = "<group>";
 		};
-		2AC79FCA50CF4A94B5B81AED /* Resources */ = {
+		2A6C2C29A04089AD8FBDAB86 /* serendptai */ = {
 			isa = PBXGroup;
 			children = (
-				48C35D3627864256A54BD1FD /* Inter.ttf */,
-				0C19540B516449F993600B1D /* EBGaramond-Regular.ttf */,
-				2AADC08244894C0190112023 /* EBGaramond-Medium.ttf */,
-				2B40F196E7874C28A8C3FCD5 /* EBGaramond-SemiBold.ttf */,
-				DED4941100594D33B2EE36BA /* EBGaramond-Bold.ttf */,
-				6FD4CAFB76874A2194D12316 /* EBGaramond-ExtraBold.ttf */,
-				A2D4C84FC6044E648D947034 /* BrownStd-Regular.otf */,
-				B3735B2A17044A0D8374FFE6 /* brownstd-bold.ttf */,
-				4E86DCEA932A434686BD1323 /* Roboto-Regular.ttf */,
-				B50528688A19436EBA63133C /* Roboto-Light.ttf */,
-				D2D2C873325442ADBDC34488 /* Roboto-Medium.ttf */,
-				EC7F2030ECC5422AB14577E3 /* Roboto-SemiBold.ttf */,
-				7D3276794D8C4AFD80B04E98 /* Roboto-Bold.ttf */,
-				4C61884E4FB241C89E3AA5FD /* Roboto-ExtraBold.ttf */,
-				0FB517445E444E7AB65DF0F6 /* Biro_Script_reduced.ttf */,
-				786084977DC645DBB9082BBC /* georgia.ttf */,
+				92ECC71CD39802E7F57DE238 /* ExpoModulesProvider.swift */,
 			);
-			name = Resources;
-			path = "";
+			name = serendptai;
 			sourceTree = "<group>";
 		};
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				C72F2477A85042079FEC4826 /* libPods-serendptai.a */,
+				E9F2CAE9146E2002E730DF79 /* libPods-serendptai.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		62E67AEDA87BE4302259D9A1 /* serendptai */ = {
+		3F67D83033494E70B9C675F0 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				F6C4F890E6F4AACAC575B3B8 /* ExpoModulesProvider.swift */,
+				40B41AB6CC0141A68F49E85D /* Inter.ttf */,
+				B357181247C74EDC9E71946F /* EBGaramond-Regular.ttf */,
+				5FB6CDBA7CFD4119B64D31E1 /* EBGaramond-Medium.ttf */,
+				56F3FD55885C43BBAE0DEE9C /* EBGaramond-SemiBold.ttf */,
+				40361188A7274E629DCFB9A5 /* EBGaramond-Bold.ttf */,
+				0A8A0920C7B347BF8F646C98 /* EBGaramond-ExtraBold.ttf */,
+				66DA60BFF1794840A45EB14F /* BrownStd-Regular.otf */,
+				C0EED33F8FB24BBB91589AB4 /* brownstd-bold.ttf */,
+				B2FC2D708DA04B3F83C87530 /* Roboto-Regular.ttf */,
+				6C4B1E0082754BD18D2D6113 /* Roboto-Light.ttf */,
+				0B0E777F3D084182AB1FEC6C /* Roboto-Medium.ttf */,
+				82569D4B1E2943CB9FA71006 /* Roboto-SemiBold.ttf */,
+				CD5574C3D85B486CB065B416 /* Roboto-Bold.ttf */,
+				89666D9B6F6B47A19C2F667A /* Roboto-ExtraBold.ttf */,
+				DF0E674A5A1B4C48B53A853B /* Biro_Script_reduced.ttf */,
+				05ACCCE0F10140198183995F /* georgia.ttf */,
 			);
-			name = serendptai;
+			name = Resources;
+			path = "";
+			sourceTree = "<group>";
+		};
+		6CCEAD2936EECEB1B33360C5 /* ExpoModulesProviders */ = {
+			isa = PBXGroup;
+			children = (
+				2A6C2C29A04089AD8FBDAB86 /* serendptai */,
+			);
+			name = ExpoModulesProviders;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
@@ -145,9 +153,9 @@
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
-				2AC79FCA50CF4A94B5B81AED /* Resources */,
-				D394A0B2E67801BE8277A169 /* Pods */,
-				D5D2DA46BB020421B37CC1F0 /* ExpoModulesProviders */,
+				3F67D83033494E70B9C675F0 /* Resources */,
+				A4024F7507201E9AE84BA0CA /* Pods */,
+				6CCEAD2936EECEB1B33360C5 /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -162,6 +170,16 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		A4024F7507201E9AE84BA0CA /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				63C95DB681CB648CBE600F5C /* Pods-serendptai.debug.xcconfig */,
+				4A59002E22FEDF71AA9550DF /* Pods-serendptai.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		BB2F792B24A3F905000567C9 /* Supporting */ = {
 			isa = PBXGroup;
 			children = (
@@ -169,24 +187,6 @@
 			);
 			name = Supporting;
 			path = serendptai/Supporting;
-			sourceTree = "<group>";
-		};
-		D394A0B2E67801BE8277A169 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				3D7A0A1FBE3461A15F4A85AA /* Pods-serendptai.debug.xcconfig */,
-				0998D2B9AF00541C2BB99078 /* Pods-serendptai.release.xcconfig */,
-			);
-			name = Pods;
-			path = Pods;
-			sourceTree = "<group>";
-		};
-		D5D2DA46BB020421B37CC1F0 /* ExpoModulesProviders */ = {
-			isa = PBXGroup;
-			children = (
-				62E67AEDA87BE4302259D9A1 /* serendptai */,
-			);
-			name = ExpoModulesProviders;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -197,13 +197,13 @@
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "serendptai" */;
 			buildPhases = (
 				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
-				4BBA9E4E3223ADD2F27CB0F6 /* [Expo] Configure project */,
+				FDE612488EBB557AF9497549 /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
-				D5D2C126CE269FB731CD68AA /* [CP] Embed Pods Frameworks */,
+				4D2DBAB32090E344FF46F221 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -253,23 +253,23 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				FD0486D233184D0085861CB3 /* Inter.ttf in Resources */,
-				DA3ABD25F9F84F8E9DDAAE85 /* EBGaramond-Regular.ttf in Resources */,
-				403388AB423A4416B00ADB92 /* EBGaramond-Medium.ttf in Resources */,
-				1101FF2C9E2C4523B242C658 /* EBGaramond-SemiBold.ttf in Resources */,
-				BD54AC9B6656457EB53C3615 /* EBGaramond-Bold.ttf in Resources */,
-				80F7A488B9D84B7C8AD8C15C /* EBGaramond-ExtraBold.ttf in Resources */,
-				0BE040348DEA4BB7999E1BD4 /* BrownStd-Regular.otf in Resources */,
-				C92C3703370B4558A313408A /* brownstd-bold.ttf in Resources */,
-				7F2D89A6D47742238DA4EDCC /* Roboto-Regular.ttf in Resources */,
-				A8EC2390F6C144708106199B /* Roboto-Light.ttf in Resources */,
-				2C8D5942A6044B159DB819AB /* Roboto-Medium.ttf in Resources */,
-				67800A76589C4710A46E5C96 /* Roboto-SemiBold.ttf in Resources */,
-				41DFC32520CE4E6F994D6CCF /* Roboto-Bold.ttf in Resources */,
-				11FA17F28A034ADBBD8F8402 /* Roboto-ExtraBold.ttf in Resources */,
-				6BD1612AC44B4FA39BB1253F /* Biro_Script_reduced.ttf in Resources */,
-				2FA79FDDA6A04374B255DCD4 /* georgia.ttf in Resources */,
-				8D2EBD287243042B03EDA7CE /* PrivacyInfo.xcprivacy in Resources */,
+				0DA874CAAD154F8C909ABEE5 /* Inter.ttf in Resources */,
+				9F0C56FCC56148E089BDF409 /* EBGaramond-Regular.ttf in Resources */,
+				BB7C85DFDF374CC9A8FF3620 /* EBGaramond-Medium.ttf in Resources */,
+				9A329B96306541598D5BB1E9 /* EBGaramond-SemiBold.ttf in Resources */,
+				FCBE9C47EAD74196BB6FB0BF /* EBGaramond-Bold.ttf in Resources */,
+				8ACC163F04964D8F94083C4C /* EBGaramond-ExtraBold.ttf in Resources */,
+				DEC47E69C4814043BB1FBD4E /* BrownStd-Regular.otf in Resources */,
+				3F2923291288429F994D7CEB /* brownstd-bold.ttf in Resources */,
+				AB5E5D7482A940E79A7233B2 /* Roboto-Regular.ttf in Resources */,
+				DB733294F4D9468E94C85045 /* Roboto-Light.ttf in Resources */,
+				451FA99E39A946B0AFE689EB /* Roboto-Medium.ttf in Resources */,
+				C797DF4BF3944F2386513930 /* Roboto-SemiBold.ttf in Resources */,
+				0D34C876A8CA4FF68190012F /* Roboto-Bold.ttf in Resources */,
+				E8CB625201F14E75A8BA19AA /* Roboto-ExtraBold.ttf in Resources */,
+				FC9D439EFA1C493CBCF88EBA /* Biro_Script_reduced.ttf in Resources */,
+				DFA3097767CC4809989DA66A /* georgia.ttf in Resources */,
+				4FEEC422C6171F758112B3B2 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -315,29 +315,27 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		4BBA9E4E3223ADD2F27CB0F6 /* [Expo] Configure project */ = {
+		4D2DBAB32090E344FF46F221 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
-			inputFileListPaths = (
-			);
 			inputPaths = (
-				"$(SRCROOT)/.xcode.env",
-				"$(SRCROOT)/.xcode.env.local",
-				"$(SRCROOT)/serendptai/serendptai.entitlements",
-				"$(SRCROOT)/Pods/Target Support Files/Pods-serendptai/expo-configure-project.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-serendptai/Pods-serendptai-frameworks.sh",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/React-Core-prebuilt/React.framework/React",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/ReactNativeDependencies/ReactNativeDependencies.framework/ReactNativeDependencies",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
 			);
-			name = "[Expo] Configure project";
-			outputFileListPaths = (
-			);
+			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
-				"$(SRCROOT)/Pods/Target Support Files/Pods-serendptai/ExpoModulesProvider.swift",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/React.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ReactNativeDependencies.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-serendptai/expo-configure-project.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-serendptai/Pods-serendptai-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
 		};
 		800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -399,29 +397,29 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-serendptai/Pods-serendptai-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		D5D2C126CE269FB731CD68AA /* [CP] Embed Pods Frameworks */ = {
+		FDE612488EBB557AF9497549 /* [Expo] Configure project */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-serendptai/Pods-serendptai-frameworks.sh",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/React-Core-prebuilt/React.framework/React",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/ReactNativeDependencies/ReactNativeDependencies.framework/ReactNativeDependencies",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/whisper-rn/rnwhisper.framework/rnwhisper",
+			inputFileListPaths = (
 			);
-			name = "[CP] Embed Pods Frameworks";
+			inputPaths = (
+				"$(SRCROOT)/.xcode.env",
+				"$(SRCROOT)/.xcode.env.local",
+				"$(SRCROOT)/serendptai/serendptai.entitlements",
+				"$(SRCROOT)/Pods/Target Support Files/Pods-serendptai/expo-configure-project.sh",
+			);
+			name = "[Expo] Configure project";
+			outputFileListPaths = (
+			);
 			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/React.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ReactNativeDependencies.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/rnwhisper.framework",
+				"$(SRCROOT)/Pods/Target Support Files/Pods-serendptai/ExpoModulesProvider.swift",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-serendptai/Pods-serendptai-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
+			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-serendptai/expo-configure-project.sh\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -431,7 +429,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
-				58A6FA07C3C0D8EFBBAD7033 /* ExpoModulesProvider.swift in Sources */,
+				71B7605B30FC73528EFB69F1 /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -440,7 +438,7 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3D7A0A1FBE3461A15F4A85AA /* Pods-serendptai.debug.xcconfig */;
+			baseConfigurationReference = 63C95DB681CB648CBE600F5C /* Pods-serendptai.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -476,7 +474,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0998D2B9AF00541C2BB99078 /* Pods-serendptai.release.xcconfig */;
+			baseConfigurationReference = 4A59002E22FEDF71AA9550DF /* Pods-serendptai.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;

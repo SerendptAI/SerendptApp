@@ -2512,30 +2512,6 @@ PODS:
   - SDWebImageWebPCoder (0.14.6):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.17)
-  - whisper-rn (0.5.4):
-    - hermes-engine
-    - RCTRequired
-    - RCTTypeSafety
-    - React
-    - React-callinvoker
-    - React-Core
-    - React-Core-prebuilt
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-ImageManager
-    - React-jsi
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-renderercss
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/bridging
-    - ReactCommon/turbomodule/core
-    - ReactNativeDependencies
-    - Yoga
   - Yoga (0.0.0)
 
 DEPENDENCIES:
@@ -2654,7 +2630,6 @@ DEPENDENCIES:
   - "RNScreens (from `../node_modules/.pnpm/react-native-screens@4.16.0_react-native@0.81.5_@babel+core@7.26.0_@types+react@19.1.17_react@19.1.0__react@19.1.0/node_modules/react-native-screens`)"
   - "RNSVG (from `../node_modules/.pnpm/react-native-svg@15.12.1_react-native@0.81.5_@babel+core@7.26.0_@types+react@19.1.17_react@19.1.0__react@19.1.0/node_modules/react-native-svg`)"
   - "RNWorklets (from `../node_modules/.pnpm/react-native-worklets@0.7.1_@babel+core@7.26.0_react-native@0.81.5_@babel+core@7.26.0_@types+_a4qlnuzla6etgcaycq6rka5ko4/node_modules/react-native-worklets`)"
-  - "whisper-rn (from `../node_modules/.pnpm/whisper.rn@0.5.4_react-native@0.81.5_@babel+core@7.26.0_@types+react@19.1.17_react@19.1.0__react@19.1.0/node_modules/whisper.rn`)"
   - "Yoga (from `../node_modules/.pnpm/react-native@0.81.5_@babel+core@7.26.0_@types+react@19.1.17_react@19.1.0/node_modules/react-native/ReactCommon/yoga`)"
 
 SPEC REPOS:
@@ -2906,8 +2881,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/.pnpm/react-native-svg@15.12.1_react-native@0.81.5_@babel+core@7.26.0_@types+react@19.1.17_react@19.1.0__react@19.1.0/node_modules/react-native-svg"
   RNWorklets:
     :path: "../node_modules/.pnpm/react-native-worklets@0.7.1_@babel+core@7.26.0_react-native@0.81.5_@babel+core@7.26.0_@types+_a4qlnuzla6etgcaycq6rka5ko4/node_modules/react-native-worklets"
-  whisper-rn:
-    :path: "../node_modules/.pnpm/whisper.rn@0.5.4_react-native@0.81.5_@babel+core@7.26.0_@types+react@19.1.17_react@19.1.0__react@19.1.0/node_modules/whisper.rn"
   Yoga:
     :path: "../node_modules/.pnpm/react-native@0.81.5_@babel+core@7.26.0_@types+react@19.1.17_react@19.1.0/node_modules/react-native/ReactCommon/yoga"
 
@@ -3042,7 +3015,6 @@ SPEC CHECKSUMS:
   SDWebImageAVIFCoder: afe194a084e851f70228e4be35ef651df0fc5c57
   SDWebImageSVGCoder: 15a300a97ec1c8ac958f009c02220ac0402e936c
   SDWebImageWebPCoder: e38c0a70396191361d60c092933e22c20d5b1380
-  whisper-rn: c566b88b4bceef65351e131ce65e05467c3ac9a0
   Yoga: 5934998fbeaef7845dbf698f698518695ab4cd1a
 
 PODFILE CHECKSUM: fde330f13ee8497c14fab0c09e98ea60f752fc19

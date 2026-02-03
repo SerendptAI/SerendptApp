@@ -118,7 +118,7 @@ export const VerifyOtpForm = ({
                   {[0, 1, 2, 3, 4, 5].map((index) => (
                     <View
                       key={index}
-                      className="mr-2 size-12 items-center justify-center rounded-md border border-[#DCDDE2]"
+                      className="mr-2 size-16 items-center justify-center rounded-md border border-[#DCDDE2]"
                       style={{
                         borderWidth: 1,
                       }}
