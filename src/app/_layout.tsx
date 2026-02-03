@@ -66,9 +66,9 @@ export default function RootLayout() {
     prepare();
   }, []);
 
-  if (!appIsReady) {
-    return null;
-  }
+  // if (!appIsReady) {
+  //   return null;
+  // }
 
   return (
     <Providers>
