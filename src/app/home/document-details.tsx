@@ -10,24 +10,10 @@ import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
 import * as FileSystem from 'expo-file-system/legacy';
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
-import { BookOpenIcon, VideoCameraIcon, XIcon } from 'phosphor-react-native';
+
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  useWindowDimensions,
-} from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet } from 'react-native';
 import Markdown from 'react-native-markdown-display';
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withSequence,
-  withTiming,
-} from 'react-native-reanimated';
 
 //@ts-ignore
 import { useChat } from '@/api/chat';
@@ -54,188 +40,18 @@ import { Resize } from '@/components/ui/icons/resize';
 
 import { AudioPill } from '../../components/home/audio-pill';
 import { AIMessageCard, UserMessageCard } from './chats';
+import { HighlightedWord } from './highlighted-word';
+import { LoadingBar } from './loading-bar';
+import { TextSkeleton } from './textskeleton';
+import { WordSelectionModal } from './word-selection-modal';
+import { PageNavigationModal } from './page-navigation-modal';
+import { SelectVoiceModal } from './select-voice-modal';
+import { ChatModal } from './chat-modal';
 interface WordTiming {
   word: string;
   start: number;
   end: number;
 }
-
-const LoadingBar = () => {
-  const { width: screenWidth } = useWindowDimensions();
-  const progress = useSharedValue(0);
-
-  const BAR_WIDTH = screenWidth * 0.4;
-  const TRAVEL_DISTANCE = screenWidth - BAR_WIDTH;
-
-  useEffect(() => {
-    progress.value = withRepeat(
-      withTiming(1, {
-        duration: 1500,
-        easing: Easing.inOut(Easing.quad),
-      }),
-      -1,
-      true
-    );
-  }, []);
-
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [
-        {
-          translateX: progress.value * TRAVEL_DISTANCE,
-        },
-      ],
-    };
-  });
-
-  return (
-    <View
-      style={{
-        height: 2,
-        backgroundColor: '#FDF4CF',
-        overflow: 'hidden',
-        width: '100%',
-      }}
-    >
-      <Animated.View
-        style={[
-          animatedStyle,
-          {
-            height: '100%',
-            width: BAR_WIDTH,
-            backgroundColor: '#FFCC00',
-            position: 'absolute',
-          },
-        ]}
-      />
-    </View>
-  );
-};
-
-const SkeletonLine = ({
-  width = '100%',
-  height = 16,
-  marginBottom = 12,
-}: any) => {
-  const opacity = useSharedValue(0.3);
-  useEffect(() => {
-    opacity.value = withRepeat(
-      withSequence(
-        withTiming(1, { duration: 800 }),
-        withTiming(0.3, { duration: 800 })
-      ),
-      -1,
-      true
-    );
-  }, []);
-  const animatedStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
-  return (
-    <Animated.View
-      style={[
-        animatedStyle,
-        {
-          width,
-          height,
-          marginBottom,
-          backgroundColor: '#E5E7EB',
-          borderRadius: 4,
-        },
-      ]}
-    />
-  );
-};
-
-const TextSkeleton = ({ numberOfLines = 20 }: any) => {
-  const opacity = useSharedValue(0.3);
-  useEffect(() => {
-    opacity.value = withRepeat(
-      withSequence(
-        withTiming(1, { duration: 800 }),
-        withTiming(0.3, { duration: 800 })
-      ),
-      -1,
-      true
-    );
-  }, []);
-  const animatedStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
-  return (
-    <View className="flex-1">
-      <View
-        style={{
-          width: '100%',
-          marginBottom: 12,
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 12,
-        }}
-      >
-        <Animated.View
-          style={[
-            animatedStyle,
-            {
-              width: 40,
-              height: 40,
-              borderRadius: 100,
-              backgroundColor: '#E5E7EB',
-            },
-          ]}
-        />
-        <Animated.View
-          style={[
-            animatedStyle,
-            {
-              flex: 1,
-              width: '100%',
-              height: 16,
-              backgroundColor: '#E5E7EB',
-              borderRadius: 4,
-            },
-          ]}
-        />
-      </View>
-      <Animated.View
-        style={[
-          animatedStyle,
-          {
-            width: '100%',
-            height: 200,
-            backgroundColor: '#E5E7EB',
-            marginBottom: 12,
-            borderRadius: 4,
-          },
-        ]}
-      />
-      {[...Array(numberOfLines)].map((_, i) => (
-        <SkeletonLine key={i} width={'100%'} />
-      ))}
-    </View>
-  );
-};
-
-const HighlightedWord = React.memo(
-  ({ word, isHighlighted, isSelected, onPress }: any) => (
-    <TouchableOpacity
-      onPress={onPress}
-      activeOpacity={0.9}
-      style={{
-        backgroundColor: isSelected
-          ? '#3B82F6'
-          : isHighlighted
-            ? '#FFEB3B'
-            : 'transparent',
-        borderRadius: 3,
-        paddingHorizontal: 2,
-      }}
-    >
-      <Text
-        className="font-georgia-regular text-[16px] leading-7"
-        style={{ color: isSelected ? '#FFFFFF' : '#000000' }}
-      >
-        {word}
-      </Text>
-    </TouchableOpacity>
-  )
-);
 
 export default function DocumentDetails() {
   const queryClient = useQueryClient();
@@ -590,16 +406,25 @@ export default function DocumentDetails() {
     try {
       if (isPlaying) await stopAudio();
 
-      await Voice.stop();
-      await Voice.destroy();
+      const isAvailable = await Voice.isAvailable();
+      if (!isAvailable) {
+        console.error('Voice recognition is not available on this device');
+        return;
+      }
 
-      // Start listening
+      try {
+        await Voice.stop();
+      } catch (e) {}
+
+      try {
+        await Voice.destroy();
+      } catch (e) {}
+
       await Voice.start('en-US');
     } catch (e) {
       console.error('Start Voice Error:', e);
     }
   };
-
   const stopListening = async () => {
     try {
       await Voice.stop();
@@ -827,355 +652,8 @@ export default function DocumentDetails() {
         toggleListeningAndProcessing={toggleListeningAndProcessing}
       />
 
-      <View>
-        
-      </View>
+      <View></View>
     </View>
-  );
-}
-
-function WordSelectionModal({
-  visible,
-  word,
-  onClose,
-  documentId,
-  batchOrder,
-}: any) {
-  const { mutateAsync, isPending, data } = explainTerm();
-  const [showMeaning, setShowMeaning] = useState(false);
-  const [displayedText, setDisplayedText] = useState('');
-
-  const [_isStreaming, setIsStreaming] = useState(false);
-
-  useEffect(() => {
-    if (!visible) setShowMeaning(false);
-  }, [visible]);
-
-  useEffect(() => {
-    if (data?.contextual_meaning && showMeaning) {
-      setIsStreaming(true);
-
-      setDisplayedText('');
-
-      const text = data.contextual_meaning;
-
-      let currentIndex = 0;
-
-      const intervalId = setInterval(() => {
-        if (currentIndex < text.length) {
-          setDisplayedText(text.slice(0, currentIndex + 1));
-
-          currentIndex++;
-        } else {
-          setIsStreaming(false);
-
-          clearInterval(intervalId);
-        }
-      }, 20); // Adjust speed here (lower = faster)
-
-      return () => clearInterval(intervalId);
-    }
-  }, [data?.contextual_meaning, showMeaning]);
-
-  return (
-    <Modal transparent visible={visible} animationType="fade">
-      <TouchableOpacity
-        className="flex-1 items-center justify-center bg-black/30 px-6"
-        activeOpacity={1}
-        onPress={onClose}
-      >
-        <View
-          className="w-full rounded-3xl bg-white p-6"
-          onStartShouldSetResponder={() => true}
-        >
-          {!showMeaning ? (
-            <>
-              <View className="">
-                <View className="flex-row items-end justify-end pt-3">
-                  <TouchableOpacity activeOpacity={1} onPress={onClose}>
-                    <XIcon size={16} />
-                  </TouchableOpacity>
-                </View>
-
-                <Pressable
-                  onPress={() => {
-                    setShowMeaning(true);
-                    mutateAsync({
-                      documentId,
-                      batch_order: batchOrder,
-                      term: word,
-                    });
-                  }}
-                  className="flex flex-row gap-5 py-4"
-                >
-                  <View className="flex size-8 items-center justify-center rounded-full bg-amber-100 text-amber-600">
-                    <BookOpenIcon size={16} color="#F59E0B" />
-                  </View>
-
-                  <Text className="font-brownstd text-lg text-black">
-                    Check meaning
-                  </Text>
-                </Pressable>
-
-                <View className=" h-px w-full bg-black/10" />
-
-                <View className="flex flex-row items-center gap-5 py-4">
-                  <View className="flex size-8 items-center justify-center rounded-full bg-slate-200">
-                    <VideoCameraIcon size={16} color="#6b7280" />
-                  </View>
-
-                  <View>
-                    <Text className=" font-brownstd text-lg text-gray-400">
-                      Generate tutorial
-                    </Text>
-
-                    <View className="items-center justify-center rounded-xl border border-gray-300 bg-slate-200">
-                      <Text className=" font-brownstd-bold text-sm text-gray-500">
-                        COMING SOON
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-              </View>
-            </>
-          ) : (
-            <View>
-              <View className="flex flex-row items-center justify-between py-4">
-                <Text className="font-brownstd text-xl text-black">{word}</Text>
-
-                <View className="flex-row items-end justify-end ">
-                  <TouchableOpacity activeOpacity={1} onPress={onClose}>
-                    <XIcon size={13} />
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              <View className="pb-8">
-                {isPending ? (
-                  <View>
-                    <TextSkeleton numberOfLines={1} />
-                  </View>
-                ) : (
-                  <Text className=" font-brownstd text-base text-black">
-                    {data?.actual_meaning}
-                  </Text>
-                )}
-              </View>
-
-              <View className=" h-px w-full bg-black/10" />
-
-              <Text className="py-4 font-brownstd text-sm text-gray-500">
-                Contextual Meaning:
-              </Text>
-
-              <View className="pb-8">
-                {isPending ? (
-                  <View>
-                    <TextSkeleton numberOfLines={1} />
-                  </View>
-                ) : (
-                  <Text className="font-biro-script text-lg text-[#1E40AF]">
-                    {displayedText}
-                  </Text>
-                )}
-              </View>
-            </View>
-          )}
-        </View>
-      </TouchableOpacity>
-    </Modal>
-  );
-}
-
-function PageNavigationModal({
-  visible,
-  total,
-  current,
-  onSelect,
-  onClose,
-  batches,
-}: any) {
-  return (
-    <Modal transparent visible={visible} animationType="slide">
-      <TouchableOpacity
-        activeOpacity={1}
-        className="flex-1 justify-end bg-black/40"
-        onPress={onClose}
-      >
-        <View className="h-3/4 w-full rounded-t-3xl bg-white ">
-          <View className="flex-row items-center justify-between rounded-t-3xl bg-[#F9FAFB]  p-4">
-            <Text className="font-brownstd-bold text-[14px] text-black">
-              Chapters
-            </Text>
-
-            <TouchableOpacity activeOpacity={1} onPress={onClose}>
-              <CloseSmall />
-            </TouchableOpacity>
-          </View>
-          <View className="mb-2 h-px w-full bg-black/10" />
-          <ScrollView>
-            {Array.from({ length: total }).map((_, i) => (
-              <TouchableOpacity
-                activeOpacity={1}
-                key={i}
-                onPress={() => onSelect(i)}
-                className={`mb-2 rounded-xl p-4 ${current === i ? 'bg-[#F9FAFB]' : ''}`}
-              >
-                <Text className={`font-brownstd `}>
-                  {batches?.[i]?.batch_title || `Page ${i + 1}`}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      </TouchableOpacity>
-    </Modal>
-  );
-}
-
-function SelectVoiceModal({
-  visible,
-  onClose,
-  audioVoices,
-  setSelectedVoice,
-  selectedVoice,
-}: any) {
-  return (
-    <Modal transparent visible={visible} animationType="fade">
-      <View className=" flex-1 justify-end bg-black/30">
-        <View className=" rounded-t-3xl bg-white">
-          <View className="flex-row items-center justify-between rounded-t-3xl bg-[#F9FAFB] p-4  ">
-            <Text className="font-brownstd-bold text-[14px] text-black">
-              Select Voice
-            </Text>
-
-            <TouchableOpacity activeOpacity={1} onPress={onClose}>
-              <CloseSmall />
-            </TouchableOpacity>
-          </View>
-
-          <View className="gap-y-3 p-4">
-            <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
-              {audioVoices?.map((voice: any) => (
-                <TouchableOpacity
-                  key={voice.name}
-                  activeOpacity={1}
-                  disabled={voice.disabled}
-                  onPress={() => {
-                    setSelectedVoice?.(voice);
-                    onClose();
-                  }}
-                  className={`mb-3 flex-row items-center rounded-2xl p-3 ${
-                    selectedVoice?.name?.toLowerCase() ===
-                    voice.name.toLowerCase()
-                      ? ' bg-[#F9FAFB]'
-                      : ''
-                  }`}
-                >
-                  <View className="mr-3 size-12 overflow-hidden rounded-full">
-                    <Image
-                      source={{
-                        uri: `https://api.serendptai.com${voice.image_url}`,
-                      }}
-                      className={`size-12 ${
-                        voice.disabled ? 'opacity-40' : 'opacity-100'
-                      }`}
-                    />
-
-                    {voice.disabled && (
-                      <View className="absolute inset-0 bg-black/65" />
-                    )}
-                  </View>
-                  <View className="flex-1">
-                    <Text className="font-brownstd-bold text-base text-black">
-                      {voice.name}
-                    </Text>
-                    <Text className="font-brownstd text-xs text-gray-500">
-                      {voice.tag?.charAt(0).toUpperCase() + voice.tag?.slice(1)}{' '}
-                      TTS {voice?.disabled ? '(Disabled)' : ''}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-}
-
-function ChatModal({
-  visible,
-  onClose,
-  messages,
-  isListening,
-  setIsChatModalOpen,
-  toggleListeningAndProcessing,
-  isloadingDeleteChat,
-  isChatModalOpen,
-}: any) {
-  return (
-    <Modal transparent visible={visible} animationType="fade">
-      <View className=" flex-1 bg-black/80  pt-[75px]">
-        <View className="mr-4 self-end pb-3">
-          <AudioPill
-            isChatModalOpen={isChatModalOpen}
-            isListening={isListening}
-            toggleListeningAndProcessing={toggleListeningAndProcessing}
-            setIsChatModalOpen={setIsChatModalOpen}
-          />
-        </View>
-        <ScrollView
-          className=" px-4"
-          contentContainerClassName="mt-[45px] pb-28"
-          showsVerticalScrollIndicator={false}
-        >
-          {messages?.length > 0 ? (
-            messages
-              .slice()
-              .reverse()
-              .map((item: any, index: number) =>
-                item.role === 'ai' ? (
-                  <AIMessageCard
-                    key={index}
-                    text={item.content}
-                    time={item.timestamp}
-                  />
-                ) : (
-                  <UserMessageCard
-                    key={index}
-                    text={item.content}
-                    time={item.timestamp}
-                  />
-                )
-              )
-          ) : (
-            <View className="flex-1 items-center justify-center">
-              <Image
-                source={require('../../../assets/emptymessage.png')}
-                style={{ height: 246, width: 246 }}
-              />
-              <Text className="mt-10 text-center font-brownstd text-[16px]">
-                No messages yet
-              </Text>
-            </View>
-          )}
-        </ScrollView>
-
-        <View className="items-center justify-center">
-          <Button
-            label="Clear all messages"
-            size="lg"
-            disabled={isloadingDeleteChat}
-            loading={isloadingDeleteChat}
-            onPress={onClose}
-            className="mb-6 w-[182px] rounded-[22px] bg-[#FFCC00]"
-            textClassName="text-[14px] font-brownstd text-[#000]"
-          />
-        </View>
-      </View>
-    </Modal>
   );
 }
 

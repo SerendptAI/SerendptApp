@@ -2,13 +2,14 @@
 import { FlashList } from '@shopify/flash-list';
 import * as DocumentPicker from 'expo-document-picker';
 import { router } from 'expo-router';
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   type GestureResponderEvent,
   Modal,
   Pressable,
   TouchableOpacity as RNTouchableOpacity,
 } from 'react-native';
+import { PermissionsAndroid, Platform } from 'react-native';
 import { showMessage } from 'react-native-flash-message';
 
 //@ts-ignore
@@ -38,7 +39,6 @@ import { WebsiteIcon } from '@/components/ui/icons/website-icon';
 // import { Search } from '@/components/ui/icons/search';
 import { showError } from '@/components/ui/utils';
 import { useUser } from '@/lib/user';
-import { ImportLinkIcon } from '@/components/ui/icons/imort-link-icon';
 
 export default function Home() {
   const user = useUser.use.user();
@@ -53,6 +53,30 @@ export default function Home() {
   const [isOptionsOpen, setIsOptionsOpen] = React.useState(false);
   const [isRenameOpen, setIsRenameOpen] = React.useState(false);
   const [newTitle, setNewTitle] = React.useState('');
+
+  async function requestMicrophonePermission() {
+    if (Platform.OS !== 'android') return true;
+
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+        {
+          title: 'Microphone Permission',
+          message:
+            'This app needs access to your microphone for speech recognition',
+          buttonPositive: 'OK',
+        }
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    } catch (err) {
+      console.warn(err);
+      return false;
+    }
+  }
+
+  useEffect(() => {
+    requestMicrophonePermission();
+  }, []);
 
   const sortedDocuments = React.useMemo(() => {
     if (!documentData) return [];
