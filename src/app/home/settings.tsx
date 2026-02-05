@@ -35,7 +35,11 @@ type FormType = z.infer<typeof schema>;
 
 export default function Settings(): JSX.Element {
   const user = useUser.use.user();
-  const { control, handleSubmit } = useForm<FormType>({
+  const {
+    control,
+    handleSubmit,
+    formState: { isDirty },
+  } = useForm<FormType>({
     resolver: zodResolver(schema),
     defaultValues: {
       fullname: user?.full_name || '',
@@ -166,9 +170,12 @@ export default function Settings(): JSX.Element {
 
             <Button
               label="Save changes"
-              className="mb-4 rounded-2xl bg-[#FFCC00] py-4"
+              className={`mb-4 rounded-2xl py-4 ${
+                isDirty ? 'bg-[#FFCC00]' : 'bg-[#F1F1F1]'
+              }`}
               textClassName="text-black font-brownstd text-lg"
               onPress={handleSaveChanges}
+              disabled={!isDirty}
             />
 
             <Button

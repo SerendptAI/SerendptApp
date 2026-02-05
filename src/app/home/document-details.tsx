@@ -145,13 +145,72 @@ const SkeletonLine = ({
   );
 };
 
-const TextSkeleton = ({ numberOfLines = 20 }: any) => (
-  <View className="flex-1">
-    {[...Array(numberOfLines)].map((_, i) => (
-      <SkeletonLine key={i} width={i % 3 === 0 ? '80%' : '100%'} />
-    ))}
-  </View>
-);
+const TextSkeleton = ({ numberOfLines = 20 }: any) => {
+  const opacity = useSharedValue(0.3);
+  useEffect(() => {
+    opacity.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 800 }),
+        withTiming(0.3, { duration: 800 })
+      ),
+      -1,
+      true
+    );
+  }, []);
+  const animatedStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
+  return (
+    <View className="flex-1">
+      <View
+        style={{
+          width: '100%',
+          marginBottom: 12,
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 12,
+        }}
+      >
+        <Animated.View
+          style={[
+            animatedStyle,
+            {
+              width: 40,
+              height: 40,
+              borderRadius: 100,
+              backgroundColor: '#E5E7EB',
+            },
+          ]}
+        />
+        <Animated.View
+          style={[
+            animatedStyle,
+            {
+              flex: 1,
+              width: '100%',
+              height: 16,
+              backgroundColor: '#E5E7EB',
+              borderRadius: 4,
+            },
+          ]}
+        />
+      </View>
+      <Animated.View
+        style={[
+          animatedStyle,
+          {
+            width: '100%',
+            height: 200,
+            backgroundColor: '#E5E7EB',
+            marginBottom: 12,
+            borderRadius: 4,
+          },
+        ]}
+      />
+      {[...Array(numberOfLines)].map((_, i) => (
+        <SkeletonLine key={i} width={'100%'} />
+      ))}
+    </View>
+  );
+};
 
 const HighlightedWord = React.memo(
   ({ word, isHighlighted, isSelected, onPress }: any) => (
@@ -767,6 +826,10 @@ export default function DocumentDetails() {
         setIsListening={setIsListening}
         toggleListeningAndProcessing={toggleListeningAndProcessing}
       />
+
+      <View>
+        
+      </View>
     </View>
   );
 }
@@ -1009,18 +1072,27 @@ function SelectVoiceModal({
                       : ''
                   }`}
                 >
-                  <Image
-                    source={{
-                      uri: `https://api.serendptai.com${voice.image_url}`,
-                    }}
-                    className="mr-3 size-12 rounded-full"
-                  />
+                  <View className="mr-3 size-12 overflow-hidden rounded-full">
+                    <Image
+                      source={{
+                        uri: `https://api.serendptai.com${voice.image_url}`,
+                      }}
+                      className={`size-12 ${
+                        voice.disabled ? 'opacity-40' : 'opacity-100'
+                      }`}
+                    />
+
+                    {voice.disabled && (
+                      <View className="absolute inset-0 bg-black/65" />
+                    )}
+                  </View>
                   <View className="flex-1">
                     <Text className="font-brownstd-bold text-base text-black">
                       {voice.name}
                     </Text>
                     <Text className="font-brownstd text-xs text-gray-500">
-                      {voice.tag}
+                      {voice.tag?.charAt(0).toUpperCase() + voice.tag?.slice(1)}{' '}
+                      TTS {voice?.disabled ? '(Disabled)' : ''}
                     </Text>
                   </View>
                 </TouchableOpacity>

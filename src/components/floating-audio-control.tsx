@@ -220,7 +220,8 @@ export function FloatingAudioControl({
                   {selectedVoice?.name}
                 </Text>
                 <Text className="font-brownstd text-sm text-gray-600">
-                  {selectedVoice?.tag}
+                  {selectedVoice?.tag.charAt(0).toUpperCase() +
+                    selectedVoice?.tag.slice(1)}
                 </Text>
               </View>
             </View>

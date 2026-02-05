@@ -169,7 +169,7 @@ export default function Home() {
                 setSelectedDocId(item.document_id);
                 setIsOptionsOpen(true);
               }}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              hitSlop={{ top: 18, bottom: 18, left: 18, right: 18 }}
             >
               <Options />
             </RNTouchableOpacity>

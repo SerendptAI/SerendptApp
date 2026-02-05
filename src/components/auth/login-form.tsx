@@ -61,10 +61,12 @@ export const LoginForm = ({
 
   return (
     <ScrollView
-      contentContainerStyle={{ flexGrow: 1, paddingBottom: 150 }}
+      contentContainerStyle={{
+        flexGrow: 1,
+        paddingBottom: 70,
+      }}
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
-      className="flex-1"
     >
       <ImageBackground
         source={require('/assets/bgimg.png')}
@@ -73,22 +75,15 @@ export const LoginForm = ({
       >
         <View className="flex-1">
           <View className="h-8" />
-
-          <View className="px-6 py-4">
-            {/* <TouchableOpacity onPress={() => router.replace('/onboarding')}>
-            <AuthBack />
-          </TouchableOpacity> */}
-          </View>
-          <View className="mt-10 items-center px-5 py-4">
+          <View className="mt-[155px] items-center px-5 py-4">
             <Logo />
           </View>
           <View className="flex-1 justify-end">
             <View
-              className="w-full rounded-t-3xl bg-white px-6 py-8"
+              className="w-full rounded-t-3xl bg-white px-6 py-8 "
               style={{ height: '80%' }}
             >
               <KeyboardAvoidingView>
-                {/* Header Text */}
                 <View className="mb-8">
                   <Text className="font-brownstd text-[12px] uppercase tracking-wider text-black">
                     WELCOME BACK
@@ -98,7 +93,6 @@ export const LoginForm = ({
                   </Text>
                 </View>
 
-                {/* Form Fields */}
                 <View className="w-full gap-y-4">
                   <View className="w-full">
                     <ControlledInput
@@ -119,7 +113,6 @@ export const LoginForm = ({
                     />
                   </View>
 
-                  {/* Remember Me and Forgot Password */}
                   <View className="flex-row items-center justify-between">
                     <View className="flex-row items-center">
                       <Checkbox
@@ -144,7 +137,6 @@ export const LoginForm = ({
                     </TouchableOpacity>
                   </View>
 
-                  {/* Continue Button */}
                   <View className="mt-6">
                     <Button
                       label="CONTINUE"
@@ -157,7 +149,6 @@ export const LoginForm = ({
                   </View>
                 </View>
 
-                {/* Sign Up Link */}
                 <View className="mt-8 items-center">
                   <TouchableOpacity
                     onPress={() => {

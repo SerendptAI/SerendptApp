@@ -25,8 +25,7 @@ export const unstable_settings = {
   initialRouteName: '(app)',
 };
 
-SplashScreen.hide();
-
+SplashScreen.preventAutoHideAsync();
 hydrateAuth();
 loadSelectedTheme();
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -60,21 +59,23 @@ export default function RootLayout() {
         console.warn('Font loading error:', e);
       } finally {
         setAppIsReady(true);
+        // Hide native splash once fonts are loaded
+        await SplashScreen.hideAsync();
       }
     }
 
     prepare();
   }, []);
 
-  // if (!appIsReady) {
-  //   return null;
-  // }
+  if (!appIsReady) {
+    return null;
+  }
 
   return (
     <Providers>
       <Stack>
-        <Stack.Screen name="(app)" options={{ headerShown: false }} />
         <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="(app)" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="auth/login" options={{ headerShown: false }} />
         <Stack.Screen name="auth/verify-otp" options={{ headerShown: false }} />

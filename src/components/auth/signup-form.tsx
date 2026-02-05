@@ -64,10 +64,12 @@ export const SignupForm = ({
 
   return (
     <ScrollView
-      contentContainerStyle={{ flexGrow: 1, paddingBottom: 150 }}
+      contentContainerStyle={{
+        flexGrow: 1,
+        paddingBottom: 150,
+      }}
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
-      className="flex-1"
     >
       <ImageBackground
         source={require('/assets/bgimg.png')}
@@ -76,17 +78,12 @@ export const SignupForm = ({
       >
         <View className="flex-1">
           <View className="h-8" />
-          <View className="flex-row items-center justify-between px-6 py-4">
-            {/* <TouchableOpacity onPress={() => router.replace('/onboarding')}>
-            <AuthBack />
-          </TouchableOpacity> */}
-          </View>
-          <View className="mt-10 items-center px-5 py-4">
+          <View className="mt-[155px] items-center px-5 py-4">
             <Logo />
           </View>
           <View className="flex-1 justify-end">
             <View
-              className="w-full rounded-t-3xl bg-white px-6 py-8"
+              className="w-full rounded-t-3xl bg-white px-6 py-8 "
               style={{ height: '80%' }}
             >
               <KeyboardAvoidingView>

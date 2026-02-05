@@ -84,14 +84,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           'com.googleusercontent.apps.6432411175-6hp32s7eqevqb168m51gcf51f383iqsk',
       },
     ],
-    // [
-    //   'expo-splash-screen',
-    //   {
-    //     backgroundColor: '#ffffff',
-    //     image: './assets/splash-icon.png',
-    //     imageWidth: 150,
-    //   },
-    // ],
+    [
+      'expo-splash-screen',
+      {
+        backgroundColor: '#ffffff',
+        image: './assets/splashicon.png',
+      },
+    ],
     [
       'expo-font',
       {
