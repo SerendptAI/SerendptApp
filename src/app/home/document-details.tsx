@@ -1,33 +1,24 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable max-params */
 /* eslint-disable max-lines-per-function */
-import Voice, {
-  type SpeechErrorEvent,
-  type SpeechResultsEvent,
-} from '@react-native-voice/voice';
 import { useQueryClient } from '@tanstack/react-query';
-import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
+import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system/legacy';
-import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
-
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import Markdown from 'react-native-markdown-display';
 
 //@ts-ignore
-import { useChat } from '@/api/chat';
 import { useDeleteChat, useGetChat } from '@/api/chat/use-get-chat';
 import {
   audioStream,
-  explainTerm,
   useGetAudioVoices,
   useGetDocumentBatchesContent,
 } from '@/api/documents';
 import { FloatingAudioControl } from '@/components/floating-audio-control';
 import { FloatingChatButton } from '@/components/floating-chat-button';
 import {
-  Button,
   FocusAwareStatusBar,
   SafeAreaView,
   Text,
@@ -35,18 +26,17 @@ import {
   View,
 } from '@/components/ui';
 import { Back, CaretDown, PageSettings } from '@/components/ui/icons';
-import { CloseSmall } from '@/components/ui/icons/closesmall';
 import { Resize } from '@/components/ui/icons/resize';
+import { handleSpeechToText } from '@/lib/stt';
 
 import { AudioPill } from '../../components/home/audio-pill';
-import { AIMessageCard, UserMessageCard } from './chats';
+import { ChatModal } from './chat-modal';
 import { HighlightedWord } from './highlighted-word';
 import { LoadingBar } from './loading-bar';
-import { TextSkeleton } from './textskeleton';
-import { WordSelectionModal } from './word-selection-modal';
 import { PageNavigationModal } from './page-navigation-modal';
 import { SelectVoiceModal } from './select-voice-modal';
-import { ChatModal } from './chat-modal';
+import { TextSkeleton } from './textskeleton';
+import { WordSelectionModal } from './word-selection-modal';
 interface WordTiming {
   word: string;
   start: number;
@@ -82,9 +72,9 @@ export default function DocumentDetails() {
   const [isAudioSessionActive, setIsAudioSessionActive] = useState(false);
 
   const soundRef = useRef<Audio.Sound | null>(null);
-  const highlightIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const highlightIntervalRef = useRef<NodeJS.Timeout | null | number>(null);
   const pageIndexRef = useRef(currentPageIndex);
-  const autoPlayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const autoPlayTimeoutRef = useRef<NodeJS.Timeout | null | number>(null);
   const audioStreamMutation = audioStream();
 
   const totalPages = batchesContent?.length || 0;
@@ -94,12 +84,88 @@ export default function DocumentDetails() {
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const [isListening, setIsListening] = useState(false);
 
-  const chatMutation = useChat();
-
   const currentBatchOrderRef = useRef<number | null>(null);
-  const lastProcessedTextRef = useRef('');
+  const recordingRef = useRef<Audio.Recording | null>(null);
 
-  const isProcessingRef = useRef(false);
+  const startRecording = async () => {
+    try {
+      const permission = await Audio.requestPermissionsAsync();
+
+      if (permission.status !== 'granted') {
+        console.log('Permission to access microphone was denied');
+        return;
+      }
+
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
+
+      recordingRef.current = recording;
+      setIsListening(true);
+      console.log('Recording started');
+    } catch (error) {
+      console.error('Failed to start recording:', error);
+    }
+  };
+
+  const stopRecording = async () => {
+    try {
+      if (!recordingRef.current) {
+        console.log('No recording in progress');
+        return null;
+      }
+
+      await recordingRef.current.stopAndUnloadAsync();
+
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        playsInSilentModeIOS: true,
+      });
+
+      const uri = recordingRef.current.getURI();
+      recordingRef.current = null;
+
+      if (uri) {
+        const playback = new Audio.Sound();
+        await playback.loadAsync({ uri });
+        await playback.playAsync();
+        await new Promise((resolve) => setTimeout(resolve, 5000)); // play for 5s
+        await playback.unloadAsync();
+        try {
+          const text = await handleSpeechToText(uri);
+
+          console.log('Transcription:', JSON.stringify(text, null, 2));
+        } catch (err) {
+          console.log('err:', err);
+        } finally {
+          setIsListening(false);
+        }
+      }
+
+      console.log('Recording stopped, file saved at:', uri);
+
+      return uri;
+    } catch (error) {
+      console.error('Failed to stop recording:', error);
+      return null;
+    }
+  };
+
+  const toggleListeningAndProcessing = async () => {
+    if (isListening) {
+      const recordingUri = await stopRecording();
+      if (recordingUri) {
+        console.log('Process audio file:', recordingUri);
+      }
+    } else {
+      await startRecording();
+    }
+  };
 
   useEffect(() => {
     currentBatchOrderRef.current = currentPage?.batch_order ?? null;
@@ -108,6 +174,7 @@ export default function DocumentDetails() {
     if (audioVoices && audioVoices?.voices.length > 0) {
       const defaultVoice =
         audioVoices.voices.find((v: any) => !v.disabled) ||
+        //@ts-ignore
         audioVoices?.voices[0];
       setSelectedVoice(defaultVoice);
     }
@@ -131,11 +198,6 @@ export default function DocumentDetails() {
     setCurrentWordIndex(-1);
   }, []);
 
-  const resetAudioCompletely = useCallback(async () => {
-    setIsAudioSessionActive(false);
-    await stopAudio();
-  }, [stopAudio]);
-
   const handlePlaybackStatusUpdate = useCallback(
     (status: any) => {
       if (status.didJustFinish) {
@@ -155,12 +217,7 @@ export default function DocumentDetails() {
   );
 
   const statusUpdateRef = useRef(handlePlaybackStatusUpdate);
-  const lastSpeechTimeRef = useRef(0);
-  const {
-    data,
-    isLoading: isLoadingChat,
-    refetch,
-  } = useGetChat({
+  const { data, isLoading: isLoadingChat } = useGetChat({
     variables: { document_id: documentId ?? '' },
   });
 
@@ -291,155 +348,6 @@ export default function DocumentDetails() {
       }
     }
   }, [generateAndPlay]);
-
-  const handleFinal = async (text: string) => {
-    const trimmedText = text?.trim();
-    if (!trimmedText) return;
-
-    const now = Date.now();
-
-    // Prevent duplicate calls within 2 seconds
-    if (now - lastSpeechTimeRef.current < 2000) {
-      return;
-    }
-
-    // Prevent duplicate processing
-    if (
-      trimmedText === lastProcessedTextRef.current ||
-      chatMutation.isPending ||
-      isProcessingRef.current
-    ) {
-      return;
-    }
-
-    const batchOrder = currentBatchOrderRef.current;
-    if (!documentId || batchOrder == null) return;
-
-    // Set processing flag BEFORE any async operations
-    isProcessingRef.current = true;
-    lastProcessedTextRef.current = trimmedText;
-    lastSpeechTimeRef.current = now;
-    setIsListening(false);
-
-    try {
-      const response = await chatMutation.mutateAsync({
-        document_id: documentId,
-        batch_order: batchOrder,
-        question: trimmedText,
-      });
-
-      if (response) {
-        setIsChatModalOpen(true);
-        refetch();
-        setTimeout(() => {
-          lastProcessedTextRef.current = '';
-          isProcessingRef.current = false; // Reset after delay
-        }, 3000);
-      }
-    } catch (error) {
-      console.error('Chat Error:', error);
-      lastProcessedTextRef.current = '';
-      isProcessingRef.current = false; // Reset on error
-    }
-  };
-
-  const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    const setupAudio = async () => {
-      try {
-        await Audio.setAudioModeAsync({
-          allowsRecordingIOS: true,
-          playsInSilentModeIOS: true,
-          staysActiveInBackground: false,
-          interruptionModeIOS: InterruptionModeIOS.DoNotMix,
-          shouldDuckAndroid: true,
-          interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
-          playThroughEarpieceAndroid: false,
-        });
-      } catch (e) {
-        console.error('Audio Setup Error:', e);
-      }
-    };
-
-    setupAudio();
-
-    // Setup Voice Listeners
-    Voice.onSpeechStart = () => setIsListening(true);
-    Voice.onSpeechEnd = () => setIsListening(false);
-    Voice.onSpeechError = handleSpeechError;
-    Voice.onSpeechResults = handleSpeechResults;
-    Voice.onSpeechVolumeChanged = () => resetSilenceTimeout();
-
-    return () => {
-      Voice.destroy().then(Voice.removeAllListeners);
-      if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
-      if (highlightIntervalRef.current)
-        clearInterval(highlightIntervalRef.current);
-    };
-  }, []);
-
-  const handleSpeechError = (e: SpeechErrorEvent) => {
-    console.error('Speech Error:', e);
-    setIsListening(false);
-  };
-
-  const handleSpeechResults = async (e: SpeechResultsEvent) => {
-    const finalResult = e.value?.[0];
-    if (
-      finalResult &&
-      finalResult.trim().length > 0 &&
-      !isProcessingRef.current
-    ) {
-      await handleFinal(finalResult);
-    }
-  };
-
-  const resetSilenceTimeout = () => {
-    if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
-    silenceTimeoutRef.current = setTimeout(() => {
-      if (isListening) stopListening();
-    }, 5000); // 5 seconds silence timeout
-  };
-
-  const startListening = async () => {
-    try {
-      if (isPlaying) await stopAudio();
-
-      const isAvailable = await Voice.isAvailable();
-      if (!isAvailable) {
-        console.error('Voice recognition is not available on this device');
-        return;
-      }
-
-      try {
-        await Voice.stop();
-      } catch (e) {}
-
-      try {
-        await Voice.destroy();
-      } catch (e) {}
-
-      await Voice.start('en-US');
-    } catch (e) {
-      console.error('Start Voice Error:', e);
-    }
-  };
-  const stopListening = async () => {
-    try {
-      await Voice.stop();
-    } catch (e) {
-      console.error('Stop Voice Error:', e);
-    }
-  };
-
-  const toggleListeningAndProcessing = () => {
-    if (isListening) {
-      stopListening();
-    } else {
-      startListening();
-    }
-  };
 
   return (
     <View className="flex-1 bg-white">

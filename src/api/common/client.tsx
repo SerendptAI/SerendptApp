@@ -10,7 +10,6 @@ export const client = axios.create({
 // Add a request interceptor to include auth token in requests
 client.interceptors.request.use(
   (config) => {
-     console.log('response', config);
     // Get the auth token from storage
     const token = getToken();
     // If token exists, add it to the Authorization header
