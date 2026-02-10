@@ -6,16 +6,12 @@ const API_URL = 'https://api.elevenlabs.io/v1/speech-to-text';
 
 export const handleSpeechToText = async (uri: string): Promise<string> => {
   try {
-    console.log('Transcribing file:', uri);
 
     // Verify file exists (legacy style)
     const fileInfo = await LegacyFileSystem.getInfoAsync(uri);
     if (!fileInfo.exists || fileInfo.size === 0) {
       throw new Error('Recording file not found or empty');
     }
-    console.log('File size:', fileInfo.size, 'bytes');
-
-    console.log('Uploading via legacy uploadAsync...');
 
     const uploadResult = await LegacyFileSystem.uploadAsync(API_URL, uri, {
       httpMethod: 'POST',
@@ -34,8 +30,6 @@ export const handleSpeechToText = async (uri: string): Promise<string> => {
       },
     });
 
-    console.log('Upload status:', uploadResult.status);
-
     if (uploadResult.status < 200 || uploadResult.status >= 300) {
       throw new Error(
         `ElevenLabs failed: ${uploadResult.status} - ${uploadResult.body}`
@@ -43,7 +37,6 @@ export const handleSpeechToText = async (uri: string): Promise<string> => {
     }
 
     const data = JSON.parse(uploadResult.body);
-    console.log('Full response:', JSON.stringify(data, null, 2));
 
     const transcript = data.text?.trim() || 'No transcription returned';
 
@@ -52,7 +45,6 @@ export const handleSpeechToText = async (uri: string): Promise<string> => {
 
     return transcript;
   } catch (error: any) {
-    console.error('Transcription failed:', error.message || error);
     if (error.stack) console.error('Stack:', error.stack);
     throw error;
   }

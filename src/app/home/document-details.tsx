@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import Markdown from 'react-native-markdown-display';
 
+import { useChat } from '@/api/chat';
 //@ts-ignore
 import { useDeleteChat, useGetChat } from '@/api/chat/use-get-chat';
 import {
@@ -87,6 +88,43 @@ export default function DocumentDetails() {
   const currentBatchOrderRef = useRef<number | null>(null);
   const recordingRef = useRef<Audio.Recording | null>(null);
 
+  const chatMutation = useChat();
+  const {
+    data,
+    isLoading: isLoadingChat,
+    refetch,
+  } = useGetChat({
+    variables: { document_id: documentId ?? '' },
+  });
+
+  const deleteChatMutation = useDeleteChat();
+
+  const messages = data?.messages ? [...data.messages].reverse() : [];
+
+  const handleFinal = async (text: string) => {
+    const trimmedText = text?.trim();
+    if (!trimmedText) return;
+
+    const batchOrder = currentBatchOrderRef.current;
+    if (!documentId || batchOrder == null) return;
+
+    try {
+      const response = await chatMutation.mutateAsync({
+        document_id: documentId,
+        batch_order: batchOrder,
+        question: trimmedText,
+      });
+
+      if (response) {
+        setIsChatModalOpen(true);
+        refetch();
+      }
+    } catch (error) {
+      console.error('Chat Error:', error);
+      setIsListening(false);
+    }
+  };
+
   const startRecording = async () => {
     try {
       const permission = await Audio.requestPermissionsAsync();
@@ -131,27 +169,25 @@ export default function DocumentDetails() {
       recordingRef.current = null;
 
       if (uri) {
-        const playback = new Audio.Sound();
-        await playback.loadAsync({ uri });
-        await playback.playAsync();
-        await new Promise((resolve) => setTimeout(resolve, 5000)); // play for 5s
-        await playback.unloadAsync();
         try {
           const text = await handleSpeechToText(uri);
 
           console.log('Transcription:', JSON.stringify(text, null, 2));
+
+          setIsListening(false);
+
+          // if text is an empty string, return
+          if (!text) return;
+          handleFinal(text);
         } catch (err) {
           console.log('err:', err);
-        } finally {
           setIsListening(false);
         }
       }
 
-      console.log('Recording stopped, file saved at:', uri);
-
       return uri;
     } catch (error) {
-      console.error('Failed to stop recording:', error);
+      setIsListening(false);
       return null;
     }
   };
@@ -160,7 +196,7 @@ export default function DocumentDetails() {
     if (isListening) {
       const recordingUri = await stopRecording();
       if (recordingUri) {
-        console.log('Process audio file:', recordingUri);
+        // console.log('Process audio file:', recordingUri);
       }
     } else {
       await startRecording();
@@ -217,13 +253,6 @@ export default function DocumentDetails() {
   );
 
   const statusUpdateRef = useRef(handlePlaybackStatusUpdate);
-  const { data, isLoading: isLoadingChat } = useGetChat({
-    variables: { document_id: documentId ?? '' },
-  });
-
-  const deleteChatMutation = useDeleteChat();
-
-  const messages = data?.messages ? [...data.messages].reverse() : [];
 
   // Update it whenever the function changes
   useEffect(() => {
@@ -378,7 +407,9 @@ export default function DocumentDetails() {
         )}
 
         <View style={{ height: 2 }}>
-          {isGeneratingAudio || (isLoadingBatches && <LoadingBar />)}
+          {isGeneratingAudio ||
+            chatMutation.isPending ||
+            (isLoadingBatches && <LoadingBar />)}
         </View>
 
         <View className="flex-row items-center justify-between bg-[#FCFCFC] px-6 py-3">
@@ -557,6 +588,7 @@ export default function DocumentDetails() {
         isloadingDeleteChat={deleteChatMutation.isPending}
         isListening={isListening}
         setIsListening={setIsListening}
+        setIsChatModalOpen={setIsChatModalOpen}
         toggleListeningAndProcessing={toggleListeningAndProcessing}
       />
 

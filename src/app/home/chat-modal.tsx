@@ -1,6 +1,7 @@
 /* eslint-disable max-lines-per-function */
 import { Image } from 'expo-image';
-import { Modal, ScrollView, View } from 'react-native';
+import { XCircleIcon } from 'phosphor-react-native';
+import { Modal, Pressable, ScrollView, View } from 'react-native';
 
 import { AudioPill } from '@/components/home/audio-pill';
 import { Button, Text } from '@/components/ui';
@@ -20,13 +21,23 @@ export function ChatModal({
   return (
     <Modal transparent visible={visible} animationType="fade">
       <View className=" flex-1 bg-black/80  pt-[75px]">
-        <View className="mr-4 self-end pb-3">
-          <AudioPill
-            isChatModalOpen={isChatModalOpen}
-            isListening={isListening}
-            toggleListeningAndProcessing={toggleListeningAndProcessing}
-            setIsChatModalOpen={setIsChatModalOpen}
-          />
+        <View className="flex-row items-center justify-between px-4">
+          <Pressable
+            className="pb-3"
+            onPress={() => {
+              setIsChatModalOpen(false);
+            }}
+          >
+            <XCircleIcon size={24} color="white" />
+          </Pressable>
+          <View className="mr-4 self-end pb-3">
+            <AudioPill
+              isChatModalOpen={isChatModalOpen}
+              isListening={isListening}
+              toggleListeningAndProcessing={toggleListeningAndProcessing}
+              setIsChatModalOpen={setIsChatModalOpen}
+            />
+          </View>
         </View>
         <ScrollView
           className=" px-4"
@@ -36,7 +47,6 @@ export function ChatModal({
           {messages?.length > 0 ? (
             messages
               .slice()
-              .reverse()
               .map((item: any, index: number) =>
                 item.role === 'ai' ? (
                   <AIMessageCard

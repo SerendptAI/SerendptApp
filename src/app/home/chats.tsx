@@ -4,8 +4,13 @@ import Voice, {
   type SpeechResultsEvent,
 } from '@react-native-voice/voice';
 import { Audio } from 'expo-av';
+import * as Clipboard from 'expo-clipboard';
+import * as FileSystem from 'expo-file-system/legacy';
 import { Image } from 'expo-image';
+import * as Print from 'expo-print';
 import { router, useLocalSearchParams } from 'expo-router';
+import * as Sharing from 'expo-sharing';
+import { CopyIcon, DownloadSimpleIcon } from 'phosphor-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 // Import ActivityIndicator
 import Animated, {
@@ -24,6 +29,7 @@ import { type ChatResponse, useChat } from '@/api/chat';
 import { useGetChat } from '@/api/chat/use-get-chat';
 import {
   FocusAwareStatusBar,
+  Pressable,
   SafeAreaView,
   ScrollView,
   Text,
@@ -100,6 +106,45 @@ export const AIMessageCard = ({
   text: string;
   time: string;
 }) => {
+  const handleCopy = async (textToCopy: string) => {
+    await Clipboard.setStringAsync(textToCopy);
+  };
+
+  const handleDownload = async (textToDownload: string) => {
+    try {
+      const html = `
+      <html>
+        <body style="font-family: sans-serif; padding: 50px;">
+          <h1>AI Message Export</h1>
+          <p style="color: #666;">Generated on: ${new Date().toLocaleString()}</p>
+          <hr />
+          <div style="font-size: 18px; margin-top: 20px;">${textToDownload.replace(/\n/g, '<br/>')}</div>
+        </body>
+      </html>
+    `;
+
+      const { uri } = await Print.printToFileAsync({ html });
+
+      const fileName = `AI_Message_${Date.now()}.pdf`;
+      const newUri = FileSystem.documentDirectory + fileName;
+
+      await FileSystem.moveAsync({
+        from: uri,
+        to: newUri,
+      });
+
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(newUri, {
+          UTI: '.pdf',
+          mimeType: 'application/pdf',
+          dialogTitle: 'Save your AI Conversation',
+        });
+      }
+    } catch (error) {
+      console.error('Download Error:', error);
+    }
+  };
+
   return (
     <View className="mb-5 w-[95%] rounded-2xl border-[0.5px] border-gray-200 bg-white p-5">
       <View className="mb-3">
@@ -113,6 +158,26 @@ export const AIMessageCard = ({
       <Text className="mt-3 text-right text-[11px] text-gray-400">
         {formatMessageTime(time)}
       </Text>
+      <View className="my-3 h-px bg-gray-100" />
+
+      <View className="flex-row items-center gap-4">
+        <Pressable onPress={() => handleCopy(text)}>
+          <View className="flex-row items-center gap-1">
+            <CopyIcon size={20} color="#242b39" />
+            <Text className="font-brownstd text-[14px] text-[#1A1A1A]">
+              Copy
+            </Text>
+          </View>
+        </Pressable>
+        <Pressable onPress={() => handleDownload(text)}>
+          <View className="flex-row items-center gap-1">
+            <DownloadSimpleIcon size={20} color="#242b39" />
+            <Text className="font-brownstd text-[14px] text-[#1A1A1A]">
+              PDF
+            </Text>
+          </View>
+        </Pressable>
+      </View>
     </View>
   );
 };
