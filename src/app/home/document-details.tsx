@@ -46,14 +46,20 @@ interface WordTiming {
 
 export default function DocumentDetails() {
   const queryClient = useQueryClient();
-  const { title, documentId } = useLocalSearchParams<{
+  const { title, documentId, lastReadPosition } = useLocalSearchParams<{
     title: string;
     documentId: string;
+    lastReadPosition: string;
   }>();
   const { data: batchesContent, isLoading: isLoadingBatches } =
     useGetDocumentBatchesContent({
       variables: { documentId: documentId || '' },
     });
+
+  console.log(
+    'last_read_position',
+    JSON.stringify(lastReadPosition, null, 2)
+  );
 
   const [selectedVoice, setSelectedVoice] = useState<any>(null);
 
@@ -553,6 +559,7 @@ export default function DocumentDetails() {
         visible={isChangePageNumberOpen}
         total={totalPages}
         current={currentPageIndex}
+        lastReadPage={lastReadPosition}
         onSelect={(i: React.SetStateAction<number>) => {
           setCurrentPageIndex(i);
           setIsChangePageNumberOpen(false);

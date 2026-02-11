@@ -11,6 +11,7 @@ export function PageNavigationModal({
   onSelect,
   onClose,
   batches,
+  lastReadPage,
 }: any) {
   return (
     <Modal transparent visible={visible} animationType="slide">
@@ -36,11 +37,18 @@ export function PageNavigationModal({
                 activeOpacity={1}
                 key={i}
                 onPress={() => onSelect(i)}
-                className={`mb-2 rounded-xl p-4 ${current === i ? 'bg-[#F9FAFB]' : ''}`}
+                className={`relative mb-2 rounded-xl p-4 ${current === i ? 'bg-[#F9FAFB]' : ''}`}
               >
                 <Text className={`font-brownstd `}>
                   {batches?.[i]?.batch_title || `Page ${i + 1}`}
                 </Text>
+                {Number(lastReadPage) === i && (
+                  <View className="absolute right-4 top-4 h-[27px] rounded-[16px] bg-[#FDF4CF6B] px-[9px] py-[4px]">
+                    <Text className="font-brownstd text-[12px] text-black">
+                      Last read
+                    </Text>
+                  </View>
+                )}
               </TouchableOpacity>
             ))}
           </ScrollView>

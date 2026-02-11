@@ -157,6 +157,7 @@ export default function Home() {
             params: {
               documentId: item.document_id,
               title: item.document_title,
+              lastReadPosition: String(item?.last_read_position),
               progress: progress.toString(),
             },
           })
