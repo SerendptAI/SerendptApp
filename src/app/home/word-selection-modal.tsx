@@ -6,7 +6,7 @@ import { Modal, Pressable, TouchableOpacity, View } from 'react-native';
 import { explainTerm } from '@/api/documents';
 import { Text } from '@/components/ui';
 
-import { TextSkeleton } from './textskeleton';
+import { WordMeaningTextSkeleton } from './textskeleton';
 export function WordSelectionModal({
   visible,
   word,
@@ -126,7 +126,7 @@ export function WordSelectionModal({
               <View className="pb-8">
                 {isPending ? (
                   <View>
-                    <TextSkeleton numberOfLines={1} />
+                    <WordMeaningTextSkeleton numberOfLines={1} />
                   </View>
                 ) : (
                   <Text className=" font-brownstd text-base text-black">
@@ -144,7 +144,7 @@ export function WordSelectionModal({
               <View className="pb-8">
                 {isPending ? (
                   <View>
-                    <TextSkeleton numberOfLines={1} />
+                    <WordMeaningTextSkeleton numberOfLines={1} />
                   </View>
                 ) : (
                   <Text className="font-biro-script text-lg text-[#1E40AF]">

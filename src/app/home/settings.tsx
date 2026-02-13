@@ -1,5 +1,6 @@
 /* eslint-disable max-lines-per-function */
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import React from 'react';
 import { useForm } from 'react-hook-form';
@@ -205,6 +206,11 @@ export default function Settings(): JSX.Element {
             >
               <CloseLogout />
             </Pressable>
+            <Image
+              source={require('../../../assets/logouttt.png')}
+              style={{ width: 170, height: 170 }}
+              contentFit="contain"
+            />
             <Text className="mb-5 max-w-[282px] text-center  font-garamond text-[35px] leading-10 text-black">
               Are you sure you want to log out?
             </Text>

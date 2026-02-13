@@ -2,11 +2,17 @@
 /* eslint-disable max-params */
 /* eslint-disable max-lines-per-function */
 import { useQueryClient } from '@tanstack/react-query';
-import { Audio } from 'expo-av';
+import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
 import * as FileSystem from 'expo-file-system/legacy';
+import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+} from 'react-native';
 import Markdown from 'react-native-markdown-display';
 
 import { useChat } from '@/api/chat';
@@ -46,6 +52,7 @@ interface WordTiming {
 
 export default function DocumentDetails() {
   const queryClient = useQueryClient();
+  const { height } = useWindowDimensions();
   const { title, documentId, lastReadPosition } = useLocalSearchParams<{
     title: string;
     documentId: string;
@@ -56,16 +63,13 @@ export default function DocumentDetails() {
       variables: { documentId: documentId || '' },
     });
 
-  console.log(
-    'last_read_position',
-    JSON.stringify(lastReadPosition, null, 2)
-  );
-
   const [selectedVoice, setSelectedVoice] = useState<any>(null);
 
   const { data: audioVoices } = useGetAudioVoices();
 
-  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [currentPageIndex, setCurrentPageIndex] = useState(
+    Number(lastReadPosition)
+  );
   const [isEnlarged, setIsEnlarged] = useState(false);
   const [isChangePageNumberOpen, setIsChangePageNumberOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -102,7 +106,6 @@ export default function DocumentDetails() {
   } = useGetChat({
     variables: { document_id: documentId ?? '' },
   });
-
   const deleteChatMutation = useDeleteChat();
 
   const messages = data?.messages ? [...data.messages].reverse() : [];
@@ -169,6 +172,7 @@ export default function DocumentDetails() {
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
         playsInSilentModeIOS: true,
+        staysActiveInBackground: true,
       });
 
       const uri = recordingRef.current.getURI();
@@ -205,6 +209,7 @@ export default function DocumentDetails() {
         // console.log('Process audio file:', recordingUri);
       }
     } else {
+      setIsListening(true);
       await startRecording();
     }
   };
@@ -359,10 +364,24 @@ export default function DocumentDetails() {
   }, [currentPageIndex, isAudioSessionActive]);
 
   useEffect(() => {
-    Audio.setAudioModeAsync({
-      allowsRecordingIOS: false,
-      playsInSilentModeIOS: true,
-    });
+    const setupAudio = async () => {
+      try {
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: false,
+          interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+          playsInSilentModeIOS: true,
+          shouldDuckAndroid: true,
+          interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+          playThroughEarpieceAndroid: false,
+          staysActiveInBackground: true, // THIS IS KEY
+        });
+      } catch (e) {
+        console.log('Error setting audio mode', e);
+      }
+    };
+
+    setupAudio();
+
     return () => {
       stopAudio();
     };
@@ -385,7 +404,7 @@ export default function DocumentDetails() {
   }, [generateAndPlay]);
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-white ">
       <FocusAwareStatusBar hidden={isEnlarged} />
       <SafeAreaView className="flex-1">
         {!isEnlarged && (
@@ -599,7 +618,38 @@ export default function DocumentDetails() {
         toggleListeningAndProcessing={toggleListeningAndProcessing}
       />
 
-      <View></View>
+      {currentPageIndex > 0 && (
+        <Pressable
+          style={{ position: 'absolute', top: height / 2, left: 10 }}
+          onPress={() => {
+            // set current to the previous page
+            if (currentPageIndex > 0) setCurrentPageIndex(currentPageIndex - 1);
+          }}
+        >
+          <Image
+            source={require('../../../assets/buttnleft.png')}
+            style={{ width: 29, height: 28 }}
+            contentFit="contain"
+          />
+        </Pressable>
+      )}
+
+      {currentPageIndex < totalPages - 1 && (
+        <Pressable
+          style={{ position: 'absolute', top: height / 2, right: 10 }}
+          onPress={() => {
+            if (currentPageIndex < totalPages - 1) {
+              setCurrentPageIndex((prev) => prev + 1);
+            }
+          }}
+        >
+          <Image
+            source={require('../../../assets/buttnright.png')}
+            style={{ width: 29, height: 28 }}
+            contentFit="contain"
+          />
+        </Pressable>
+      )}
     </View>
   );
 }

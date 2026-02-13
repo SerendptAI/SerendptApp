@@ -1,8 +1,5 @@
 /* eslint-disable max-lines-per-function */
-import Voice, {
-  type SpeechErrorEvent,
-  type SpeechResultsEvent,
-} from '@react-native-voice/voice';
+
 import { Audio } from 'expo-av';
 import * as Clipboard from 'expo-clipboard';
 import * as FileSystem from 'expo-file-system/legacy';
@@ -12,20 +9,20 @@ import { router, useLocalSearchParams } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { CopyIcon, DownloadSimpleIcon } from 'phosphor-react-native';
 import React, { useEffect, useRef, useState } from 'react';
+import { StyleSheet } from 'react-native';
+import Markdown from 'react-native-markdown-display';
 // Import ActivityIndicator
 import Animated, {
-  interpolate,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
   withRepeat,
   withSequence,
-  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 
 //@ts-ignore
-import { type ChatResponse, useChat } from '@/api/chat';
+import { useChat } from '@/api/chat';
 import { useGetChat } from '@/api/chat/use-get-chat';
 import {
   FocusAwareStatusBar,
@@ -39,6 +36,7 @@ import {
 import { Back } from '@/components/ui/icons/back';
 import { Mics } from '@/components/ui/icons/mics';
 import { SmallLogo } from '@/components/ui/icons/small-logo';
+import { handleSpeechToText } from '@/lib/stt';
 
 const TypingIndicator = () => {
   const Dot = ({ delay }: { delay: number }) => {
@@ -152,9 +150,10 @@ export const AIMessageCard = ({
           <Text className="text-[11px] font-bold text-[#1A1A1A]">AI</Text>
         </View>
       </View>
-      <Text className="font-brownstd  text-[16px] leading-7 text-black">
+      <Markdown style={markdownStyles}>{text}</Markdown>
+      {/* <Text className="font-brownstd  text-[16px] leading-7 text-black">
         {text}
-      </Text>
+      </Text> */}
       <Text className="mt-3 text-right text-[11px] text-gray-400">
         {formatMessageTime(time)}
       </Text>
@@ -319,8 +318,6 @@ export default function Chats() {
 
   const [isListening, setIsListening] = useState(false);
 
-  const volumeLevel = useSharedValue(1);
-
   const chatMutation = useChat();
 
   const { data, isLoading, refetch } = useGetChat({
@@ -329,107 +326,105 @@ export default function Chats() {
 
   const messages = data?.messages ? [...data.messages].reverse() : [];
 
-  const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const recordingRef = useRef<Audio.Recording | null>(null);
 
-  useEffect(() => {
-    const setupAudio = async () => {
-      try {
-        await Audio.setAudioModeAsync({
-          allowsRecordingIOS: true,
-          playsInSilentModeIOS: true,
-          staysActiveInBackground: false,
-        });
-      } catch (e) {
-        console.error('Audio Setup Error:', e);
-      }
-    };
+  const handleFinal = async (text: string) => {
+    const trimmedText = text?.trim();
+    if (!trimmedText) return;
 
-    setupAudio();
+    if (!documentId || batchOrder == null) return;
 
-    // 2. Setup Voice Listeners
-    Voice.onSpeechStart = () => setIsListening(true);
-    Voice.onSpeechEnd = () => setIsListening(false);
-    Voice.onSpeechError = handleSpeechError;
-    Voice.onSpeechResults = handleSpeechResults;
-    Voice.onSpeechPartialResults = handlePartialResults;
-    Voice.onSpeechVolumeChanged = (e: any) => {
-      const normalized = interpolate(e.value, [0, 10], [1, 2.2], 'clamp');
-      volumeLevel.value = withSpring(normalized);
-      resetSilenceTimeout();
-    };
-
-    return () => {
-      Voice.destroy().then(Voice.removeAllListeners);
-      if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
-    };
-  }, []);
-
-  const handleSpeechError = (e: SpeechErrorEvent) => {
-    console.error('Speech Error:', e);
-    setIsListening(false);
-  };
-
-  const handlePartialResults = (e: SpeechResultsEvent) => {
-    const partialResult = e.value?.[0];
-    if (partialResult && partialResult.trim().length > 0) {
-    }
-  };
-
-  const handleSpeechResults = async (e: SpeechResultsEvent) => {
-    const finalResult = e.value?.[0];
-    if (finalResult && finalResult.trim().length > 0) {
-      console.log('Final Speech Result:', finalResult);
-
-      const response: ChatResponse = await chatMutation.mutateAsync({
+    try {
+      const response = await chatMutation.mutateAsync({
         document_id: documentId,
         batch_order: Number(batchOrder),
-        question: finalResult,
+        question: trimmedText,
       });
 
       if (response) {
-        setIsListening(false);
         refetch();
       }
+    } catch (error) {
+      console.error('Chat Error:', error);
+      setIsListening(false);
     }
   };
-
-  const resetSilenceTimeout = () => {
-    if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
-    //@ts-ignore
-    silenceTimeoutRef.current = setTimeout(() => {
-      if (isListening) stopListening();
-    }, 2500);
-  };
-
-  const startListening = async () => {
+  const startRecording = async () => {
     try {
-      const isAlreadyRecognizing = await Voice.isRecognizing();
-      if (isAlreadyRecognizing) {
+      const permission = await Audio.requestPermissionsAsync();
+
+      if (permission.status !== 'granted') {
+        console.log('Permission to access microphone was denied');
         return;
       }
 
-      await Voice.destroy();
-      await Voice.start('en-US');
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
+
+      recordingRef.current = recording;
       setIsListening(true);
-    } catch (e) {
-      console.error('Start Voice Error:', e);
+      console.log('Recording started');
+    } catch (error) {
+      console.error('Failed to start recording:', error);
     }
   };
 
-  const stopListening = async () => {
+  const stopRecording = async () => {
     try {
-      await Voice.stop();
-      volumeLevel.value = withTiming(1);
-    } catch (e) {
-      console.error('Stop Voice Error:', e);
+      if (!recordingRef.current) {
+        console.log('No recording in progress');
+        return null;
+      }
+
+      await recordingRef.current.stopAndUnloadAsync();
+
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        playsInSilentModeIOS: true,
+      });
+
+      const uri = recordingRef.current.getURI();
+      recordingRef.current = null;
+
+      if (uri) {
+        try {
+          const text = await handleSpeechToText(uri);
+
+          console.log('Transcription:', JSON.stringify(text, null, 2));
+
+          setIsListening(false);
+
+          // if text is an empty string, return
+          if (!text) return;
+          handleFinal(text);
+        } catch (err) {
+          console.log('err:', err);
+          setIsListening(false);
+        }
+      }
+
+      return uri;
+    } catch (error) {
+      setIsListening(false);
+      return null;
     }
   };
 
-  const toggleListeningAndProcessing = () => {
+  const toggleListeningAndProcessing = async () => {
     if (isListening) {
-      stopListening();
+      const recordingUri = await stopRecording();
+      if (recordingUri) {
+        // console.log('Process audio file:', recordingUri);
+      }
     } else {
-      startListening();
+      setIsListening(true);
+      await startRecording();
     }
   };
 
@@ -515,3 +510,15 @@ export default function Chats() {
     </View>
   );
 }
+
+const markdownStyles = StyleSheet.create({
+  body: {
+    fontSize: 16,
+    fontFamily: 'font-brownstd',
+    color: '#000',
+    lineHeight: 28,
+  },
+  paragraph: { marginBottom: 16 },
+  heading1: { fontSize: 24, fontFamily: 'bold', marginBottom: 12 },
+  heading2: { fontSize: 20, fontWeight: 'bold', marginBottom: 8 },
+});

@@ -1,6 +1,7 @@
 /* eslint-disable max-lines-per-function */
 import { Image } from 'expo-image';
 import { XCircleIcon } from 'phosphor-react-native';
+import React, { useEffect, useRef } from 'react';
 import { Modal, Pressable, ScrollView, View } from 'react-native';
 
 import { AudioPill } from '@/components/home/audio-pill';
@@ -18,6 +19,16 @@ export function ChatModal({
   isloadingDeleteChat,
   isChatModalOpen,
 }: any) {
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    if (visible) {
+      // Small timeout ensures layout is finished
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+    }
+  }, [visible, messages]);
   return (
     <Modal transparent visible={visible} animationType="fade">
       <View className=" flex-1 bg-black/80  pt-[75px]">
@@ -40,6 +51,7 @@ export function ChatModal({
           </View>
         </View>
         <ScrollView
+          ref={scrollViewRef}
           className=" px-4"
           contentContainerClassName="mt-[45px] pb-28"
           showsVerticalScrollIndicator={false}
@@ -47,6 +59,7 @@ export function ChatModal({
           {messages?.length > 0 ? (
             messages
               .slice()
+              .reverse()
               .map((item: any, index: number) =>
                 item.role === 'ai' ? (
                   <AIMessageCard
@@ -82,7 +95,7 @@ export function ChatModal({
             disabled={isloadingDeleteChat}
             loading={isloadingDeleteChat}
             onPress={onClose}
-            className="mb-6 w-[182px] rounded-[22px] bg-[#FFCC00]"
+            className="mb-8 w-[182px] rounded-[22px] bg-[#FFCC00]"
             textClassName="text-[14px] font-brownstd text-[#000]"
           />
         </View>

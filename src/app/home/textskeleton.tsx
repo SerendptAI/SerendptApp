@@ -107,3 +107,24 @@ export const TextSkeleton = ({ numberOfLines = 20 }: any) => {
     </View>
   );
 };
+
+export const WordMeaningTextSkeleton = ({ numberOfLines = 20 }: any) => {
+  const opacity = useSharedValue(0.3);
+  useEffect(() => {
+    opacity.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 800 }),
+        withTiming(0.3, { duration: 800 })
+      ),
+      -1,
+      true
+    );
+  }, []);
+  return (
+    <View className="flex-1">
+      {[...Array(numberOfLines)].map((_, i) => (
+        <SkeletonLine key={i} width={'100%'} />
+      ))}
+    </View>
+  );
+};

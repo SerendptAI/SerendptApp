@@ -45,6 +45,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     config: {
       usesNonExemptEncryption: false, // Avoid the export compliance warning on the app store
     },
+    infoPlist: {
+      UIBackgroundModes: ['audio'],
+    },
   },
   experiments: {
     typedRoutes: true,
@@ -59,6 +62,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       'android.permission.READ_EXTERNAL_STORAGE',
       'android.permission.WRITE_EXTERNAL_STORAGE',
       'android.permission.RECORD_AUDIO',
+      'FOREGROUND_SERVICE',
+      'FOREGROUND_SERVICE_MEDIA_PLAYBACK',
     ],
   },
   web: {
