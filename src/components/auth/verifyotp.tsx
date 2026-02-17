@@ -86,7 +86,7 @@ export const VerifyOtpForm = ({
         <View className="flex-1">
           <View className="h-8" />
 
-          <View className="mt-[155px]items-center px-5 py-4">
+          <View className="mt-[155px] items-center px-5 py-4">
             <Logo />
           </View>
           <View className="flex-1 justify-end">

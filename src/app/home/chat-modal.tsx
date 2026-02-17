@@ -30,7 +30,7 @@ export function ChatModal({
     }
   }, [visible, messages]);
   return (
-    <Modal transparent visible={visible} animationType="fade">
+    <Modal transparent visible={visible} animationType="none">
       <View className=" flex-1 bg-black/80  pt-[75px]">
         <View className="flex-row items-center justify-between px-4">
           <Pressable

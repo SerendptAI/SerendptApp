@@ -27,20 +27,8 @@ type Props = {
   voiceName?: string;
   voiceType?: string;
   currentText?: string;
-  setSelectedVoice?: (voice: {
-    id: string;
-    name: string;
-    image_url: string;
-    tag: string;
-    disabled: boolean;
-  }) => void;
-  selectedVoice?: {
-    id: string;
-    name: string;
-    image_url: string;
-    tag: string;
-    disabled: boolean;
-  };
+  setSelectedVoice?: (voice: any) => void;
+  selectedVoice?: any;
   audioVoices?: any;
   setShowSelectVoiceModal?: any;
 };
@@ -58,111 +46,84 @@ export function FloatingAudioControl({
   const [showMinimized, setShowMinimized] = useState(false);
   const animationProgress = useSharedValue(0);
 
+  // Behavior: If playing, minimize after a delay to keep the screen clean
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
-
-    if (isPlaying) {
-      timer = setTimeout(() => {
-        setShowMinimized(true);
-      }, 30000); // 30 seconds
+    if (isPlaying && !pausedAudio) {
+      timer = setTimeout(() => setShowMinimized(true), 15000); // 15 seconds is more standard
     } else {
       setShowMinimized(false);
     }
+    return () => clearTimeout(timer);
+  }, [isPlaying, pausedAudio]);
 
-    return () => {
-      if (timer) {
-        clearTimeout(timer);
-      }
-    };
-  }, [isPlaying]);
-
-  // Animate between states
   useEffect(() => {
-    if (isPlaying && showMinimized) {
-      animationProgress.value = withSpring(1, {
-        damping: 20,
-        stiffness: 90,
-      });
-    } else {
-      animationProgress.value = withSpring(0, {
-        damping: 20,
-        stiffness: 90,
-      });
-    }
-  }, [isPlaying, showMinimized]);
+    animationProgress.value = withSpring(showMinimized ? 1 : 0, {
+      damping: 20,
+      stiffness: 90,
+    });
+  }, [showMinimized]);
 
-  // Animated styles for minimized view
-  const minimizedStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(
+  const minimizedStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
       animationProgress.value,
       [0, 1],
       [0, 1],
       Extrapolate.CLAMP
-    );
+    ),
+    transform: [
+      {
+        scale: interpolate(
+          animationProgress.value,
+          [0, 1],
+          [0.8, 1],
+          Extrapolate.CLAMP
+        ),
+      },
+      {
+        translateX: interpolate(
+          animationProgress.value,
+          [0, 1],
+          [50, 0],
+          Extrapolate.CLAMP
+        ),
+      },
+    ],
+    pointerEvents: animationProgress.value > 0.5 ? 'auto' : 'none',
+  }));
 
-    const scale = interpolate(
-      animationProgress.value,
-      [0, 1],
-      [0.8, 1],
-      Extrapolate.CLAMP
-    );
-
-    const translateX = interpolate(
-      animationProgress.value,
-      [0, 1],
-      [50, 0],
-      Extrapolate.CLAMP
-    );
-
-    return {
-      opacity,
-      transform: [{ scale }, { translateX }],
-      pointerEvents: animationProgress.value > 0.5 ? 'auto' : 'none',
-    };
-  });
-
-  // Animated styles for full view
-  const fullViewStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(
+  const fullViewStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
       animationProgress.value,
       [0, 1],
       [1, 0],
       Extrapolate.CLAMP
-    );
-
-    const scale = interpolate(
-      animationProgress.value,
-      [0, 1],
-      [1, 0.95],
-      Extrapolate.CLAMP
-    );
-
-    return {
-      opacity,
-      transform: [{ scale }],
-      pointerEvents: animationProgress.value < 0.5 ? 'auto' : 'none',
-    };
-  });
+    ),
+    transform: [
+      {
+        scale: interpolate(
+          animationProgress.value,
+          [0, 1],
+          [1, 0.95],
+          Extrapolate.CLAMP
+        ),
+      },
+    ],
+    pointerEvents: animationProgress.value < 0.5 ? 'auto' : 'none',
+  }));
 
   if (!isVisible) return null;
 
   return (
     <View className="absolute inset-x-4 bottom-20 z-50">
-      {/* Minimized view */}
       <Animated.View
-        style={[
-          {
-            position: 'absolute',
-            right: 0,
-            bottom: 0,
-          },
-          minimizedStyle,
-        ]}
+        style={[{ position: 'absolute', right: 0, bottom: 0 }, minimizedStyle]}
       >
         <View className="flex-row items-center justify-end gap-4">
           <TouchableOpacity
+            activeOpacity={0.9}
             onPress={() => setShowMinimized(false)}
-            className="size-[65px] items-center justify-center rounded-full bg-[#FEF3C7]"
+            className="size-[65px] items-center justify-center rounded-full bg-[#FEF3C7] shadow-sm"
           >
             <MoreOption />
           </TouchableOpacity>
@@ -175,9 +136,8 @@ export function FloatingAudioControl({
                 className="size-16 rounded-full"
                 contentFit="cover"
               />
-              <View className="absolute inset-0 bg-black/50" />
+              <View className="absolute inset-0 bg-black/30" />
             </View>
-
             <View className="absolute">
               <SoundSignal />
             </View>
@@ -185,26 +145,19 @@ export function FloatingAudioControl({
         </View>
       </Animated.View>
 
-      {/* Full view */}
       <Animated.View
         style={[
-          {
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-          },
+          { position: 'absolute', left: 0, right: 0, bottom: 0 },
           fullViewStyle,
         ]}
       >
-        <View className="rounded-2xl border-[0.5px] border-[#ede2b6] bg-[#FFFBEB] p-2.5 drop-shadow-xl">
+        <View className="rounded-2xl border-[0.5px] border-[#ede2b6] bg-[#FFFBEB] p-2.5 shadow-xl">
           <View className="flex-row items-center justify-between">
-            {/* Left side - Profile and Voice Info */}
             <View className="flex-1 flex-row items-center">
               <TouchableOpacity
-                activeOpacity={1}
+                activeOpacity={0.7}
                 onPress={() => setShowSelectVoiceModal(true)}
-                className="mr-3 size-12 overflow-hidden rounded-full active:opacity-70"
+                className="mr-3 size-12 overflow-hidden rounded-full"
               >
                 <Image
                   source={{
@@ -214,39 +167,37 @@ export function FloatingAudioControl({
                   contentFit="cover"
                 />
               </TouchableOpacity>
-
               <View className="flex-1">
                 <Text className="font-brownstd-bold text-base text-black">
                   {selectedVoice?.name}
                 </Text>
                 <Text className="font-brownstd text-sm text-gray-600">
-                  {selectedVoice?.tag.charAt(0).toUpperCase() +
-                    selectedVoice?.tag.slice(1)}
+                  {selectedVoice?.tag
+                    ? selectedVoice.tag.charAt(0).toUpperCase() +
+                      selectedVoice.tag.slice(1)
+                    : ''}
                 </Text>
               </View>
             </View>
 
-            {/* Right side - Controls */}
-            {isPlaying && (
+            {isPlaying || pausedAudio ? (
               <View className="flex-row items-center space-x-2">
                 <TouchableOpacity
+                  activeOpacity={0.9}
                   onPress={onPlayPause}
-                  className="mr-5 size-10 items-center justify-center rounded-full  bg-[#FEF3C7]"
+                  className="mr-5 size-10 items-center justify-center rounded-full bg-[#FEF3C7]"
                 >
                   {pausedAudio ? <Play /> : <Pause />}
                 </TouchableOpacity>
-
                 <TouchableOpacity
+                  activeOpacity={0.9}
                   onPress={onStop}
                   className="size-10 items-center justify-center rounded-full border border-gray-300 bg-[#FDF4CF]"
                 >
                   <StopPlay />
                 </TouchableOpacity>
               </View>
-            )}
-
-            {/* Read aloud button - only show when not playing */}
-            {!isPlaying && (
+            ) : (
               <TouchableOpacity
                 onPress={onPlayPause}
                 activeOpacity={0.9}

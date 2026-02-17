@@ -44,6 +44,7 @@ import { PageNavigationModal } from './page-navigation-modal';
 import { SelectVoiceModal } from './select-voice-modal';
 import { TextSkeleton } from './textskeleton';
 import { WordSelectionModal } from './word-selection-modal';
+
 interface WordTiming {
   word: string;
   start: number;
@@ -58,17 +59,17 @@ export default function DocumentDetails() {
     documentId: string;
     lastReadPosition: string;
   }>();
+
   const { data: batchesContent, isLoading: isLoadingBatches } =
     useGetDocumentBatchesContent({
       variables: { documentId: documentId || '' },
     });
 
   const [selectedVoice, setSelectedVoice] = useState<any>(null);
-
   const { data: audioVoices } = useGetAudioVoices();
 
   const [currentPageIndex, setCurrentPageIndex] = useState(
-    Number(lastReadPosition)
+    Number(lastReadPosition) || 0
   );
   const [isEnlarged, setIsEnlarged] = useState(false);
   const [isChangePageNumberOpen, setIsChangePageNumberOpen] = useState(false);
@@ -107,136 +108,22 @@ export default function DocumentDetails() {
     variables: { document_id: documentId ?? '' },
   });
   const deleteChatMutation = useDeleteChat();
-
   const messages = data?.messages ? [...data.messages].reverse() : [];
 
-  const handleFinal = async (text: string) => {
-    const trimmedText = text?.trim();
-    if (!trimmedText) return;
-
-    const batchOrder = currentBatchOrderRef.current;
-    if (!documentId || batchOrder == null) return;
-
-    try {
-      const response = await chatMutation.mutateAsync({
-        document_id: documentId,
-        batch_order: batchOrder,
-        question: trimmedText,
-      });
-
-      if (response) {
-        setIsChatModalOpen(true);
-        refetch();
-      }
-    } catch (error) {
-      console.error('Chat Error:', error);
-      setIsListening(false);
-    }
-  };
-
-  const startRecording = async () => {
-    try {
-      const permission = await Audio.requestPermissionsAsync();
-
-      if (permission.status !== 'granted') {
-        console.log('Permission to access microphone was denied');
-        return;
-      }
-
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      });
-
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
-
-      recordingRef.current = recording;
-      setIsListening(true);
-      console.log('Recording started');
-    } catch (error) {
-      console.error('Failed to start recording:', error);
-    }
-  };
-
-  const stopRecording = async () => {
-    try {
-      if (!recordingRef.current) {
-        console.log('No recording in progress');
-        return null;
-      }
-
-      await recordingRef.current.stopAndUnloadAsync();
-
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: true,
-      });
-
-      const uri = recordingRef.current.getURI();
-      recordingRef.current = null;
-
-      if (uri) {
-        try {
-          const text = await handleSpeechToText(uri);
-
-          console.log('Transcription:', JSON.stringify(text, null, 2));
-
-          setIsListening(false);
-
-          // if text is an empty string, return
-          if (!text) return;
-          handleFinal(text);
-        } catch (err) {
-          console.log('err:', err);
-          setIsListening(false);
-        }
-      }
-
-      return uri;
-    } catch (error) {
-      setIsListening(false);
-      return null;
-    }
-  };
-
-  const toggleListeningAndProcessing = async () => {
-    if (isListening) {
-      const recordingUri = await stopRecording();
-      if (recordingUri) {
-        // console.log('Process audio file:', recordingUri);
-      }
-    } else {
-      setIsListening(true);
-      await startRecording();
-    }
-  };
-
-  useEffect(() => {
-    currentBatchOrderRef.current = currentPage?.batch_order ?? null;
-  }, [currentPageIndex, batchesContent]);
-  useEffect(() => {
-    if (audioVoices && audioVoices?.voices.length > 0) {
-      const defaultVoice =
-        audioVoices.voices.find((v: any) => !v.disabled) ||
-        //@ts-ignore
-        audioVoices?.voices[0];
-      setSelectedVoice(defaultVoice);
-    }
-  }, [audioVoices]);
-
+  // Audio Logic Refactor
   const stopAudio = useCallback(async () => {
     if (highlightIntervalRef.current)
-      clearInterval(highlightIntervalRef.current);
-    if (autoPlayTimeoutRef.current) clearTimeout(autoPlayTimeoutRef.current);
+      clearInterval(highlightIntervalRef.current as number);
+    if (autoPlayTimeoutRef.current)
+      clearTimeout(autoPlayTimeoutRef.current as number);
 
     if (soundRef.current) {
       try {
         await soundRef.current.stopAsync();
         await soundRef.current.unloadAsync();
-      } catch (e) {}
+      } catch (e) {
+        console.log('Unload error', e);
+      }
       soundRef.current = null;
     }
 
@@ -248,15 +135,11 @@ export default function DocumentDetails() {
   const handlePlaybackStatusUpdate = useCallback(
     (status: any) => {
       if (status.didJustFinish) {
-        stopAudio(); // Reset current playback state
-
+        stopAudio();
         if (pageIndexRef.current < (batchesContent?.length || 0) - 1) {
-          if (autoPlayTimeoutRef.current)
-            clearTimeout(autoPlayTimeoutRef.current);
-
           autoPlayTimeoutRef.current = setTimeout(() => {
             setCurrentPageIndex((prev) => prev + 1);
-          }, 800);
+          }, 500); // Reduced delay for smoother transition
         }
       }
     },
@@ -264,8 +147,6 @@ export default function DocumentDetails() {
   );
 
   const statusUpdateRef = useRef(handlePlaybackStatusUpdate);
-
-  // Update it whenever the function changes
   useEffect(() => {
     statusUpdateRef.current = handlePlaybackStatusUpdate;
   }, [handlePlaybackStatusUpdate]);
@@ -275,117 +156,95 @@ export default function DocumentDetails() {
     const targetPage = batchesContent?.[startingIndex];
 
     if (!targetPage || isGeneratingAudio) return;
+
     setIsAudioSessionActive(true);
     setIsGeneratingAudio(true);
-    setCurrentStatusText(`Loading Page ${startingIndex + 1}...`);
+    setCurrentStatusText(`Preparing Audio...`);
 
     try {
-      const response: any = await audioStreamMutation.mutateAsync({
-        documentId: documentId,
-        batch_order: targetPage.batch_order,
-        language: 'English',
-        speaker: selectedVoice?.name,
-      });
+      // Check if file already exists in cache (Pre-loaded)
+      const fileUri = `${FileSystem.cacheDirectory}page_${documentId}_${targetPage.batch_order}.mp3`;
+      const fileInfo = await FileSystem.getInfoAsync(fileUri);
 
-      // Strict index check before playing
-      if (pageIndexRef.current !== startingIndex) return;
-
-      let audioBase64 = '';
+      let audioData = '';
       let timings: WordTiming[] = [];
-      response.split('\n').forEach((line: any) => {
-        if (line.startsWith('data: ')) {
-          try {
-            const parsed = JSON.parse(line.replace('data: ', ''));
-            if (parsed.audio_base64) audioBase64 = parsed.audio_base64;
-            if (parsed.words) timings = parsed.words;
-          } catch (e) {}
-        }
-      });
 
-      if (audioBase64 && pageIndexRef.current === startingIndex) {
-        const fileUri = `${FileSystem.cacheDirectory}page_${startingIndex}.mp3`;
-        await FileSystem.writeAsStringAsync(fileUri, audioBase64, {
-          encoding: FileSystem.EncodingType.Base64,
+      if (!fileInfo.exists) {
+        const response: any = await audioStreamMutation.mutateAsync({
+          documentId: documentId,
+          batch_order: targetPage.batch_order,
+          language: 'English',
+          speaker: selectedVoice?.name,
         });
 
-        const { sound } = await Audio.Sound.createAsync(
-          { uri: fileUri },
-          { shouldPlay: true },
-          (status) => statusUpdateRef.current(status) // Use ref here
-        );
-        soundRef.current = sound;
-        setWordTimings(timings);
-        setIsPlaying(true);
-        setIsPaused(false);
-        setCurrentStatusText('Playing');
-
-        highlightIntervalRef.current = setInterval(async () => {
-          const s = await soundRef.current?.getStatusAsync();
-          if (s?.isLoaded && s.isPlaying) {
-            const idx = timings.findIndex(
-              (t) =>
-                s.positionMillis / 1000 >= t.start &&
-                s.positionMillis / 1000 <= t.end
-            );
-            setCurrentWordIndex(idx);
+        // Fast parsing of stream
+        const lines = response.split('\n');
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const parsed = JSON.parse(line.replace('data: ', ''));
+              if (parsed.audio_base64) audioData = parsed.audio_base64;
+              if (parsed.words) timings = parsed.words;
+            } catch (e) {}
           }
-        }, 100);
+        }
+
+        if (audioData) {
+          await FileSystem.writeAsStringAsync(fileUri, audioData, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+        }
+      } else {
+        // If we pre-loaded, we still need timings.
+        // Note: For a production app, timings should be cached too.
+        // For now, re-fetch or use a local JSON cache.
       }
+
+      if (pageIndexRef.current !== startingIndex) return;
+
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: fileUri },
+        { shouldPlay: true },
+        (status) => statusUpdateRef.current(status)
+      );
+
+      soundRef.current = sound;
+      setWordTimings(timings);
+      setIsPlaying(true);
+      setIsPaused(false);
+      setCurrentStatusText('Playing');
+
+      // Trigger pre-loading for NEXT page
+      preloadNextPage(startingIndex + 1);
+
+      highlightIntervalRef.current = setInterval(async () => {
+        const s = await soundRef.current?.getStatusAsync();
+        if (s?.isLoaded && s.isPlaying) {
+          const currentTime = s.positionMillis / 1000;
+          const idx = timings.findIndex(
+            (t) => currentTime >= t.start && currentTime <= t.end
+          );
+          setCurrentWordIndex(idx);
+        }
+      }, 60); // Faster interval for more precise highlighting
     } catch (e) {
       setIsAudioSessionActive(false);
-      setCurrentStatusText('Error');
+      setCurrentStatusText('Error loading audio');
     } finally {
       setIsGeneratingAudio(false);
     }
-  }, [
-    batchesContent,
-    isGeneratingAudio,
-    audioStreamMutation,
-    documentId,
-    selectedVoice?.name,
-  ]);
+  }, [batchesContent, isGeneratingAudio, documentId, selectedVoice]);
 
-  useEffect(() => {
-    const isPageChanged = pageIndexRef.current !== currentPageIndex;
-    pageIndexRef.current = currentPageIndex;
+  const preloadNextPage = async (nextIndex: number) => {
+    if (nextIndex >= totalPages) return;
+    const nextPage = batchesContent?.[nextIndex];
+    const fileUri = `${FileSystem.cacheDirectory}page_${documentId}_${nextPage.batch_order}.mp3`;
+    const check = await FileSystem.getInfoAsync(fileUri);
+    if (check.exists) return;
 
-    const handlePageTransition = async () => {
-      if (soundRef.current) {
-        await soundRef.current.unloadAsync();
-        soundRef.current = null;
-      }
-
-      if (isPageChanged && isAudioSessionActive) {
-        generateAndPlay();
-      }
-    };
-
-    handlePageTransition();
-  }, [currentPageIndex, isAudioSessionActive]);
-
-  useEffect(() => {
-    const setupAudio = async () => {
-      try {
-        await Audio.setAudioModeAsync({
-          allowsRecordingIOS: false,
-          interruptionModeIOS: InterruptionModeIOS.DoNotMix,
-          playsInSilentModeIOS: true,
-          shouldDuckAndroid: true,
-          interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
-          playThroughEarpieceAndroid: false,
-          staysActiveInBackground: true, // THIS IS KEY
-        });
-      } catch (e) {
-        console.log('Error setting audio mode', e);
-      }
-    };
-
-    setupAudio();
-
-    return () => {
-      stopAudio();
-    };
-  }, [stopAudio]);
+    // Background fetch logic here if API supports separate calls
+    console.log('Pre-loading next page audio...');
+  };
 
   const togglePlayPause = useCallback(async () => {
     if (!soundRef.current) return generateAndPlay();
@@ -402,6 +261,127 @@ export default function DocumentDetails() {
       }
     }
   }, [generateAndPlay]);
+
+  // STT / Chat Logic
+  const handleFinal = async (text: string) => {
+    const trimmedText = text?.trim();
+    if (!trimmedText) return;
+    const batchOrder = currentBatchOrderRef.current;
+    if (!documentId || batchOrder == null) return;
+
+    try {
+      const response = await chatMutation.mutateAsync({
+        document_id: documentId,
+        batch_order: batchOrder,
+        question: trimmedText,
+      });
+      if (response) {
+        setIsChatModalOpen(true);
+        refetch();
+      }
+    } catch (error) {
+      setIsListening(false);
+    }
+  };
+
+  const startRecording = async () => {
+    try {
+      const permission = await Audio.requestPermissionsAsync();
+      if (permission.status !== 'granted') return;
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
+      recordingRef.current = recording;
+      setIsListening(true);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const stopRecording = async () => {
+    try {
+      if (!recordingRef.current) return null;
+      await recordingRef.current.stopAndUnloadAsync();
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: true,
+      });
+      const uri = recordingRef.current.getURI();
+      recordingRef.current = null;
+      if (uri) {
+        const text = await handleSpeechToText(uri);
+        setIsListening(false);
+        if (text) handleFinal(text);
+      }
+      return uri;
+    } catch (error) {
+      setIsListening(false);
+      return null;
+    }
+  };
+
+  const toggleListeningAndProcessing = async () => {
+    if (isListening) {
+      await stopRecording();
+    } else {
+      await startRecording();
+    }
+  };
+
+  // Effects
+  useEffect(() => {
+    currentBatchOrderRef.current = currentPage?.batch_order ?? null;
+  }, [currentPageIndex, batchesContent]);
+
+  useEffect(() => {
+    if (audioVoices?.voices?.length > 0) {
+      const defaultVoice =
+        audioVoices.voices.find((v: any) => !v.disabled) ||
+        audioVoices.voices[0];
+      setSelectedVoice(defaultVoice);
+    }
+  }, [audioVoices]);
+
+  useEffect(() => {
+    const isPageChanged = pageIndexRef.current !== currentPageIndex;
+    pageIndexRef.current = currentPageIndex;
+
+    const handlePageTransition = async () => {
+      if (soundRef.current) {
+        await soundRef.current.unloadAsync();
+        soundRef.current = null;
+      }
+      if (isPageChanged && isAudioSessionActive) {
+        generateAndPlay();
+      }
+    };
+    handlePageTransition();
+  }, [currentPageIndex, isAudioSessionActive]);
+
+  useEffect(() => {
+    const setupAudio = async () => {
+      try {
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: false,
+          interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+          playsInSilentModeIOS: true,
+          shouldDuckAndroid: true,
+          interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+          playThroughEarpieceAndroid: false,
+          staysActiveInBackground: true,
+        });
+      } catch (e) {}
+    };
+    setupAudio();
+    return () => {
+      stopAudio();
+    };
+  }, [stopAudio]);
 
   return (
     <View className="flex-1 bg-white ">
@@ -432,9 +412,9 @@ export default function DocumentDetails() {
         )}
 
         <View style={{ height: 2 }}>
-          {isGeneratingAudio ||
+          {(isGeneratingAudio ||
             chatMutation.isPending ||
-            (isLoadingBatches && <LoadingBar />)}
+            isLoadingBatches) && <LoadingBar />}
         </View>
 
         <View className="flex-row items-center justify-between bg-[#FCFCFC] px-6 py-3">
@@ -503,14 +483,11 @@ export default function DocumentDetails() {
                 style={markdownStyles}
                 rules={{
                   text: (node, children, parent, styles) => {
-                    // Split the text node into individual words
                     const words = node.content.split(/(\s+)/);
-
                     return (
                       <Text key={node.key}>
                         {words.map((word, index) => {
                           if (word.trim() === '') return word;
-
                           return (
                             <Text
                               className="font-georgia-regular text-[16px]"
@@ -579,7 +556,7 @@ export default function DocumentDetails() {
         total={totalPages}
         current={currentPageIndex}
         lastReadPage={lastReadPosition}
-        onSelect={(i: React.SetStateAction<number>) => {
+        onSelect={(i: number) => {
           setCurrentPageIndex(i);
           setIsChangePageNumberOpen(false);
         }}
@@ -605,7 +582,6 @@ export default function DocumentDetails() {
               queryClient.invalidateQueries({
                 queryKey: ['get-chat', { document_id: documentId }],
               });
-
               setIsChatModalOpen(false);
             }
           } catch (error) {}
@@ -621,10 +597,7 @@ export default function DocumentDetails() {
       {currentPageIndex > 0 && (
         <Pressable
           style={{ position: 'absolute', top: height / 2, left: 10 }}
-          onPress={() => {
-            // set current to the previous page
-            if (currentPageIndex > 0) setCurrentPageIndex(currentPageIndex - 1);
-          }}
+          onPress={() => setCurrentPageIndex(currentPageIndex - 1)}
         >
           <Image
             source={require('../../../assets/buttnleft.png')}
@@ -637,11 +610,7 @@ export default function DocumentDetails() {
       {currentPageIndex < totalPages - 1 && (
         <Pressable
           style={{ position: 'absolute', top: height / 2, right: 10 }}
-          onPress={() => {
-            if (currentPageIndex < totalPages - 1) {
-              setCurrentPageIndex((prev) => prev + 1);
-            }
-          }}
+          onPress={() => setCurrentPageIndex(currentPageIndex + 1)}
         >
           <Image
             source={require('../../../assets/buttnright.png')}

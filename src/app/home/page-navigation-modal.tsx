@@ -14,7 +14,7 @@ export function PageNavigationModal({
   lastReadPage,
 }: any) {
   return (
-    <Modal transparent visible={visible} animationType="slide">
+    <Modal transparent visible={visible} animationType="none">
       <TouchableOpacity
         activeOpacity={1}
         className="flex-1 justify-end bg-black/40"

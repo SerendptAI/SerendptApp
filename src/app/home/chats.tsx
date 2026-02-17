@@ -428,6 +428,16 @@ export default function Chats() {
     }
   };
 
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    if (messages.length > 0 || chatMutation.isPending) {
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+    }
+  }, [messages.length, chatMutation.isPending]);
+
   return (
     <View className="flex-1 bg-white">
       <FocusAwareStatusBar />
@@ -452,6 +462,7 @@ export default function Chats() {
           <ChatSkeleton />
         ) : (
           <ScrollView
+            ref={scrollViewRef}
             className="flex-1 px-4"
             contentContainerClassName="pt-3 pb-28"
             showsVerticalScrollIndicator={false}
@@ -512,13 +523,28 @@ export default function Chats() {
 }
 
 const markdownStyles = StyleSheet.create({
+  text: {
+    fontFamily: 'BrownStd-Regular',
+    fontSize: 16,
+    color: '#000',
+  },
   body: {
     fontSize: 16,
-    fontFamily: 'font-brownstd',
+    fontFamily: 'BrownStd-Regular', // Ensure it's here too
     color: '#000',
     lineHeight: 28,
   },
-  paragraph: { marginBottom: 16 },
-  heading1: { fontSize: 24, fontFamily: 'bold', marginBottom: 12 },
-  heading2: { fontSize: 20, fontWeight: 'bold', marginBottom: 8 },
+  paragraph: {
+    fontFamily: 'BrownStd-Regular',
+    marginBottom: 16,
+    flexWrap: 'wrap',
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+  },
+
+  strong: {
+    fontFamily: 'BrownStd-Regular', // or 'font-brownstd-bold' if you have it
+    fontWeight: 'bold',
+  },
 });

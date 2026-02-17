@@ -13,7 +13,7 @@ export function SelectVoiceModal({
   selectedVoice,
 }: any) {
   return (
-    <Modal transparent visible={visible} animationType="fade">
+    <Modal transparent visible={visible} animationType="none">
       <View className=" flex-1 justify-end bg-black/30">
         <View className=" rounded-t-3xl bg-white">
           <View className="flex-row items-center justify-between rounded-t-3xl bg-[#F9FAFB] p-4  ">

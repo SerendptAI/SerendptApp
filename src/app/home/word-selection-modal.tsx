@@ -51,7 +51,7 @@ export function WordSelectionModal({
   }, [data?.contextual_meaning, showMeaning]);
 
   return (
-    <Modal transparent visible={visible} animationType="fade">
+    <Modal transparent visible={visible} animationType="none">
       <TouchableOpacity
         className="flex-1 items-center justify-center bg-black/30 px-6"
         activeOpacity={1}
