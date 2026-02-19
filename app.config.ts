@@ -29,7 +29,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   slug: 'serendptai',
   version: Env.VERSION.toString(),
   orientation: 'portrait',
-  icon: './assets/icon.png',
+  icon: './assets/icon4.png',
   userInterfaceStyle: 'light',
   newArchEnabled: true,
   updates: {
@@ -54,8 +54,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   android: {
     adaptiveIcon: {
-      foregroundImage: './assets/adaptive-icon.png',
-      backgroundColor: '#ffffff',
+      foregroundImage: './assets/icon4.png',
+      backgroundColor: '#000000',
     },
     package: Env.PACKAGE,
     permissions: [
@@ -92,8 +92,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       'expo-splash-screen',
       {
-        backgroundColor: '#ffffff',
-        image: './assets/splashicon.png',
+        backgroundColor: '#000000',
+        image: './assets/icon4.png',
       },
     ],
     [

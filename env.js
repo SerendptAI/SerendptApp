@@ -36,7 +36,7 @@ require('dotenv').config({
 
 const BUNDLE_ID = 'com.serendptai'; // ios bundle id
 const PACKAGE = 'com.serendptai'; // android package name
-const NAME = 'serendptai'; // app name
+const NAME = 'Serendpt'; // app name
 const EXPO_ACCOUNT_OWNER = 'serendptai'; // expo account owner
 const EAS_PROJECT_ID = '91ab65b8-afef-42b5-99ef-9e729d9fab8c'; // eas project id
 const SCHEME = 'serendptai'; // app scheme
